@@ -4,7 +4,7 @@
 .\build\lx_fc_state.o: ..\DriversMcu\STM32F407\McuConfig.h
 .\build\lx_fc_state.o: ..\DriversMcu\STM32F407\Libraries\CMSIS\ST\STM32F4xx\Include\stm32f4xx.h
 .\build\lx_fc_state.o: ..\DriversMcu\STM32F407\Libraries\CMSIS\Include\core_cm4.h
-.\build\lx_fc_state.o: D:\software\keil\Core\ARM\ARMCC\Bin\..\include\stdint.h
+.\build\lx_fc_state.o: D:\keil5\ARM\ARMCC\Bin\..\include\stdint.h
 .\build\lx_fc_state.o: ..\DriversMcu\STM32F407\Libraries\CMSIS\Include\core_cmInstr.h
 .\build\lx_fc_state.o: ..\DriversMcu\STM32F407\Libraries\CMSIS\Include\core_cmFunc.h
 .\build\lx_fc_state.o: ..\DriversMcu\STM32F407\Libraries\CMSIS\Include\core_cm4_simd.h
@@ -32,4 +32,5 @@
 .\build\lx_fc_state.o: ..\FcSrc\ANO_LX.h
 .\build\lx_fc_state.o: ..\DriversMcu\STM32F407\Drivers\Drv_RcIn.h
 .\build\lx_fc_state.o: ..\FcSrc\ANO_DT_LX.h
+.\build\lx_fc_state.o: ..\DriversBsp\Drv_AnoOf.h
 .\build\lx_fc_state.o: ..\FcSrc\LX_FC_Fun.h

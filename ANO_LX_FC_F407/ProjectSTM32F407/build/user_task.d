@@ -4,7 +4,7 @@
 .\build\user_task.o: ..\DriversMcu\STM32F407\McuConfig.h
 .\build\user_task.o: ..\DriversMcu\STM32F407\Libraries\CMSIS\ST\STM32F4xx\Include\stm32f4xx.h
 .\build\user_task.o: ..\DriversMcu\STM32F407\Libraries\CMSIS\Include\core_cm4.h
-.\build\user_task.o: D:\software\keil\Core\ARM\ARMCC\Bin\..\include\stdint.h
+.\build\user_task.o: D:\keil5\ARM\ARMCC\Bin\..\include\stdint.h
 .\build\user_task.o: ..\DriversMcu\STM32F407\Libraries\CMSIS\Include\core_cmInstr.h
 .\build\user_task.o: ..\DriversMcu\STM32F407\Libraries\CMSIS\Include\core_cmFunc.h
 .\build\user_task.o: ..\DriversMcu\STM32F407\Libraries\CMSIS\Include\core_cm4_simd.h
@@ -32,3 +32,5 @@
 .\build\user_task.o: ..\FcSrc\ANO_LX.h
 .\build\user_task.o: ..\DriversMcu\STM32F407\Drivers\Drv_RcIn.h
 .\build\user_task.o: ..\FcSrc\LX_FC_Fun.h
+.\build\user_task.o: ..\FcSrc\ANO_DT_LX.h
+.\build\user_task.o: ..\DriversBsp\Drv_AnoOf.h
