@@ -849,11 +849,12 @@ erwork --depend=.\build\startup_stm32f4xx.d -o.\build\startup_stm32f4xx.o -I.\R
 ARM Macro Assembler    Page 14 
 
 
-TE\_Ano_LX -ID:\software\keil\Core\ARM\PACK\Keil\STM32F4xx_DFP\2.15.0\Drivers\C
-MSIS\Device\ST\STM32F4xx\Include -ID:\software\keil\Core\ARM\CMSIS\Include --pr
-edefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 526" --predefin
-e="STM32F407xx SETA 1" --list=.\build\startup_stm32f4xx.lst ..\DriversMcu\STM32
-F407\Libraries\CMSIS\ST\STM32F4xx\Source\Templates\arm\startup_stm32f4xx.s
+TE\_Ano_LX -IC:\Keil_v5\ARM\PACK\Keil\STM32F4xx_DFP\2.15.0\Drivers\CMSIS\Device
+\ST\STM32F4xx\Include -IC:\Keil_v5\ARM\CMSIS\Include --predefine="__EVAL SETA 1
+" --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 526" --pr
+edefine="STM32F407xx SETA 1" --list=.\build\startup_stm32f4xx.lst ..\DriversMcu
+\STM32F407\Libraries\CMSIS\ST\STM32F4xx\Source\Templates\arm\startup_stm32f4xx.
+s
 
 
 
@@ -2283,4 +2284,4 @@ Source\Templates\arm\startup_stm32f4xx.s
 Source\Templates\arm\startup_stm32f4xx.s
 Comment: __main used once
 2 symbols
-445 symbols in table
+446 symbols in table
