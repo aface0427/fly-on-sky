@@ -10,6 +10,8 @@
 #include "Drv_OpenMV.h"
 #include "ANO_DT_LX.h"
 #include "Drv_AnoOf.h"
+#include "Drv_TFMini_Plus.h"
+
 
 extern _ano_of_st ano_of;
 _user_flag_set user_flag;
@@ -67,6 +69,7 @@ static void Loop_50Hz(void) //20ms÷¥––“ª¥Œ
 {
 	//////////////////////////////////////////////////////////////////////
     OpenMV_Offline_Check(20);
+    TFmini_Offline_Check(20);
 	UserTask_OneKeyCmd();
 	//////////////////////////////////////////////////////////////////////
 }
