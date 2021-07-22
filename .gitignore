@@ -3,12 +3,16 @@
 *.d
 *.crf
 *.htm
+*.build_log.htm
+*.build_log
 *.dep
 *.map
 *.bak
 *.lnp
 *.lst
 *.ini
+*.hp
+*.uvoptx
 *.iex
 *.sct
 *.scvd
@@ -16,9 +20,6 @@
 *.dbg*
 *.uvguix.*
 .mxproject
-RTE/
-Templates/
-Examples/
 *.uvprojx
 !*.h
 !*.c
@@ -26,4 +27,13 @@ Examples/
 *.axf
 *.bin
 *.hex
+
+build/
+RTE/
+Templates/
+Examples/
+DebugConfig/  
+OBJ/
+
+
 

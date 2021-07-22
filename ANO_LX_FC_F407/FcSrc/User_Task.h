@@ -7,6 +7,7 @@
 #define safe_div(numerator,denominator,safe_value) ( (denominator == 0)? (safe_value) : ((numerator)/(denominator)) )
 #define LIMIT( x,min,max ) ( ((x) <= (min)) ? (min) : ( ((x) > (max))? (max) : (x) ) )
 
+//pid参数结构体
 typedef struct
 {
 	u8 fb_d_mode;
@@ -20,6 +21,7 @@ typedef struct
 
 }_PID_arg_st;
 
+//pid数据结构体
 typedef struct
 {
 	float err;
