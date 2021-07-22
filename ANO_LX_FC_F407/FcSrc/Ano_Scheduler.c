@@ -8,6 +8,12 @@
 #include "Ano_Scheduler.h"
 #include "User_Task.h"
 #include "Drv_OpenMV.h"
+#include "ANO_DT_LX.h"
+#include "Drv_AnoOf.h"
+
+extern _ano_of_st ano_of;
+_user_flag_set user_flag;
+
 //////////////////////////////////////////////////////////////////////
 //用户程序调度器
 //////////////////////////////////////////////////////////////////////
@@ -35,9 +41,26 @@ static void Loop_200Hz(void) //5ms执行一次
 
 static void Loop_100Hz(void) //10ms执行一次
 {
-	//////////////////////////////////////////////////////////////////////
-
-	//////////////////////////////////////////////////////////////////////
+	u8 _dt = 10;
+	static s32 dis_dx, dis_dy;
+	static s32 dx, dy;
+	
+	/*速度积分*/
+	if(user_flag.of_dis_clear_cmd){
+		dis_dx = 0;
+		dis_dy = 0;
+	}
+	else{
+		dis_dx += _dt * ano_of.of2_dx_fix;
+		dis_dy += _dt * ano_of.of2_dy_fix;
+	}
+	
+	dx = dis_dx / 1000;
+	dy = dis_dy / 1000;
+	
+	/*数据发送*/
+	User_DT_Send(ano_of, dx, dy);
+	
 }
 
 static void Loop_50Hz(void) //20ms执行一次

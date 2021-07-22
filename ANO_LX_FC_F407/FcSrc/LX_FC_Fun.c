@@ -264,10 +264,36 @@ u8 OneKey_Hold(void)
 		dt.cmd_send.CMD[1] = 0X04;
 		CMD_Send(0xff, &dt.cmd_send);
 		return 1;
+		
 	}
 	else
 	{
 		return 0;
 	}
+}
+
+
+/*上升*/
+u8 Vertical_Up(u16 height_cm, u16 velocity_cms)
+{
+	//
+	if (dt.wait_ck == 0) //没有其他等待校验的CMD时才发送本CMD
+	{
+		//按协议发送指令
+		dt.cmd_send.CID = 0X10;
+		dt.cmd_send.CMD[0] = 0X02;
+		dt.cmd_send.CMD[1] = 0X01;
+		dt.cmd_send.CMD[2] = BYTE0(height_cm);
+		dt.cmd_send.CMD[3] = BYTE1(height_cm);
+		dt.cmd_send.CMD[4] = BYTE0(velocity_cms);
+		dt.cmd_send.CMD[5] = BYTE1(velocity_cms);
+		CMD_Send(0xff, &dt.cmd_send);
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+
 }
 

@@ -26,6 +26,7 @@
 
 u8 send_buffer[50]; //发送数据缓存
 _dt_st dt;
+static u8 user_send_buffer[50];
 
 //===================================================================
 void ANO_DT_Init(void)
@@ -489,3 +490,38 @@ void ANO_LX_Data_Exchange_Task(float dT_s)
 }
 
 //===================================================================
+//自定义数据发送
+//读取光流数据
+void User_DT_Send(_ano_of_st ano_of, s16 dis_dx, s16 dis_dy){
+	u8 _cnt = 0;
+	
+	user_send_buffer[_cnt++] = 0xAA;
+	user_send_buffer[_cnt++] = 0xFF;
+	user_send_buffer[_cnt++] = 0xF1;
+	user_send_buffer[_cnt++] = 8;
+	
+	/*速度*/
+	user_send_buffer[_cnt++] = BYTE0(ano_of.of2_dx);
+	user_send_buffer[_cnt++] = BYTE1(ano_of.of2_dx);
+	user_send_buffer[_cnt++] = BYTE0(ano_of.of2_dy);
+	user_send_buffer[_cnt++] = BYTE1(ano_of.of2_dy);
+	
+	/*位移*/
+	user_send_buffer[_cnt++] = BYTE0(dis_dx);
+	user_send_buffer[_cnt++] = BYTE1(dis_dx);
+	user_send_buffer[_cnt++] = BYTE0(dis_dy);
+	user_send_buffer[_cnt++] = BYTE1(dis_dy);
+	
+	u8 sc = 0;
+	u8 ac = 0;
+	for(u8 i = 0; i < user_send_buffer[3] + 4; i++){
+		sc += user_send_buffer[i];
+		ac += sc;
+	}
+	
+	user_send_buffer[_cnt++] = sc;
+	user_send_buffer[_cnt++] = ac;
+	
+	DrvUart5SendBuf(user_send_buffer, _cnt);
+}
+

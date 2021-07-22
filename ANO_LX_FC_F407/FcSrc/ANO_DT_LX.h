@@ -2,7 +2,7 @@
 #define __ANO_DT_LX_H
 //==引用
 #include "SysConfig.h"
-
+#include "Drv_AnoOf.h"
 //==定义/声明
 #define FUN_NUM_LEN 256
 
@@ -64,4 +64,5 @@ void ANO_DT_LX_Data_Receive_Prepare(u8 data);
 void CMD_Send(u8 dest_addr, _cmd_st *cmd);
 void CK_Back(u8 dest_addr, _ck_st *ck);
 void PAR_Back(u8 dest_addr, _par_st *par);
+void User_DT_Send(_ano_of_st ano_of, s16 dis_dx, s16 dis_dy);
 #endif

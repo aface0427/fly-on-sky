@@ -25,4 +25,7 @@ u8 Mag_Calibrate(void);
 u8 ACC_Calibrate(void);
 u8 GYR_Calibrate(void);
 u8 OneKey_Hold(void);
+
+u8 Vertical_Up(u16 height_cm, u16 velocity_cms);
+u8 OneKey_Hold(void);
 #endif
