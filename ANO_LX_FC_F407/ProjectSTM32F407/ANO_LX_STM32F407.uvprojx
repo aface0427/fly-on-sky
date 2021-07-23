@@ -507,6 +507,16 @@
               <FileType>5</FileType>
               <FilePath>..\DriversBsp\Drv_OpenMV.h</FilePath>
             </File>
+            <File>
+              <FileName>Drv_TFMini_Plus.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DriversBsp\Drv_TFMini_Plus.c</FilePath>
+            </File>
+            <File>
+              <FileName>Drv_TFMini_Plus.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\DriversBsp\Drv_TFMini_Plus.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
