@@ -28,8 +28,8 @@ void UserTask_OneKeyCmd(void)
             if (one_key_takeoff_f == 0)
             {
 								one_key_takeoff_f = 1;
-								mission_task = 1;
-								mission_step = 1;
+	//							mission_task = 1;
+	//							mission_step = 1;
             }
 						
         }
@@ -49,9 +49,10 @@ void UserTask_OneKeyCmd(void)
                 //标记已经执行
                 //Add_Send_Data(0x41, );
 								//FC_Lock();
-								OneKey_Hold();
+//								OneKey_Hold();
 							  mission_task = 0;
 								mission_step = 0;
+								one_key_land_f = 1;
 								_cnt = 0;
 								
             }
