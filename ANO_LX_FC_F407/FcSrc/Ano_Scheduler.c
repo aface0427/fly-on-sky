@@ -16,6 +16,38 @@
 extern _ano_of_st ano_of;
 _user_flag_set user_flag;
 
+/*xy速度环参数*/
+_PID_arg_st PID_Speed_arg_xy; //xy共用PID参数 
+/*xy速度环位置*/
+_PID_val_st PID_Speed_val_x;
+_PID_val_st	PID_Speed_val_y;
+
+/*xy位置环参数*/
+_PID_arg_st PID_Distance_arg_xy; //xy共用PID参数 
+/*xy位置环参数*/
+_PID_val_st PID_Distance_val_x;
+_PID_val_st	PID_Distance_val_y;
+
+/*yaw速度环参数*/
+_PID_arg_st PID_Speed_arg_yaw;
+/*yaw速度环参数*/
+_PID_val_st PID_Speed_val_yaw;
+
+/*yaw位置环参数*/
+_PID_arg_st PID_Distance_arg_yaw;
+/*yaw位置环参数*/
+_PID_val_st PID_Distance_val_yaw;
+
+/*z速度环参数*/
+_PID_arg_st PID_Speed_arg_z;
+/*z速度环参数*/
+_PID_val_st PID_Speed_val_z;
+
+/*z位置环参数*/
+_PID_arg_st PID_Distance_arg_z;
+/*z位置环参数*/
+_PID_val_st PID_Distance_val_z;
+/**
 //////////////////////////////////////////////////////////////////////
 //用户程序调度器
 //////////////////////////////////////////////////////////////////////
