@@ -2,9 +2,20 @@
 #include "Drv_RcIn.h"
 #include "LX_FC_Fun.h"
 #include "ANO_DT_LX.h"
+#include "Ano_Math.h"
 
 s16 THR_Val = 800;
 s16 CTRL_SPD_Z = 10;
+
+enum AxialDirection{
+	Direction_x = 1,
+	Direction_y,
+	Direction_z,
+	Direction_yaw,
+	Direction_xy,
+	Direction_yz,
+	Direction_xz
+}axialDirect;
 
 //20ms执行一次
 void UserTask_OneKeyCmd(void)
@@ -28,8 +39,8 @@ void UserTask_OneKeyCmd(void)
             if (one_key_takeoff_f == 0)
             {
 								one_key_takeoff_f = 1;
-	//							mission_task = 1;
-	//							mission_step = 1;
+								mission_task = 1;
+								mission_step = 1;
             }
 						
         }
@@ -83,13 +94,13 @@ void UserTask_OneKeyCmd(void)
 							case 2: 
 									/*延时10s*/
 									
-									if(_cnt < 100){
-											if(_cnt % 10);
+									if(_cnt < 2000){
+											if(_cnt % 200);
 											else{
 												rt_tar.st_data.vel_x = 25;
 												dt.fun[0x41].WTS = 1;
 											}
-											_cnt++;
+											_cnt += 20;
 									}
 									else{
 											_cnt = 0;
@@ -102,8 +113,8 @@ void UserTask_OneKeyCmd(void)
 									
 							case 3:
 									/*延时10s*/
-									if(_cnt < 500)
-											_cnt++;
+									if(_cnt < 3000)
+											_cnt += 20;
 									else{
 											_cnt = 0;
 											OneKey_Land();
@@ -184,4 +195,79 @@ float PID_calculate( float dT_s,            //周期（单位：秒）
 	pid_val->exp_old = expect;
 	
 	return (pid_val->out);
+}
+
+u8 AprilTag_Track(){
+	
+
+	
+}
+
+/*
+*@fn:			u8 RealTimeSpeedControl(u16 velocity, u8 direction)
+*@brief:	通过实时控制帧控制指定方向(x、y、z轴)的速度
+*@para:		u16 velocity 平移速度, u8 direction 平移方向
+*@return:	1
+*@comment:
+*/
+u8 RealTimeSpeedControl(u16 velocity, u8 direction){
+	if(velocity > SAFE_SPEED)
+		velocity = SAFE_SPEED;
+	
+	switch(direction){
+		case Direction_x:
+			rt_tar.st_data.vel_x = velocity;
+			break;
+		case Direction_y:
+			rt_tar.st_data.vel_y = velocity;
+			break;
+		case Direction_z:
+			rt_tar.st_data.vel_z = velocity;
+			break;
+		default:
+			break;
+	}
+	return 1;
+}
+
+/*
+*@fn:			u8 RealTimeSpeedControlSend(u16 velocity, u8 direction)
+*@brief:	通过实时控制帧控制指定方向(x、y、z轴)的速度，并发送控制指令
+*@para:		u16 velocity 平移速度, u8 direction 平移方向
+*@return:	1
+*@comment:
+*/
+u8 RealTimeSpeedControlSend(u16 velocity, u8 direction){
+	RealTimeSpeedControl(velocity, direction);
+	dt.fun[0x41].WTS = 1;
+	
+	return 1;
+}
+
+/*
+*@fn:			u8 RealTimeSpeedControl_Angle(u16 velocity, u8 direction, u16 degree)
+*@brief:	通过实时控制帧控制指定平面任意角度的平移速度，并发送控制指令
+*@para:		u16 velocity 平移速度, u8 direction 平移平面, u16 degree 平移角度(单位：°)
+*@return:	1
+*@comment:对于不同平面角度值的方向定义
+					xy	以飞机为圆心，x轴正方向为起点，向y轴正方向移动为正
+					yz	以飞机为圆心，y轴正方向为起点，向z轴正方向移动为正
+					xz	以飞机为圆心，x轴正方向为起点，向z轴正方向移动为正
+*/
+u8 RealTimeSpeedControl_Angle(u16 velocity, u8 direction, u16 degree){
+	if(direction == Direction_xy){
+		RealTimeSpeedControl(velocity * my_cos(degree / 360 * 3.14159265), Direction_x);
+		RealTimeSpeedControl(velocity * my_sin(degree / 360 * 3.14159265), Direction_y);
+	}
+	else if(direction == Direction_yz){
+		RealTimeSpeedControl(velocity * my_cos(degree / 360 * 3.14159265), Direction_y);
+		RealTimeSpeedControl(velocity * my_sin(degree / 360 * 3.14159265), Direction_z);
+	}
+	else if(direction == Direction_xz){
+		RealTimeSpeedControl(velocity * my_cos(degree / 360 * 3.14159265), Direction_x);
+		RealTimeSpeedControl(velocity * my_sin(degree / 360 * 3.14159265), Direction_z);
+	}
+	dt.fun[0x41].WTS = 1;
+	
+	return 1;
 }

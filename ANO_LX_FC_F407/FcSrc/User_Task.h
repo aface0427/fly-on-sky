@@ -6,6 +6,7 @@
 
 #define safe_div(numerator,denominator,safe_value) ( (denominator == 0)? (safe_value) : ((numerator)/(denominator)) )
 #define LIMIT( x,min,max ) ( ((x) <= (min)) ? (min) : ( ((x) > (max))? (max) : (x) ) )
+#define SAFE_SPEED 200
 
 //pid参数结构体
 typedef struct
@@ -50,5 +51,9 @@ float PID_calculate( float dT_s,            //周期（单位：秒）
 										float inte_d_lim,//积分误差限幅
 										float inte_lim			//integration limit，积分限幅									
 										 );
+
+u8 RealTimeSpeedControl(u16 velocity, u8 direction);
+u8 RealTimeSpeedControlSend(u16 velocity, u8 direction);
+u8 RealTimeSpeedControl_Angle(u16 velocity, u8 direction, u16 degree);
 
 #endif
