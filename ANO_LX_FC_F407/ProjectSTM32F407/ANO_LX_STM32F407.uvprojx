@@ -517,6 +517,16 @@
               <FileType>5</FileType>
               <FilePath>..\DriversBsp\Drv_TFMini_Plus.h</FilePath>
             </File>
+            <File>
+              <FileName>Drv_HC08.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DriversBsp\Drv_HC08.c</FilePath>
+            </File>
+            <File>
+              <FileName>Drv_HC08.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\DriversBsp\Drv_HC08.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

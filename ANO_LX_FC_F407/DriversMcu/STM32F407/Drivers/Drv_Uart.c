@@ -9,6 +9,8 @@
 #include "Ano_DT_LX.h"
 #include "Drv_UbloxGPS.h"
 #include "Drv_AnoOf.h"
+#include "Drv_OpenMV.h"
+#include "Drv_TFMini_Plus.h"
 
 void NoUse(u8 data){}
 //串口接收发送快速定义，直接修改此处的函数名称宏，修改成自己的串口解析和发送函数名称即可，注意函数参数格式需统一

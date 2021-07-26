@@ -45,12 +45,12 @@ extern _openmv_data_st opmv;
 //==º¯ÊıÉùÃ÷
 
 //static
-static void OpenMV_Data_Analysis(u8 *buf_data,u8 len);
+static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len);
 static void OpenMV_Check_Reset(void);
 
 //public
 void OpenMV_Offline_Check(u8 dT_ms);
-void OpenMV_Byte_Get(u8 bytedata);
+void OpenMV_Byte_Get(uint8_t bytedata);
 
 
 #endif

@@ -14,7 +14,7 @@ _openmv_data_st opmv;
 *参    数: 字节数据
 *返 回 值: 无
 **********************************************************************************************************/
-void OpenMV_Byte_Get(u8 bytedata)
+void OpenMV_Byte_Get(uint8_t bytedata)
 {	
 	static u8 len = 0,rec_sta;
 	u8 check_val=0;
@@ -113,7 +113,7 @@ void OpenMV_Byte_Get(u8 bytedata)
 *参    数: 缓存数据（形参），长度
 *返 回 值: 无
 **********************************************************************************************************/
-static void OpenMV_Data_Analysis(u8 *buf_data,u8 len)
+static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
 {
 	if(*(buf_data+3)==0x41)
 	{

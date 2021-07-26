@@ -12,6 +12,7 @@
 ".\build\drv_anoof.o"
 ".\build\drv_openmv.o"
 ".\build\drv_tfmini_plus.o"
+".\build\drv_hc08.o"
 ".\build\stm32f4xx_it.o"
 ".\build\drv_sys.o"
 ".\build\drv_adc.o"
