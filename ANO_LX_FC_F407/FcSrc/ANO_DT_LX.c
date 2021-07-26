@@ -27,6 +27,7 @@
 u8 send_buffer[50]; //发送数据缓存
 _dt_st dt;
 static u8 user_send_buffer[50];
+extern s32 dx, dy;
 
 //===================================================================
 void ANO_DT_Init(void)
@@ -65,6 +66,11 @@ void ANO_DT_Init(void)
 	dt.fun[0xe2].D_Addr = 0xff;
 	dt.fun[0xe2].fre_ms = 0;	  //0 由外部触发
 	dt.fun[0xe2].time_cnt_ms = 0; //设置初始相位，单位1ms
+	
+	//
+	dt.fun[0xf1].D_Addr = 0xff;
+	dt.fun[0xf1].fre_ms = 0;
+	dt.fun[0xf1].time_cnt_ms = 0;
 }
 
 //数据发送接口
@@ -350,6 +356,21 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
 		send_buffer[(*_cnt)++] = BYTE3(temp_data_32);
 	}
 	break;
+	case 0xf1: 
+	{
+		/*速度*/
+		send_buffer[(*_cnt)++] = BYTE0(ano_of.of2_dx);
+		send_buffer[(*_cnt)++] = BYTE1(ano_of.of2_dx);
+		send_buffer[(*_cnt)++] = BYTE0(ano_of.of2_dy);
+		send_buffer[(*_cnt)++] = BYTE1(ano_of.of2_dy);
+	
+		/*位移*/
+		send_buffer[(*_cnt)++] = BYTE0(dx);
+		send_buffer[(*_cnt)++] = BYTE1(dx);
+		send_buffer[(*_cnt)++] = BYTE0(dy);
+		send_buffer[(*_cnt)++] = BYTE1(dy);
+	}
+	break;
 	default:
 		break;
 	}
@@ -487,6 +508,7 @@ void ANO_LX_Data_Exchange_Task(float dT_s)
 	Check_To_Send(0xe0);
 	Check_To_Send(0xe2);
 	Check_To_Send(0x0d);
+	Check_To_Send(0xf1);
 }
 
 //===================================================================

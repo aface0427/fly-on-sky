@@ -15,6 +15,7 @@
 
 extern _ano_of_st ano_of;
 _user_flag_set user_flag;
+s32 dx, dy;
 
 /*xy速度环参数*/
 _PID_arg_st PID_Speed_arg_xy; //xy共用PID参数 
@@ -75,25 +76,7 @@ static void Loop_200Hz(void) //5ms执行一次
 
 static void Loop_100Hz(void) //10ms执行一次
 {
-	u8 _dt = 10;
-	static s32 dis_dx, dis_dy;
-	static s32 dx, dy;
 	
-	/*速度积分*/
-	if(user_flag.of_dis_clear_cmd){
-		dis_dx = 0;
-		dis_dy = 0;
-	}
-	else{
-		dis_dx += _dt * ano_of.of2_dx_fix;
-		dis_dy += _dt * ano_of.of2_dy_fix;
-	}
-	
-	dx = dis_dx / 1000;
-	dy = dis_dy / 1000;
-	
-	/*数据发送*/
-	User_DT_Send(ano_of, dx, dy);
 	
 }
 
@@ -102,7 +85,28 @@ static void Loop_50Hz(void) //20ms执行一次
 	//////////////////////////////////////////////////////////////////////
     OpenMV_Offline_Check(20);
     TFmini_Offline_Check(20);
-	UserTask_OneKeyCmd();
+		UserTask_OneKeyCmd();
+	//////////////////////////////////////////////////////////////////////
+		u8 _dt = 20;
+		static s32 dis_dx, dis_dy;
+	
+	
+		/*速度积分*/
+		if(user_flag.of_dis_clear_cmd){
+			dis_dx = 0;
+			dis_dy = 0;
+		}
+		else{
+			dis_dx += _dt * ano_of.of2_dx_fix;
+			dis_dy += _dt * ano_of.of2_dy_fix;
+		}
+	
+		dx = dis_dx / 1000;
+		dy = dis_dy / 1000;
+	
+		dt.fun[0xf1].WTS = 1;
+//		/*数据发送*/
+//		User_DT_Send(ano_of, dx, dy);
 	//////////////////////////////////////////////////////////////////////
 }
 
