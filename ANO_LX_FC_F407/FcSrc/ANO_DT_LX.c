@@ -5,6 +5,7 @@
 #include "Drv_led.h"
 #include "LX_FC_State.h"
 #include "Drv_Uart.h"
+#include "Drv_TFMini_Plus.h"
 
 /*==========================================================================
  * 描述    ：凌霄飞控通信主程序
@@ -369,6 +370,17 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
 		send_buffer[(*_cnt)++] = BYTE1(dx);
 		send_buffer[(*_cnt)++] = BYTE0(dy);
 		send_buffer[(*_cnt)++] = BYTE1(dy);
+
+		send_buffer[(*_cnt)++] = BYTE0(tfmini.Dist);
+		send_buffer[(*_cnt)++] = BYTE1(tfmini.Dist);		
+		
+	}
+	break;
+	case 0xf2: 
+	{
+		/*TFmini plus 高度数据*/
+		send_buffer[(*_cnt)++] = BYTE0(tfmini.Dist);
+		send_buffer[(*_cnt)++] = BYTE1(tfmini.Dist);
 	}
 	break;
 	default:
@@ -509,6 +521,7 @@ void ANO_LX_Data_Exchange_Task(float dT_s)
 	Check_To_Send(0xe2);
 	Check_To_Send(0x0d);
 	Check_To_Send(0xf1);
+	Check_To_Send(0xf2);
 }
 
 //===================================================================

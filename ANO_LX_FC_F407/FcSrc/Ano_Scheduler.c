@@ -105,6 +105,7 @@ static void Loop_50Hz(void) //20ms执行一次
 		dy = dis_dy / 1000;
 	
 		dt.fun[0xf1].WTS = 1;
+		dt.fun[0xf2].WTS = 1;
 //		/*数据发送*/
 //		User_DT_Send(ano_of, dx, dy);
 	//////////////////////////////////////////////////////////////////////
