@@ -3,7 +3,7 @@ import sensor, image, time, math, struct
 import json
 from pyb import LED,Timer
 from struct import pack, unpack
-import Message,LineFollowing,DotFollowing,ColorRecognition,QRcode,Photography,find_apriltags
+import Message,LineFollowing,DotFollowing,ColorRecognition,QRcode,Photography,find_apriltags01
 #初始化镜头
 sensor.reset()
 sensor.set_vflip(True)
@@ -27,7 +27,7 @@ while(True):
     elif Message.Ctr.WorkMode==1:#线检测
         LineFollowing.LineCheck()
     elif Message.Ctr.WorkMode==2:#AprilTag检测
-        find_apriltags.Find_Apriltags()
+        find_apriltags01.Find_Apriltags()
     elif Message.Ctr.WorkMode==3:#颜色识别
         ColorRecognition.ColorRecognition()
     elif Message.Ctr.WorkMode==4:#二维码识别

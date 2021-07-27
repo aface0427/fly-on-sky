@@ -65,9 +65,9 @@ def AprilTagDataPack(crossx,crossy):
     sum = 0
     #和校验
     while i<(lens-1):
-        sum = sum + line_data[i]
+        sum = sum + AprilTag_data[i]
         i = i+1
-    line_data[lens-1] = sum;
+    AprilTag_data[lens-1] = sum;
     return AprilTag_data
 
 #用户数据打包
