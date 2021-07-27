@@ -4,6 +4,7 @@
 #include "ANO_DT_LX.h"
 #include "Ano_Math.h"
 #include "Drv_TFMini_Plus.h"
+#include "Drv_OpenMV.h"
 #include "Ano_Scheduler.h"
 #define TF_EXPECT_DIST  300.0f
 #define NORMALIZE_DIST  500.0f
@@ -13,6 +14,8 @@
 s16 THR_Val = 800;
 s16 CTRL_SPD_Z = 10;
 s16 out_speed = 0;
+s16 out_speed_y = 0;
+s16 out_speed_z = 0;
 
 enum AxialDirection{
 	Direction_x = 1,
@@ -162,6 +165,13 @@ float PID_calculate( float dT_s,            //周期（单位：秒）
 	return (pid_val->out);
 }
 
+/*
+*@fn:			u8 TFMini_Track(void)
+*@brief:	利用TFmini返回x轴方向的距离，实现x轴的轴向定位
+*@para:		none
+*@return:	1
+*@comment:
+*/
 u8 TFMini_Track(void){
 	float fdb_distance = tfmini.Dist > NORMALIZE_DIST? 1.0f: tfmini.Dist / NORMALIZE_DIST;
 	float exp_distance = TF_EXPECT_DIST / NORMALIZE_DIST;
@@ -188,6 +198,63 @@ u8 TFMini_Track(void){
 		out_speed = _out_speed;
 	
 	RealTimeSpeedControlSend(out_speed, Direction_x);
+	
+	return 1;
+}
+
+/*
+*@fn:			u8 OpenMV_Track(void)
+*@brief:	利用OpenMV_Track返回在yz平面摄像头中心距标签的距离，实现yz方向的定位
+*@para:		none
+*@return:	1
+*@comment:
+*/
+u8 OpenMV_Track(void){
+	
+	float fdb_distance_y = 0;
+	float exp_distance_y = 0;
+	float fdb_speed_y = 0;
+	float exp_speed_y = 0;
+	s16 _out_speed_y = 0;
+	
+	float fdb_distance_z = 0;
+	float exp_distance_z= 0;
+	float fdb_speed_z = 0;
+	float exp_speed_z = 0;
+	s16 _out_speed_z = 0;
+	
+	PID_calculate(0.02, 0, exp_distance_y, fdb_distance_y, &PID_Distance_arg_xy, &PID_Distance_val_y, 0, 0);
+	PID_calculate(0.02, 0, exp_distance_z, fdb_distance_z, &PID_Distance_arg_z, &PID_Distance_val_z, 0, 0);
+	exp_speed_y = PID_Distance_val_y.out;
+	exp_speed_z = PID_Distance_val_z.out;
+	
+	if(ano_of.of2_dy > NORMALIZE_SPEED)
+		fdb_speed_y = 1.0f;
+	else if(ano_of.of2_dy < -1 * NORMALIZE_SPEED)
+		fdb_speed_y = -1.0f;
+	else fdb_speed_y = (float)ano_of.of2_dy / NORMALIZE_SPEED;
+	
+	PID_calculate(0.02, 0, exp_speed_y, fdb_speed_y, &PID_Speed_arg_xy, &PID_Speed_val_y, 0, 0);
+	//PID_calculate(0.02, 0, exp_speed_z, fdb_speed_z, &PID_Speed_arg_z, &PID_Speed_val_z, 0, 0);
+	_out_speed_y = PID_Speed_val_y.out * NORMALIZE_SPEED;
+	_out_speed_z = exp_speed_z * NORMALIZE_SPEED;
+	
+	if(_out_speed_y > MAX_SPEED)
+		out_speed_y = MAX_SPEED;
+	else if(_out_speed_y < -1 * MAX_SPEED)
+		out_speed_y = -1 * MAX_SPEED;
+	else 
+		out_speed_y = _out_speed_y;
+	
+	if(_out_speed_z > MAX_SPEED)
+		out_speed_z = MAX_SPEED;
+	else if(_out_speed_z < -1 * MAX_SPEED)
+		out_speed_z = -1 * MAX_SPEED;
+	else 
+		out_speed_z = _out_speed_z;
+	
+	RealTimeSpeedControlSend(out_speed_y, Direction_y);
+	RealTimeSpeedControlSend(out_speed_z, Direction_z);
 	
 	return 1;
 }

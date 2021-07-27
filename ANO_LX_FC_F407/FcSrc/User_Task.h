@@ -53,8 +53,11 @@ float PID_calculate( float dT_s,            //周期（单位：秒）
 										 );
 
 extern s16 out_speed;
+extern s16 out_speed_y;
+extern s16 out_speed_z;
 
 u8 TFMini_Track(void);
+u8 OpenMV_Track(void);
 u8 RealTimeSpeedControl(s16 velocity, u8 direction);
 u8 RealTimeSpeedControlSend(s16 velocity, u8 direction);
 u8 RealTimeSpeedControl_Angle(s16 velocity, u8 direction, u16 degree);

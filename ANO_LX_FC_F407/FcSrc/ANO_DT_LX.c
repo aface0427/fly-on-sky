@@ -386,6 +386,12 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
 		/*TFmini plus 高度数据*/
 		send_buffer[(*_cnt)++] = BYTE0(out_speed);
 		send_buffer[(*_cnt)++] = BYTE1(out_speed);
+		
+		/*TFmini plus 高度数据*/
+		send_buffer[(*_cnt)++] = BYTE0(out_speed_y);
+		send_buffer[(*_cnt)++] = BYTE1(out_speed_y);
+		send_buffer[(*_cnt)++] = BYTE0(out_speed_z);
+		send_buffer[(*_cnt)++] = BYTE1(out_speed_z);
 	}
 	break;
 	default:
