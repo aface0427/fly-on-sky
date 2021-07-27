@@ -55,6 +55,21 @@ def LineDataPack(flag,angle,distance,crossflag,crossx,crossy,T_ms):
         i = i+1
     line_data[lens-1] = sum;
     return line_data
+
+#AprilTag检测数据打包
+def AprilTagDataPack(crossx,crossy):
+    AprilTag_data=bytearray([0xAA,0x29,0x05,0x43,0x00,crossx>>8,crossx,(-crossy)>>8,(-crossy),0x00])
+    lens = len(AprilTag_data)#数据包大小
+    AprilTag_data[4] = 4;#有效数据个数
+    i = 0
+    sum = 0
+    #和校验
+    while i<(lens-1):
+        sum = sum + line_data[i]
+        i = i+1
+    line_data[lens-1] = sum;
+    return AprilTag_data
+
 #用户数据打包
 def UserDataPack(data0,data1,data2,data3,data4,data5,data6,data7,data8,data9):
     UserData=bytearray([0xAA,0x05,0xAF,0xF1,0x00
