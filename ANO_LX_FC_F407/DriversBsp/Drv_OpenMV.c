@@ -4,6 +4,12 @@
 //设定
 #define OPMV_OFFLINE_TIME_MS  1000  //毫秒
 
+enum OpenMVmodeflag{
+    Dot_Following = 1,
+    Line_Following,
+    AprilTag
+}OpenMVmodeflagdata;
+
 //全局变量
 u16 offline_check_time;
 u8 openmv_buf[20];
@@ -136,6 +142,12 @@ static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
 		opmv.lt.dT_ms = *(buf_data+15);
 		//
 		opmv.mode_sta = 2;
+	}
+    else if(*(buf_data+3)==0x43)//AprilTag识别码    
+	{
+		opmv.lt.pos_y = (s16)((*(buf_data+5)<<8)|*(buf_data+6));
+		opmv.lt.pos_z = (s16)((*(buf_data+7)<<8)|*(buf_data+8));
+		opmv.mode_sta = 3;
 	}
 	//
 	OpenMV_Check_Reset();

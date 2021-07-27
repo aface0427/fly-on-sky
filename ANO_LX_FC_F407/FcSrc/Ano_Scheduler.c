@@ -84,27 +84,26 @@ static void Loop_50Hz(void) //20ms执行一次
 	//////////////////////////////////////////////////////////////////////
     OpenMV_Offline_Check(20);
     TFmini_Offline_Check(20);
-		UserTask_OneKeyCmd();
+	UserTask_OneKeyCmd();
 	//////////////////////////////////////////////////////////////////////
-		u8 _dt = 20;
-		static s32 dis_dx, dis_dy;
+	u8 _dt = 20;
+	static s32 dis_dx, dis_dy;
 	
 	
-		/*速度积分*/
-		if(user_flag.of_dis_clear_cmd){
-			dis_dx = 0;
-			dis_dy = 0;
-		}
-		else{
-			dis_dx += _dt * ano_of.of2_dx_fix;
-			dis_dy += _dt * ano_of.of2_dy_fix;
-		}
+	/*速度积分*/
+	if(user_flag.of_dis_clear_cmd){
+		dis_dx = 0;
+		dis_dy = 0;
+	}
+	else{
+		dis_dx += _dt * ano_of.of2_dx_fix;
+		dis_dy += _dt * ano_of.of2_dy_fix;
+	}
+	dx = dis_dx / 1000;
+	dy = dis_dy / 1000;
 	
-		dx = dis_dx / 1000;
-		dy = dis_dy / 1000;
-	
-		dt.fun[0xf1].WTS = 1;
-		dt.fun[0xf2].WTS = 1;
+	dt.fun[0xf1].WTS = 1;
+	dt.fun[0xf2].WTS = 1;
 //		/*数据发送*/
 //		User_DT_Send(ano_of, dx, dy);
 	//////////////////////////////////////////////////////////////////////
@@ -122,10 +121,6 @@ static void Loop_20Hz(void) //50ms执行一次
 
 static void Loop_2Hz(void) //500ms执行一次
 {
-//	if(user_flag.init_pid_flag == 0){
-//		void Init_PID(void);
-//		user_flag.init_pid_flag = 1;
-//	}
 }
 
 /*

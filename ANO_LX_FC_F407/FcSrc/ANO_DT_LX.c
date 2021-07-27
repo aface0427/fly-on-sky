@@ -69,11 +69,12 @@ void ANO_DT_Init(void)
 	dt.fun[0xe2].fre_ms = 0;	  //0 由外部触发
 	dt.fun[0xe2].time_cnt_ms = 0; //设置初始相位，单位1ms
 	
-	//
+	//外部触发 发至上位机用于观察光流数据中xy的位移
 	dt.fun[0xf1].D_Addr = 0xff;
 	dt.fun[0xf1].fre_ms = 0;
 	dt.fun[0xf1].time_cnt_ms = 0;
 	
+    //外部触发 发至上位机用于观察pid计算得出的out_xyz方向速度
 	dt.fun[0xf2].D_Addr = 0xff;
 	dt.fun[0xf2].fre_ms = 0;
 	dt.fun[0xf2].time_cnt_ms = 0;
@@ -383,11 +384,11 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
 	break;
 	case 0xf2: 
 	{
-		/*TFmini plus 高度数据*/
+		/*TFmini plus x方向数据*/
 		send_buffer[(*_cnt)++] = BYTE0(out_speed);
 		send_buffer[(*_cnt)++] = BYTE1(out_speed);
 		
-		/*TFmini plus 高度数据*/
+		/*openmv yz方向数据*/
 		send_buffer[(*_cnt)++] = BYTE0(out_speed_y);
 		send_buffer[(*_cnt)++] = BYTE1(out_speed_y);
 		send_buffer[(*_cnt)++] = BYTE0(out_speed_z);

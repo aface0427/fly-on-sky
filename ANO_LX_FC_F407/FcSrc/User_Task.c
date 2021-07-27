@@ -6,10 +6,10 @@
 #include "Drv_TFMini_Plus.h"
 #include "Drv_OpenMV.h"
 #include "Ano_Scheduler.h"
-#define TF_EXPECT_DIST  300.0f
-#define NORMALIZE_DIST  500.0f
-#define NORMALIZE_SPEED 20.0f
-#define MAX_SPEED 20
+#define TF_EXPECT_DIST  300.0f //期望距离
+#define NORMALIZE_DIST  500.0f //距离阈值
+#define NORMALIZE_SPEED 20.0f  //xy方向速度阈值
+#define MAX_SPEED 20           //最大输出速度
 
 s16 THR_Val = 800;
 s16 CTRL_SPD_Z = 10;
@@ -173,23 +173,31 @@ float PID_calculate( float dT_s,            //周期（单位：秒）
 *@comment:
 */
 u8 TFMini_Track(void){
+    //测距所得与期望距离进行归一化处理
 	float fdb_distance = tfmini.Dist > NORMALIZE_DIST? 1.0f: tfmini.Dist / NORMALIZE_DIST;
 	float exp_distance = TF_EXPECT_DIST / NORMALIZE_DIST;
+    
 	float fdb_speed = 0;
 	float exp_speed = 0;
 	s16 _out_speed = 0;
-	
+	//位置环pid计算
 	PID_calculate(0.02, 0, exp_distance, fdb_distance, &PID_Distance_arg_xy, &PID_Distance_val_x, 0, 0);
+    //位置环pid输出作为速度环的期望速度输入
 	exp_speed = PID_Distance_val_x.out * -1;
+    
+    //光流数据输入归一化处理得出实际速度输入
 	if(ano_of.of2_dx > NORMALIZE_SPEED)
 		fdb_speed = 1.0f;
 	else if(ano_of.of2_dx < -1 * NORMALIZE_SPEED)
 		fdb_speed = -1.0f;
 	else fdb_speed = (float)ano_of.of2_dx / NORMALIZE_SPEED;
 	
+    //速度环pid计算
 	PID_calculate(0.02, 0, exp_speed, fdb_speed, &PID_Speed_arg_xy, &PID_Speed_val_x, 0, 0);
+    
 	_out_speed = PID_Speed_val_x.out * NORMALIZE_SPEED;
 	
+    //输出速度限位
 	if(_out_speed > MAX_SPEED)
 		out_speed = MAX_SPEED;
 	else if(_out_speed < -1 * MAX_SPEED)
@@ -197,6 +205,7 @@ u8 TFMini_Track(void){
 	else 
 		out_speed = _out_speed;
 	
+    //发送对应输出指令
 	RealTimeSpeedControlSend(out_speed, Direction_x);
 	
 	return 1;
@@ -223,6 +232,7 @@ u8 OpenMV_Track(void){
 	float exp_speed_z = 0;
 	s16 _out_speed_z = 0;
 	
+    //位置环pid计算
 	PID_calculate(0.02, 0, exp_distance_y, fdb_distance_y, &PID_Distance_arg_xy, &PID_Distance_val_y, 0, 0);
 	PID_calculate(0.02, 0, exp_distance_z, fdb_distance_z, &PID_Distance_arg_z, &PID_Distance_val_z, 0, 0);
 	exp_speed_y = PID_Distance_val_y.out;
@@ -239,6 +249,7 @@ u8 OpenMV_Track(void){
 	_out_speed_y = PID_Speed_val_y.out * NORMALIZE_SPEED;
 	_out_speed_z = exp_speed_z * NORMALIZE_SPEED;
 	
+    //输出速度限位
 	if(_out_speed_y > MAX_SPEED)
 		out_speed_y = MAX_SPEED;
 	else if(_out_speed_y < -1 * MAX_SPEED)
@@ -253,6 +264,7 @@ u8 OpenMV_Track(void){
 	else 
 		out_speed_z = _out_speed_z;
 	
+    //发送对应输出指令
 	RealTimeSpeedControlSend(out_speed_y, Direction_y);
 	RealTimeSpeedControlSend(out_speed_z, Direction_z);
 	

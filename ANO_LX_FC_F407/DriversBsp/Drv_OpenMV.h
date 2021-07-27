@@ -26,6 +26,8 @@ typedef struct
 	u8 p_flag;
 	s16 pos_x;
 	s16 pos_y;
+    s16 pos_z;
+    s16 yaw;
 	u8 dT_ms;
 
 }_openmv_line_tracking_st;

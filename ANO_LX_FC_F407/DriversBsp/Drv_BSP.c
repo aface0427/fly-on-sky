@@ -48,10 +48,9 @@ u8 All_Init()
 	MyDelayMs(800);
 	//初始化定时中断
 	DrvTimerFcInit();
-	//初始化完成，返回1
-	
 	//pid参数初始化
 	Init_PID();
+    //初始化完成，返回1
 	return (1);
 }
 
