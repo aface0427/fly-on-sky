@@ -10,6 +10,8 @@
 #define NORMALIZE_DIST  500.0f //距离阈值
 #define NORMALIZE_SPEED 20.0f  //xy方向速度阈值
 #define MAX_SPEED 20           //最大输出速度
+#define NORMALIZE_MV_DIST_Y 40.0f
+#define NORMALIZE_MV_DIST_Z 27.0f
 
 s16 THR_Val = 800;
 s16 CTRL_SPD_Z = 10;
@@ -220,13 +222,13 @@ u8 TFMini_Track(void){
 */
 u8 OpenMV_Track(void){
 	
-	float fdb_distance_y = 0;
+	float fdb_distance_y = opmv.at.pos_y / NORMALIZE_MV_DIST_Y;
 	float exp_distance_y = 0;
 	float fdb_speed_y = 0;
 	float exp_speed_y = 0;
 	s16 _out_speed_y = 0;
 	
-	float fdb_distance_z = 0;
+	float fdb_distance_z = opmv.at.pos_z / NORMALIZE_MV_DIST_Z;
 	float exp_distance_z= 0;
 	float fdb_speed_z = 0;
 	float exp_speed_z = 0;
