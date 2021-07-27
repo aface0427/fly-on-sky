@@ -145,8 +145,8 @@ static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
 	}
     else if(*(buf_data+3)==0x43)//AprilTagÊ¶±ğÂë    
 	{
-		opmv.lt.pos_y = (s16)((*(buf_data+5)<<8)|*(buf_data+6));
-		opmv.lt.pos_z = (s16)((*(buf_data+7)<<8)|*(buf_data+8));
+		opmv.at.pos_y = (s16)((*(buf_data+5)<<8)|*(buf_data+6));
+		opmv.at.pos_z = (s16)((*(buf_data+7)<<8)|*(buf_data+8));
 		opmv.mode_sta = 3;
 	}
 	//
