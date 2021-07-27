@@ -3,9 +3,16 @@
 #include "LX_FC_Fun.h"
 #include "ANO_DT_LX.h"
 #include "Ano_Math.h"
+#include "Drv_TFMini_Plus.h"
+#include "Ano_Scheduler.h"
+#define TF_EXPECT_DIST  300.0f
+#define NORMALIZE_DIST  500.0f
+#define NORMALIZE_SPEED 20.0f
+#define MAX_SPEED 20
 
 s16 THR_Val = 800;
 s16 CTRL_SPD_Z = 10;
+s16 out_speed = 0;
 
 enum AxialDirection{
 	Direction_x = 1,
@@ -38,9 +45,10 @@ void UserTask_OneKeyCmd(void)
             //还没有执行
             if (one_key_takeoff_f == 0)
             {
-								one_key_takeoff_f = 1;
-								mission_task = 1;
-								mission_step = 1;
+//								one_key_takeoff_f = 1;
+//								mission_task = 1;
+//								mission_step = 1;
+								user_flag.tfmini_ctl_flag = 1;
             }
 						
         }
@@ -61,6 +69,7 @@ void UserTask_OneKeyCmd(void)
                 //Add_Send_Data(0x41, );
 								//FC_Lock();
 //								OneKey_Hold();
+								user_flag.tfmini_ctl_flag = 0;
 							  mission_task = 0;
 								mission_step = 0;
 								one_key_land_f = 1;
@@ -79,65 +88,21 @@ void UserTask_OneKeyCmd(void)
 							case 0:
 									break;
 							case 1:
+									
 								
-									/*实时帧控制*/
-										rt_tar.st_data.vel_x = 25;
-										dt.fun[0x41].WTS = 1;
-										mission_step += 1;
-									
-									/*命令帧控制*/
-									//mission_step += Horizontal_Move(40, 20, 0); //以20cm/s的速度向前移动40cm
-									
-									//mission_step += FC_Unlock(); //解锁
-									//LX_Change_Mode(3);
 									break;
 							case 2: 
-									/*延时10s*/
-									
-									if(_cnt < 2000){
-											if(_cnt % 200);
-											else{
-												rt_tar.st_data.vel_x = 25;
-												dt.fun[0x41].WTS = 1;
-											}
-											_cnt += 20;
-									}
-									else{
-											_cnt = 0;
-											rt_tar.st_data.vel_x = 0;
-											dt.fun[0x41].WTS = 1;
-											mission_step += 1;
-											//mission_step += OneKey_Takeoff(40);
-									}
+								
 									break;
 									
 							case 3:
-									/*延时10s*/
-									if(_cnt < 3000)
-											_cnt += 20;
-									else{
-											_cnt = 0;
-											OneKey_Land();
-											mission_step = 0;
-											/*上升20cm，速度10cm/s*/
-											//mission_step += Vertical_Up(10, 10);
-											
-											
-											//mission_step += 1;
-									}
+						
 									break;
 							case 4:
-									/*延时2s*/
-									
-//									if(_cnt < 100)
-//											_cnt++;
-//									else{
-//											_cnt = 0;
-//									}
-//									mission_step += 1;
+							
 									break;
 							case 5:
-									mission_step = 0;
+
 									break;
 							default:
 									break;
@@ -197,22 +162,46 @@ float PID_calculate( float dT_s,            //周期（单位：秒）
 	return (pid_val->out);
 }
 
-u8 AprilTag_Track(){
+u8 TFMini_Track(void){
+	float fdb_distance = tfmini.Dist > NORMALIZE_DIST? 1.0f: tfmini.Dist / NORMALIZE_DIST;
+	float exp_distance = TF_EXPECT_DIST / NORMALIZE_DIST;
+	float fdb_speed = 0;
+	float exp_speed = 0;
+	s16 _out_speed = 0;
 	
-
+	PID_calculate(0.02, 0, exp_distance, fdb_distance, &PID_Distance_arg_xy, &PID_Distance_val_x, 0, 0);
+	exp_speed = PID_Distance_val_x.out * -1;
+	if(ano_of.of2_dx > NORMALIZE_SPEED)
+		fdb_speed = 1.0f;
+	else if(ano_of.of2_dx < -1 * NORMALIZE_SPEED)
+		fdb_speed = -1.0f;
+	else fdb_speed = (float)ano_of.of2_dx / NORMALIZE_SPEED;
 	
+	PID_calculate(0.02, 0, exp_speed, fdb_speed, &PID_Speed_arg_xy, &PID_Speed_val_x, 0, 0);
+	_out_speed = PID_Speed_val_x.out * NORMALIZE_SPEED;
+	
+	if(_out_speed > MAX_SPEED)
+		out_speed = MAX_SPEED;
+	else if(_out_speed < -1 * MAX_SPEED)
+		out_speed = -1 * MAX_SPEED;
+	else 
+		out_speed = _out_speed;
+	
+	RealTimeSpeedControlSend(out_speed, Direction_x);
+	
+	return 1;
 }
 
 /*
-*@fn:			u8 RealTimeSpeedControl(u16 velocity, u8 direction)
+*@fn:			u8 RealTimeSpeedControl(s16 velocity, u8 direction)
 *@brief:	通过实时控制帧控制指定方向(x、y、z轴)的速度
-*@para:		u16 velocity 平移速度, u8 direction 平移方向
+*@para:		s16 velocity 平移速度, u8 direction 平移方向
 *@return:	1
 *@comment:
 */
-u8 RealTimeSpeedControl(u16 velocity, u8 direction){
-	if(velocity > SAFE_SPEED)
-		velocity = SAFE_SPEED;
+u8 RealTimeSpeedControl(s16 velocity, u8 direction){
+//	if(velocity > SAFE_SPEED)
+//		velocity = SAFE_SPEED;
 	
 	switch(direction){
 		case Direction_x:
@@ -231,13 +220,13 @@ u8 RealTimeSpeedControl(u16 velocity, u8 direction){
 }
 
 /*
-*@fn:			u8 RealTimeSpeedControlSend(u16 velocity, u8 direction)
+*@fn:			u8 RealTimeSpeedControlSend(s16 velocity, u8 direction)
 *@brief:	通过实时控制帧控制指定方向(x、y、z轴)的速度，并发送控制指令
-*@para:		u16 velocity 平移速度, u8 direction 平移方向
+*@para:		s16 velocity 平移速度, u8 direction 平移方向
 *@return:	1
 *@comment:
 */
-u8 RealTimeSpeedControlSend(u16 velocity, u8 direction){
+u8 RealTimeSpeedControlSend(s16 velocity, u8 direction){
 	RealTimeSpeedControl(velocity, direction);
 	dt.fun[0x41].WTS = 1;
 	
@@ -245,16 +234,16 @@ u8 RealTimeSpeedControlSend(u16 velocity, u8 direction){
 }
 
 /*
-*@fn:			u8 RealTimeSpeedControl_Angle(u16 velocity, u8 direction, u16 degree)
+*@fn:			u8 RealTimeSpeedControl_Angle(s16 velocity, u8 direction, u16 degree)
 *@brief:	通过实时控制帧控制指定平面任意角度的平移速度，并发送控制指令
-*@para:		u16 velocity 平移速度, u8 direction 平移平面, u16 degree 平移角度(单位：°)
+*@para:		s16 velocity 平移速度, u8 direction 平移平面, u16 degree 平移角度(单位：°)
 *@return:	1
 *@comment:对于不同平面角度值的方向定义
 					xy	以飞机为圆心，x轴正方向为起点，向y轴正方向移动为正
 					yz	以飞机为圆心，y轴正方向为起点，向z轴正方向移动为正
 					xz	以飞机为圆心，x轴正方向为起点，向z轴正方向移动为正
 */
-u8 RealTimeSpeedControl_Angle(u16 velocity, u8 direction, u16 degree){
+u8 RealTimeSpeedControl_Angle(s16 velocity, u8 direction, u16 degree){
 	if(direction == Direction_xy){
 		RealTimeSpeedControl(velocity * my_cos(degree / 360 * 3.14159265), Direction_x);
 		RealTimeSpeedControl(velocity * my_sin(degree / 360 * 3.14159265), Direction_y);
@@ -271,3 +260,6 @@ u8 RealTimeSpeedControl_Angle(u16 velocity, u8 direction, u16 degree){
 	
 	return 1;
 }
+
+
+

@@ -6,7 +6,6 @@
  * 描述    ：任务调度
 **********************************************************************************/
 #include "Ano_Scheduler.h"
-#include "User_Task.h"
 #include "Drv_OpenMV.h"
 #include "ANO_DT_LX.h"
 #include "Drv_AnoOf.h"
@@ -14,7 +13,7 @@
 
 
 extern _ano_of_st ano_of;
-_user_flag_set user_flag;
+_user_flag_set user_flag = {0};
 s32 dx, dy;
 
 /*xy速度环参数*/
@@ -114,14 +113,79 @@ static void Loop_50Hz(void) //20ms执行一次
 static void Loop_20Hz(void) //50ms执行一次
 {
 	//////////////////////////////////////////////////////////////////////
-    
+  if(user_flag.tfmini_ctl_flag){
+		TFMini_Track();
+	}
 	//////////////////////////////////////////////////////////////////////
 }
 
 static void Loop_2Hz(void) //500ms执行一次
 {
-	
+//	if(user_flag.init_pid_flag == 0){
+//		void Init_PID(void);
+//		user_flag.init_pid_flag = 1;
+//	}
 }
+
+/*
+*@fn:			void Init_PID(void)
+*@brief:	PID参数初始化
+*@para:		none
+*@return:	none
+*@comment:
+*/
+void Init_PID(void){
+//xy速度环
+	PID_Speed_arg_xy.kp = 0.5f;
+	PID_Speed_arg_xy.ki = 0;
+	PID_Speed_arg_xy.kd_ex = 0;
+	PID_Speed_arg_xy.fb_d_mode = 0;
+	PID_Speed_arg_xy.kd_fb = 0;
+	PID_Speed_arg_xy.k_ff = 0;
+	
+//xy位置环
+	PID_Distance_arg_xy.kp = 10.0f;
+	PID_Distance_arg_xy.ki = 0;
+	PID_Distance_arg_xy.kd_ex = 0;
+	PID_Distance_arg_xy.fb_d_mode = 0;
+	PID_Distance_arg_xy.kd_fb = 0;
+	PID_Distance_arg_xy.k_ff = 0;
+	
+//yaw速度环
+	PID_Speed_arg_yaw.kp = 0.5f;
+	PID_Speed_arg_yaw.ki = 0;
+	PID_Speed_arg_yaw.kd_ex = 0;
+	PID_Speed_arg_yaw.fb_d_mode = 0;
+	PID_Speed_arg_yaw.kd_fb = 0;
+	PID_Speed_arg_yaw.k_ff = 0;
+	
+//yaw位置环
+	PID_Distance_arg_yaw.kp = 0.5f;
+	PID_Distance_arg_yaw.ki = 0;
+	PID_Distance_arg_yaw.kd_ex = 0;
+	PID_Distance_arg_yaw.fb_d_mode = 0;
+	PID_Distance_arg_yaw.kd_fb = 0;
+	PID_Distance_arg_yaw.k_ff = 0;	
+	
+//z速度环
+	PID_Speed_arg_z.kp = 0.5f;
+	PID_Speed_arg_z.ki = 0;
+	PID_Speed_arg_z.kd_ex = 0;
+	PID_Speed_arg_z.fb_d_mode = 0;
+	PID_Speed_arg_z.kd_fb = 0;
+	PID_Speed_arg_z.k_ff = 0;
+	
+//z位置环
+	PID_Distance_arg_z.kp = 0.5f;
+	PID_Distance_arg_z.ki = 0;
+	PID_Distance_arg_z.kd_ex = 0;
+	PID_Distance_arg_z.fb_d_mode = 0;
+	PID_Distance_arg_z.kd_fb = 0;
+	PID_Distance_arg_z.k_ff = 0;	
+}
+
+
+
 //////////////////////////////////////////////////////////////////////
 //调度器初始化
 //////////////////////////////////////////////////////////////////////

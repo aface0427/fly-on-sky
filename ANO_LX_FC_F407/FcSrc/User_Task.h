@@ -52,8 +52,11 @@ float PID_calculate( float dT_s,            //周期（单位：秒）
 										float inte_lim			//integration limit，积分限幅									
 										 );
 
-u8 RealTimeSpeedControl(u16 velocity, u8 direction);
-u8 RealTimeSpeedControlSend(u16 velocity, u8 direction);
-u8 RealTimeSpeedControl_Angle(u16 velocity, u8 direction, u16 degree);
+extern s16 out_speed;
+
+u8 TFMini_Track(void);
+u8 RealTimeSpeedControl(s16 velocity, u8 direction);
+u8 RealTimeSpeedControlSend(s16 velocity, u8 direction);
+u8 RealTimeSpeedControl_Angle(s16 velocity, u8 direction, u16 degree);
 
 #endif

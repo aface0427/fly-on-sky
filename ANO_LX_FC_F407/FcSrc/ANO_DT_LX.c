@@ -6,6 +6,7 @@
 #include "LX_FC_State.h"
 #include "Drv_Uart.h"
 #include "Drv_TFMini_Plus.h"
+#include "User_Task.h"
 
 /*==========================================================================
  * 描述    ：凌霄飞控通信主程序
@@ -72,6 +73,10 @@ void ANO_DT_Init(void)
 	dt.fun[0xf1].D_Addr = 0xff;
 	dt.fun[0xf1].fre_ms = 0;
 	dt.fun[0xf1].time_cnt_ms = 0;
+	
+	dt.fun[0xf2].D_Addr = 0xff;
+	dt.fun[0xf2].fre_ms = 0;
+	dt.fun[0xf2].time_cnt_ms = 0;
 }
 
 //数据发送接口
@@ -379,8 +384,8 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
 	case 0xf2: 
 	{
 		/*TFmini plus 高度数据*/
-		send_buffer[(*_cnt)++] = BYTE0(tfmini.Dist);
-		send_buffer[(*_cnt)++] = BYTE1(tfmini.Dist);
+		send_buffer[(*_cnt)++] = BYTE0(out_speed);
+		send_buffer[(*_cnt)++] = BYTE1(out_speed);
 	}
 	break;
 	default:
