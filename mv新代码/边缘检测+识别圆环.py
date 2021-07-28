@@ -20,7 +20,8 @@ sensor.reset() # 初始化 sensor.
 sensor.set_pixformat(sensor.GRAYSCALE) # or sensor.RGB565
 #设置图像色彩格式，有RGB565色彩图和GRAYSCALE灰度图两种
 
-sensor.set_framesize(sensor.HQVGA) # or sensor.QVGA (or others)
+sensor.set_framesize(sensor.QQVGA) # or sensor.QVGA (or others)
+sensor.set_windowing((120,120))
 #设置图像像素大小
 sensor.skip_frames(10) # 让新的设置生效
 clock = time.clock() # 跟踪FPS帧率
@@ -37,7 +38,7 @@ def cmp(x):
 while(True):
     clock.tick() # 追踪两个snapshots()之间经过的毫秒数.
     img = sensor.snapshot() # 拍一张照片，返回图像
-    img.morph(kernel_size,kernel,mul=1.7)
+    img.morph(kernel_size,kernel,mul=1.9)
     #morph(size, kernel, mul=Auto, add=0)，morph变换，mul根据图像对比度
     #进行调整，mul使图像每个像素乘mul；add根据明暗度调整，使得每个像素值加上add值。
     #如果不设置则不对morph变换后的图像进行处理。
@@ -53,7 +54,7 @@ while(True):
     p=0
     a=[]
     a.append((0,0))
-    for c in img.find_circles(threshold = 5200, x_margin = 2, y_margin = 2, r_margin = 2,r_min = 20, r_max = 100, r_step = 2):
+    for c in img.find_circles(threshold = 4800, x_margin = 2, y_margin = 2, r_margin = 2,r_min = 20, r_max = 100, r_step = 2):
         p=p+1
         a.append((c.x(),c.y()))
         img.draw_circle(c.x(), c.y(), c.r(), color = (255, 0, 0))
