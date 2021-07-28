@@ -23,13 +23,13 @@ def degrees(radians):
     return (180 * radians) / math.pi
 
 def Find_Apriltags() :
-    img = sensor.snapshot()
+    img = sensor.snapshot().lens_corr(strength=1.65, zoom=1)
     tags = img.find_apriltags(fx=f_x, fy=f_y, cx=c_x, cy=c_y)
     if len(tags)==1:
         for tag in tags : # 默认为TAG36H11
             img.draw_rectangle(tag.rect(), color = (255, 0, 0))
             img.draw_cross(tag.cx(), tag.cy(), color = (0, 255, 0))
             print("%f %f",tag.cx(),tag.cy())
-            Message.UartSendData(Message.AprilTagDataPack(1,tag.cx(),tag.cy()))
+            Message.UartSendData(Message.AprilTagDataPack(0,tag.cx(),tag.cy()))
     else:
-        Message.UartSendData(Message.AprilTagDataPack(0,1,1))
+        Message.UartSendData(Message.AprilTagDataPack(1,1,1))

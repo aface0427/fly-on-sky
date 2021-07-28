@@ -7,6 +7,7 @@
 #include "Drv_Uart.h"
 #include "Drv_TFMini_Plus.h"
 #include "User_Task.h"
+#include "Drv_OpenMV.h"
 
 /*==========================================================================
  * 描述    ：凌霄飞控通信主程序
@@ -377,22 +378,32 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
 		send_buffer[(*_cnt)++] = BYTE0(dy);
 		send_buffer[(*_cnt)++] = BYTE1(dy);
 
-		send_buffer[(*_cnt)++] = BYTE0(tfmini.Dist);
-		send_buffer[(*_cnt)++] = BYTE1(tfmini.Dist);		
+				
 		
 	}
 	break;
 	case 0xf2: 
 	{
-		/*TFmini plus x方向数据*/
+        /*TFminiPlus-x方向数据*/
+        send_buffer[(*_cnt)++] = BYTE0(tfmini.Dist);
+		send_buffer[(*_cnt)++] = BYTE1(tfmini.Dist);
+        
+		/*TFminiPlus-pid-x方向数据*/
 		send_buffer[(*_cnt)++] = BYTE0(out_speed);
 		send_buffer[(*_cnt)++] = BYTE1(out_speed);
+        
+        /*opmv-yz方向数据*/
+		send_buffer[(*_cnt)++] = BYTE0(opmv.at.pos_y);
+		send_buffer[(*_cnt)++] = BYTE1(opmv.at.pos_y);
+		send_buffer[(*_cnt)++] = BYTE0(opmv.at.pos_z);
+		send_buffer[(*_cnt)++] = BYTE1(opmv.at.pos_z);
 		
-		/*openmv yz方向数据*/
+		/*opmv-pid-yz方向数据*/
 		send_buffer[(*_cnt)++] = BYTE0(out_speed_y);
 		send_buffer[(*_cnt)++] = BYTE1(out_speed_y);
 		send_buffer[(*_cnt)++] = BYTE0(out_speed_z);
 		send_buffer[(*_cnt)++] = BYTE1(out_speed_z);
+        
 	}
 	break;
 	default:

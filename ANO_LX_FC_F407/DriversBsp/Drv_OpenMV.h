@@ -33,7 +33,7 @@ typedef struct
 }_openmv_line_tracking_st;
 
 typedef struct{
-    u8 flag;
+    u8 is_invalid;
 	s16 pos_y;
     s16 pos_z;
 }_openmv_apriltag_tracking_st;

@@ -58,7 +58,7 @@ def LineDataPack(flag,angle,distance,crossflag,crossx,crossy,T_ms):
 
 #AprilTag检测数据打包
 def AprilTagDataPack(flag,crossx,crossy):
-    AprilTag_data=bytearray([0xAA,0x29,0x05,0x43,0x00,flag,crossx>>8,crossx,(-crossy)>>8,(-crossy),0x00])
+    AprilTag_data=bytearray([0xAA,0x29,0x05,0x43,0x00,flag,crossx>>8,crossx,(crossy)>>8,(crossy),0x00])
     lens = len(AprilTag_data)#数据包大小
     AprilTag_data[4] = 5;#有效数据个数
     i = 0

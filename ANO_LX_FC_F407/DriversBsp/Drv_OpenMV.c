@@ -112,7 +112,7 @@ void OpenMV_Byte_Get(uint8_t bytedata)
 	}
 	
 }
-
+s16 pos_y,pos_z;
 /**********************************************************************************************************
 *函 数 名: OpenMV_Data_Analysis
 *功能说明: OpenMV数据解析
@@ -121,6 +121,8 @@ void OpenMV_Byte_Get(uint8_t bytedata)
 **********************************************************************************************************/
 static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
 {
+    
+    
 	if(*(buf_data+3)==0x41)
 	{
 		opmv.cb.color_flag = *(buf_data+5);
@@ -145,9 +147,17 @@ static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
 	}
     else if(*(buf_data+3)==0x43)//AprilTag识别码    
 	{
-        opmv.at.flag = *(buf_data+5);
-		opmv.at.pos_y = (s16)((*(buf_data+6)<<8)|*(buf_data+7));
-		opmv.at.pos_z = (s16)((*(buf_data+8)<<8)|*(buf_data+9));
+        opmv.at.is_invalid = *(buf_data+5);
+        if (!opmv.at.is_invalid){
+            pos_y = (s16)((*(buf_data+6)<<8)|*(buf_data+7));
+            pos_z = (s16)((*(buf_data+8)<<8)|*(buf_data+9));
+            opmv.at.pos_y = 80 - pos_y ;
+            opmv.at.pos_z = 60 - pos_z ;
+        }
+        else {
+            opmv.at.pos_y = 0;
+            opmv.at.pos_z = 0 ;
+        }
 		opmv.mode_sta = 3;
 	}
 	//
