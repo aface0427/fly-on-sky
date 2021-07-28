@@ -9,9 +9,10 @@
 #define TF_EXPECT_DIST  300.0f //期望距离
 #define NORMALIZE_DIST  500.0f //距离阈值
 #define NORMALIZE_SPEED 20.0f  //xy方向速度阈值
-#define MAX_SPEED 20           //最大输出速度
-#define NORMALIZE_MV_DIST_Y 40.0f
-#define NORMALIZE_MV_DIST_Z 27.0f
+#define MAX_SPEED_XY 20           //最大输出速度
+#define MAX_SPEED_Z 10
+#define NORMALIZE_MV_DIST_Y 80.0f
+#define NORMALIZE_MV_DIST_Z 60.0f
 
 s16 THR_Val = 800;
 s16 CTRL_SPD_Z = 10;
@@ -19,15 +20,8 @@ s16 out_speed = 0;
 s16 out_speed_y = 0;
 s16 out_speed_z = 0;
 
-enum AxialDirection{
-	Direction_x = 1,
-	Direction_y,
-	Direction_z,
-	Direction_yaw,
-	Direction_xy,
-	Direction_yz,
-	Direction_xz
-}axialDirect;
+
+enum AxialDirection axialdirection;
 
 //20ms执行一次
 void UserTask_OneKeyCmd(void)
@@ -54,6 +48,7 @@ void UserTask_OneKeyCmd(void)
 //								mission_task = 1;
 //								mission_step = 1;
 								user_flag.tfmini_ctl_flag = 1;
+								user_flag.openmv_clr_flag = 0;
             }
 						
         }
@@ -75,6 +70,7 @@ void UserTask_OneKeyCmd(void)
 								//FC_Lock();
 //								OneKey_Hold();
 								user_flag.tfmini_ctl_flag = 0;
+								user_flag.openmv_clr_flag = 1;
 							  mission_task = 0;
 								mission_step = 0;
 								one_key_land_f = 1;
@@ -183,7 +179,7 @@ u8 TFMini_Track(void){
 	float exp_speed = 0;
 	s16 _out_speed = 0;
 	//位置环pid计算
-	PID_calculate(0.02, 0, exp_distance, fdb_distance, &PID_Distance_arg_xy, &PID_Distance_val_x, 0, 0);
+	PID_calculate(0.02, 0, exp_distance, fdb_distance, &PID_Distance_arg_x, &PID_Distance_val_x, 0, 0);
     //位置环pid输出作为速度环的期望速度输入
 	exp_speed = PID_Distance_val_x.out * -1;
     
@@ -195,15 +191,15 @@ u8 TFMini_Track(void){
 	else fdb_speed = (float)ano_of.of2_dx / NORMALIZE_SPEED;
 	
     //速度环pid计算
-	PID_calculate(0.02, 0, exp_speed, fdb_speed, &PID_Speed_arg_xy, &PID_Speed_val_x, 0, 0);
+	PID_calculate(0.02, 0, exp_speed, fdb_speed, &PID_Speed_arg_x, &PID_Speed_val_x, 0, 0);
     
 	_out_speed = PID_Speed_val_x.out * NORMALIZE_SPEED;
 	
     //输出速度限位
-	if(_out_speed > MAX_SPEED)
-		out_speed = MAX_SPEED;
-	else if(_out_speed < -1 * MAX_SPEED)
-		out_speed = -1 * MAX_SPEED;
+	if(_out_speed > MAX_SPEED_XY)
+		out_speed = MAX_SPEED_XY;
+	else if(_out_speed < -1 * MAX_SPEED_XY)
+		out_speed = -1 * MAX_SPEED_XY;
 	else 
 		out_speed = _out_speed;
 	
@@ -221,52 +217,66 @@ u8 TFMini_Track(void){
 *@comment:
 */
 u8 OpenMV_Track(void){
-	
-	float fdb_distance_y = opmv.at.pos_y / NORMALIZE_MV_DIST_Y;
+	//判断openmv返回值是否有效
+	if(opmv.at.is_invalid){
+		out_speed_y = 0;
+		out_speed_z = 0;
+		RealTimeSpeedControlSend(out_speed_y, Direction_y);
+		RealTimeSpeedControlSend(out_speed_z, Direction_z);
+		return 0;
+	}
+		
+	//根据openmv返回的数据作归一化处理
+	//y方向
+	float fdb_distance_y = opmv.at.pos_y / NORMALIZE_MV_DIST_Y; //NORMALIZE_MV_DIST_Y = 80.0f
 	float exp_distance_y = 0;
 	float fdb_speed_y = 0;
 	float exp_speed_y = 0;
 	s16 _out_speed_y = 0;
-	
-	float fdb_distance_z = opmv.at.pos_z / NORMALIZE_MV_DIST_Z;
+	//z方向
+	float fdb_distance_z = opmv.at.pos_z / NORMALIZE_MV_DIST_Z; //NORMALIZE_MV_DIST_Z = 60.0f
 	float exp_distance_z= 0;
 	float fdb_speed_z = 0;
 	float exp_speed_z = 0;
 	s16 _out_speed_z = 0;
 	
-    //位置环pid计算
-	PID_calculate(0.02, 0, exp_distance_y, fdb_distance_y, &PID_Distance_arg_xy, &PID_Distance_val_y, 0, 0);
+  //位置环pid计算
+	PID_calculate(0.02, 0, exp_distance_y, fdb_distance_y, &PID_Distance_arg_y, &PID_Distance_val_y, 0, 0);
 	PID_calculate(0.02, 0, exp_distance_z, fdb_distance_z, &PID_Distance_arg_z, &PID_Distance_val_z, 0, 0);
-	exp_speed_y = PID_Distance_val_y.out;
-	exp_speed_z = PID_Distance_val_z.out;
+	//输出取反
+	exp_speed_y = PID_Distance_val_y.out * -1;
+	exp_speed_z = PID_Distance_val_z.out * -1;
 	
+	//阈值保护
 	if(ano_of.of2_dy > NORMALIZE_SPEED)
 		fdb_speed_y = 1.0f;
 	else if(ano_of.of2_dy < -1 * NORMALIZE_SPEED)
 		fdb_speed_y = -1.0f;
 	else fdb_speed_y = (float)ano_of.of2_dy / NORMALIZE_SPEED;
 	
-	PID_calculate(0.02, 0, exp_speed_y, fdb_speed_y, &PID_Speed_arg_xy, &PID_Speed_val_y, 0, 0);
+	//速度环计算(Z方向只有位置环)
+	PID_calculate(0.02, 0, exp_speed_y, fdb_speed_y, &PID_Speed_arg_y, &PID_Speed_val_y, 0, 0);
 	//PID_calculate(0.02, 0, exp_speed_z, fdb_speed_z, &PID_Speed_arg_z, &PID_Speed_val_z, 0, 0);
 	_out_speed_y = PID_Speed_val_y.out * NORMALIZE_SPEED;
 	_out_speed_z = exp_speed_z * NORMALIZE_SPEED;
 	
-    //输出速度限位
-	if(_out_speed_y > MAX_SPEED)
-		out_speed_y = MAX_SPEED;
-	else if(_out_speed_y < -1 * MAX_SPEED)
-		out_speed_y = -1 * MAX_SPEED;
+  //输出速度限位
+	//y方向
+	if(_out_speed_y > MAX_SPEED_XY)
+		out_speed_y = MAX_SPEED_XY;
+	else if(_out_speed_y < -1 * MAX_SPEED_XY)
+		out_speed_y = -1 * MAX_SPEED_XY;
 	else 
 		out_speed_y = _out_speed_y;
-	
-	if(_out_speed_z > MAX_SPEED)
-		out_speed_z = MAX_SPEED;
-	else if(_out_speed_z < -1 * MAX_SPEED)
-		out_speed_z = -1 * MAX_SPEED;
+	//z方向
+	if(_out_speed_z > MAX_SPEED_Z)
+		out_speed_z = MAX_SPEED_Z;
+	else if(_out_speed_z < -1 * MAX_SPEED_Z)
+		out_speed_z = -1 * MAX_SPEED_Z;
 	else 
 		out_speed_z = _out_speed_z;
 	
-    //发送对应输出指令
+  //发送对应输出指令
 	RealTimeSpeedControlSend(out_speed_y, Direction_y);
 	RealTimeSpeedControlSend(out_speed_z, Direction_z);
 	

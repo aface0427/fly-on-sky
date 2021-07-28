@@ -17,13 +17,15 @@ _user_flag_set user_flag = {0};
 s32 dx, dy;
 
 /*xy速度环参数*/
-_PID_arg_st PID_Speed_arg_xy; //xy共用PID参数 
+_PID_arg_st PID_Speed_arg_x; 
+_PID_arg_st PID_Speed_arg_y; 
 /*xy速度环位置*/
 _PID_val_st PID_Speed_val_x;
 _PID_val_st	PID_Speed_val_y;
 
 /*xy位置环参数*/
-_PID_arg_st PID_Distance_arg_xy; //xy共用PID参数 
+_PID_arg_st PID_Distance_arg_x;
+_PID_arg_st PID_Distance_arg_y; 
 /*xy位置环参数*/
 _PID_val_st PID_Distance_val_x;
 _PID_val_st	PID_Distance_val_y;
@@ -113,8 +115,15 @@ static void Loop_20Hz(void) //50ms执行一次
 {
 	//////////////////////////////////////////////////////////////////////
   if(user_flag.tfmini_ctl_flag){
-		TFMini_Track();
+		//TFMini_Track();
 		OpenMV_Track();
+	}
+	if(user_flag.openmv_clr_flag){
+		user_flag.openmv_clr_flag = 0;
+		RealTimeSpeedControlSend(0, Direction_x);
+		RealTimeSpeedControlSend(0, Direction_y);
+		RealTimeSpeedControlSend(0, Direction_z);
+		//RealTimeSpeedControlSend(0, Direction_yaw);
 	}
 	//////////////////////////////////////////////////////////////////////
 }
@@ -131,21 +140,37 @@ static void Loop_2Hz(void) //500ms执行一次
 *@comment:
 */
 void Init_PID(void){
-//xy速度环
-	PID_Speed_arg_xy.kp = 0.5f;
-	PID_Speed_arg_xy.ki = 0;
-	PID_Speed_arg_xy.kd_ex = 0;
-	PID_Speed_arg_xy.fb_d_mode = 0;
-	PID_Speed_arg_xy.kd_fb = 0;
-	PID_Speed_arg_xy.k_ff = 0;
+//x速度环
+	PID_Speed_arg_x.kp = 0.5f;
+	PID_Speed_arg_x.ki = 0;
+	PID_Speed_arg_x.kd_ex = 0;
+	PID_Speed_arg_x.fb_d_mode = 0;
+	PID_Speed_arg_x.kd_fb = 0;
+	PID_Speed_arg_x.k_ff = 0;
 	
-//xy位置环
-	PID_Distance_arg_xy.kp = 10.0f;
-	PID_Distance_arg_xy.ki = 0;
-	PID_Distance_arg_xy.kd_ex = 0;
-	PID_Distance_arg_xy.fb_d_mode = 0;
-	PID_Distance_arg_xy.kd_fb = 0;
-	PID_Distance_arg_xy.k_ff = 0;
+//x位置环
+	PID_Distance_arg_x.kp = 10.0f;
+	PID_Distance_arg_x.ki = 0;
+	PID_Distance_arg_x.kd_ex = 0;
+	PID_Distance_arg_x.fb_d_mode = 0;
+	PID_Distance_arg_x.kd_fb = 0;
+	PID_Distance_arg_x.k_ff = 0;
+	
+//y速度环
+	PID_Speed_arg_y.kp = 0.5f;
+	PID_Speed_arg_y.ki = 0;
+	PID_Speed_arg_y.kd_ex = 0;
+	PID_Speed_arg_y.fb_d_mode = 0;
+	PID_Speed_arg_y.kd_fb = 0;
+	PID_Speed_arg_y.k_ff = 0;
+	
+//y位置环
+	PID_Distance_arg_y.kp = 3.0f;
+	PID_Distance_arg_y.ki = 0;
+	PID_Distance_arg_y.kd_ex = 0;
+	PID_Distance_arg_y.fb_d_mode = 0;
+	PID_Distance_arg_y.kd_fb = 0;
+	PID_Distance_arg_y.k_ff = 0;	
 	
 //yaw速度环
 	PID_Speed_arg_yaw.kp = 0.5f;
@@ -179,8 +204,6 @@ void Init_PID(void){
 	PID_Distance_arg_z.kd_fb = 0;
 	PID_Distance_arg_z.k_ff = 0;	
 }
-
-
 
 //////////////////////////////////////////////////////////////////////
 //调度器初始化

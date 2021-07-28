@@ -384,8 +384,8 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
 	break;
 	case 0xf2: 
 	{
-        /*TFminiPlus-x方向数据*/
-        send_buffer[(*_cnt)++] = BYTE0(tfmini.Dist);
+    /*TFminiPlus-x方向数据*/
+    send_buffer[(*_cnt)++] = BYTE0(tfmini.Dist);
 		send_buffer[(*_cnt)++] = BYTE1(tfmini.Dist);
         
 		/*TFminiPlus-pid-x方向数据*/

@@ -56,6 +56,18 @@ extern s16 out_speed;
 extern s16 out_speed_y;
 extern s16 out_speed_z;
 
+enum AxialDirection{
+	Direction_x = 1,
+	Direction_y,
+	Direction_z,
+	Direction_yaw,
+	Direction_xy,
+	Direction_yz,
+	Direction_xz
+};
+extern enum AxialDirection axialdirection;
+
+
 u8 TFMini_Track(void);
 u8 OpenMV_Track(void);
 u8 RealTimeSpeedControl(s16 velocity, u8 direction);
