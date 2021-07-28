@@ -19,17 +19,23 @@ f_y = (2.8 / 2.952) * 120 # 默认值
 c_x = 160 * 0.5 # 默认值(image.w * 0.5)
 c_y = 120 * 0.5 # 默认值(image.h * 0.5)
 
+
 def degrees(radians):
     return (180 * radians) / math.pi
 
 def Find_Apriltags() :
     img = sensor.snapshot().lens_corr(strength=1.65, zoom=1)
-    tags = img.find_apriltags(fx=f_x, fy=f_y, cx=c_x, cy=c_y)
+    tags = img.find_apriltags(roi=[5,5,150,110],fx=f_x, fy=f_y, cx=c_x, cy=c_y)
     if len(tags)==1:
         for tag in tags : # 默认为TAG36H11
             img.draw_rectangle(tag.rect(), color = (255, 0, 0))
             img.draw_cross(tag.cx(), tag.cy(), color = (0, 255, 0))
-            print("%f %f",tag.cx(),tag.cy())
-            Message.UartSendData(Message.AprilTagDataPack(0,tag.cx(),tag.cy()))
+            print_args = (tag.x_translation(), tag.y_translation(), tag.z_translation(), \
+                        degrees(tag.x_rotation()), degrees(tag.y_rotation()), degrees(tag.z_rotation()))
+                    # 位置的单位是未知的，旋转的单位是角度
+            tx=int(4*tag.x_translation())
+            ty=int(4*tag.y_translation())
+            print("%f %f",tx,ty)
+            Message.UartSendData(Message.AprilTagDataPack(0,tx,ty))
     else:
         Message.UartSendData(Message.AprilTagDataPack(1,1,1))
