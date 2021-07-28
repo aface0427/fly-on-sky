@@ -8,6 +8,7 @@
 #include "Drv_TFMini_Plus.h"
 #include "User_Task.h"
 #include "Drv_OpenMV.h"
+#include "Ano_Scheduler.h"
 
 /*==========================================================================
  * 描述    ：凌霄飞控通信主程序
@@ -30,7 +31,6 @@
 u8 send_buffer[50]; //发送数据缓存
 _dt_st dt;
 static u8 user_send_buffer[50];
-extern s32 dx, dy;
 
 //===================================================================
 void ANO_DT_Init(void)
@@ -79,6 +79,11 @@ void ANO_DT_Init(void)
 	dt.fun[0xf2].D_Addr = 0xff;
 	dt.fun[0xf2].fre_ms = 0;
 	dt.fun[0xf2].time_cnt_ms = 0;
+	
+	//低通滤波测试
+	dt.fun[0xf3].D_Addr = 0xff;
+	dt.fun[0xf3].fre_ms = 0;
+	dt.fun[0xf3].time_cnt_ms = 0;
 }
 
 //数据发送接口
@@ -406,6 +411,20 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
         
 	}
 	break;
+	case 0xf3: 
+	{
+		/*低通滤波前数据*/
+		send_buffer[(*_cnt)++] = BYTE0(dis_x);
+		send_buffer[(*_cnt)++] = BYTE1(dis_x);
+		send_buffer[(*_cnt)++] = BYTE0(dis_y);
+		send_buffer[(*_cnt)++] = BYTE1(dis_y);
+    /*低通滤波数据*/
+    send_buffer[(*_cnt)++] = BYTE0(dis_fix_x);
+		send_buffer[(*_cnt)++] = BYTE1(dis_fix_x);
+		send_buffer[(*_cnt)++] = BYTE0(dis_fix_y);
+		send_buffer[(*_cnt)++] = BYTE1(dis_fix_y);
+	}
+	break;
 	default:
 		break;
 	}
@@ -545,6 +564,7 @@ void ANO_LX_Data_Exchange_Task(float dT_s)
 	Check_To_Send(0x0d);
 	Check_To_Send(0xf1);
 	Check_To_Send(0xf2);
+	Check_To_Send(0xf3);
 }
 
 //===================================================================

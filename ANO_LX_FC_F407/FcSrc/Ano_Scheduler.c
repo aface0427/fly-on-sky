@@ -14,7 +14,11 @@
 
 extern _ano_of_st ano_of;
 _user_flag_set user_flag = {0};
-s32 dx, dy;
+s16 dx, dy;
+
+//低通滤波测试参数
+s16 dis_fix_x, dis_fix_y;
+s16 dis_x, dis_y;
 
 /*xy速度环参数*/
 _PID_arg_st PID_Speed_arg_x; 
@@ -84,13 +88,13 @@ static void Loop_100Hz(void) //10ms执行一次
 static void Loop_50Hz(void) //20ms执行一次
 {
 	//////////////////////////////////////////////////////////////////////
-    OpenMV_Offline_Check(20);
-    TFmini_Offline_Check(20);
+  OpenMV_Offline_Check(20);
+  TFmini_Offline_Check(20);
 	UserTask_OneKeyCmd();
 	//////////////////////////////////////////////////////////////////////
 	u8 _dt = 20;
 	static s32 dis_dx, dis_dy;
-	
+	static s32 _dis_x, _dis_y;
 	
 	/*速度积分*/
 	if(user_flag.of_dis_clear_cmd){
@@ -101,11 +105,22 @@ static void Loop_50Hz(void) //20ms执行一次
 		dis_dx += _dt * ano_of.of2_dx_fix;
 		dis_dy += _dt * ano_of.of2_dy_fix;
 	}
+	
+	/*低通滤波*/
+	_dis_x += _dt * ano_of.of1_dx;
+	_dis_y += _dt * ano_of.of1_dy;
+	dis_x = _dis_x / 1000;
+	dis_y = _dis_y / 1000;
+	dis_fix_x += (dis_x - dis_fix_x) * 0.2;
+	dis_fix_y += (dis_y - dis_fix_y) * 0.2;
+	
+	/*实际距离数据*/
 	dx = dis_dx / 1000;
 	dy = dis_dy / 1000;
 	
 	dt.fun[0xf1].WTS = 1;
 	dt.fun[0xf2].WTS = 1;
+	dt.fun[0xf3].WTS = 1;
 //		/*数据发送*/
 //		User_DT_Send(ano_of, dx, dy);
 	//////////////////////////////////////////////////////////////////////
@@ -115,8 +130,9 @@ static void Loop_20Hz(void) //50ms执行一次
 {
 	//////////////////////////////////////////////////////////////////////
   if(user_flag.tfmini_ctl_flag){
-		//TFMini_Track();
+		TFMini_Track();
 		OpenMV_Track();
+		//MPU6050_Track();
 	}
 	if(user_flag.openmv_clr_flag){
 		user_flag.openmv_clr_flag = 0;
@@ -197,7 +213,7 @@ void Init_PID(void){
 	PID_Speed_arg_z.k_ff = 0;
 	
 //z位置环
-	PID_Distance_arg_z.kp = 0.5f;
+	PID_Distance_arg_z.kp = 1.0f;
 	PID_Distance_arg_z.ki = 0;
 	PID_Distance_arg_z.kd_ex = 0;
 	PID_Distance_arg_z.fb_d_mode = 0;

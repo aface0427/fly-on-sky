@@ -54,6 +54,9 @@ typedef struct
 } _user_flag_set;
 
 extern _user_flag_set user_flag;
+extern s16 dx, dy;
+extern s16 dis_fix_x, dis_fix_y;
+extern s16 dis_x, dis_y;
 
 void Init_PID(void);
 void Scheduler_Setup(void);
