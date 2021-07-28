@@ -11,8 +11,8 @@
 #define NORMALIZE_SPEED 20.0f  //xy方向速度阈值
 #define MAX_SPEED_XY 20           //最大输出速度
 #define MAX_SPEED_Z 10
-#define NORMALIZE_MV_DIST_Y 80.0f
-#define NORMALIZE_MV_DIST_Z 60.0f
+#define NORMALIZE_MV_DIST_Y 40.0f
+#define NORMALIZE_MV_DIST_Z 35.0f
 
 s16 THR_Val = 800;
 s16 CTRL_SPD_Z = 10;
