@@ -133,6 +133,7 @@ static void Loop_20Hz(void) //50ms÷¥––“ª¥Œ
 		TFMini_Track();
 		OpenMV_Track();
 		//MPU6050_Track();
+		//OpenMV_Circle_Track();
 	}
 	if(user_flag.openmv_clr_flag){
 		user_flag.openmv_clr_flag = 0;

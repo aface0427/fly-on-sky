@@ -70,6 +70,7 @@ extern enum AxialDirection axialdirection;
 
 u8 TFMini_Track(void);
 u8 OpenMV_Track(void);
+u8 OpenMV_Circle_Track(void);
 u8 MPU6050_Tack(void);
 
 u8 RealTimeSpeedControl(s16 velocity, u8 direction);

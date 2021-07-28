@@ -18,6 +18,7 @@
 #define NORMALIZE_MV_DIST_Y 40.0f
 #define NORMALIZE_MV_DIST_Z 35.0f
 #define NORMALIZE_MPU_ANGLE_YAW 200.0f //yaw轴角度归一化
+#define NORMALIZE_MOLCIRCLE_DIST_XY 40.0f //摩尔环xy方向阈值
 
 s16 THR_Val = 800;
 s16 CTRL_SPD_Z = 10;
@@ -168,6 +169,7 @@ float PID_calculate( float dT_s,            //周期（单位：秒）
 	return (pid_val->out);
 }
 
+
 /*
 *@fn:			u8 TFMini_Track(void)
 *@brief:	利用TFmini返回x轴方向的距离，实现x轴的轴向定位
@@ -189,11 +191,11 @@ u8 TFMini_Track(void){
 	exp_speed = PID_Distance_val_x.out * -1;
     
     //光流数据输入归一化处理得出实际速度输入
-	if(ano_of.of2_dx > NORMALIZE_SPEED)
+	if(ano_of.of1_dx > NORMALIZE_SPEED)
 		fdb_speed = 1.0f;
-	else if(ano_of.of2_dx < -1 * NORMALIZE_SPEED)
+	else if(ano_of.of1_dx < -1 * NORMALIZE_SPEED)
 		fdb_speed = -1.0f;
-	else fdb_speed = (float)ano_of.of2_dx / NORMALIZE_SPEED;
+	else fdb_speed = (float)ano_of.of1_dx / NORMALIZE_SPEED;
 	
     //速度环pid计算
 	PID_calculate(0.02, 0, exp_speed, fdb_speed, &PID_Speed_arg_x, &PID_Speed_val_x, 0, 0);
@@ -264,7 +266,7 @@ u8 TFMini_Track(void){
 
 /*
 *@fn:			u8 OpenMV_Track(void)
-*@brief:	利用OpenMV_Track返回在yz平面摄像头中心距标签的距离，实现yz方向的定位
+*@brief:	利用OpenMV返回在yz平面摄像头中心距标签的距离，实现yz方向的定位
 *@para:		none
 *@return:	1
 *@comment:
@@ -301,11 +303,11 @@ u8 OpenMV_Track(void){
 	exp_speed_z = PID_Distance_val_z.out * -1;
 	
 	//阈值保护
-	if(ano_of.of2_dy > NORMALIZE_SPEED)
+	if(ano_of.of1_dy > NORMALIZE_SPEED)
 		fdb_speed_y = 1.0f;
-	else if(ano_of.of2_dy < -1 * NORMALIZE_SPEED)
+	else if(ano_of.of1_dy < -1 * NORMALIZE_SPEED)
 		fdb_speed_y = -1.0f;
-	else fdb_speed_y = (float)ano_of.of2_dy / NORMALIZE_SPEED;
+	else fdb_speed_y = (float)ano_of.of1_dy / NORMALIZE_SPEED;
 	
 	//速度环计算(Z方向只有位置环)
 	PID_calculate(0.02, 0, exp_speed_y, fdb_speed_y, &PID_Speed_arg_y, &PID_Speed_val_y, 0, 0);
@@ -335,6 +337,86 @@ u8 OpenMV_Track(void){
 	
 	return 1;
 }
+
+/*
+*@fn:			u8 OpenMV_Circle_Track(void)
+*@brief:	利用OpenMV返回在xy平面摄像头中心距同心摩尔环中心的距离，实现xy方向的定位
+*@para:		none
+*@return:	1
+*@comment:
+*/
+//u8 OpenMV_Circle_Track(void){
+//	//判断openmv返回值是否有效
+//	if(opmv.mct.is_invalid){
+//		out_speed_y = 0;
+//		out_speed = 0;
+//		RealTimeSpeedControlSend(out_speed_y, Direction_y);
+//		RealTimeSpeedControlSend(out_speed, Direction_x);
+//		return 0;
+//	}
+//		
+//	//根据openmv返回的数据作归一化处理
+//	//y方向
+//	float fdb_distance_y = opmv.mct.pos_y / NORMALIZE_MOLCIRCLE_DIST_XY; //NORMALIZE_MV_DIST_Y = 80.0f
+//	float exp_distance_y = 0;
+//	float fdb_speed_y = 0;
+//	float exp_speed_y = 0;
+//	s16 _out_speed_y = 0;
+//	//z方向
+//	float fdb_distance_x = opmv.mct.pos_x / NORMALIZE_MOLCIRCLE_DIST_XY; //NORMALIZE_MV_DIST_Z = 60.0f
+//	float exp_distance_x= 0;
+//	float fdb_speed_x = 0;
+//	float exp_speed_x = 0;
+//	s16 _out_speed_x = 0;
+//	
+//  //位置环pid计算
+//	PID_calculate(0.02, 0, exp_distance_y, fdb_distance_y, &PID_Distance_arg_y, &PID_Distance_val_y, 0, 0);
+//	PID_calculate(0.02, 0, exp_distance_x, fdb_distance_x, &PID_Distance_arg_x, &PID_Distance_val_x, 0, 0);
+//	//输出取反
+//	exp_speed_y = PID_Distance_val_y.out * -1;
+//	exp_speed_x = PID_Distance_val_x.out * -1;
+//	
+//	//阈值保护
+//	if(ano_of.of1_dy > NORMALIZE_SPEED)
+//		fdb_speed_y = 1.0f;
+//	else if(ano_of.of1_dy < -1 * NORMALIZE_SPEED)
+//		fdb_speed_y = -1.0f;
+//	else fdb_speed_y = (float)ano_of.of1_dy / NORMALIZE_SPEED;
+//	
+//	if(ano_of.of1_dx > NORMALIZE_SPEED)
+//		fdb_speed = 1.0f;
+//	else if(ano_of.of1_dx < -1 * NORMALIZE_SPEED)
+//		fdb_speed = -1.0f;
+//	else fdb_speed = (float)ano_of.of1_dx / NORMALIZE_SPEED;
+//	
+//	//速度环计算
+//	PID_calculate(0.02, 0, exp_speed_y, fdb_speed_y, &PID_Speed_arg_y, &PID_Speed_val_y, 0, 0);
+//	PID_calculate(0.02, 0, exp_speed_x, fdb_speed_x, &PID_Speed_arg_x, &PID_Speed_val_x, 0, 0);
+//	_out_speed_y = PID_Speed_val_y.out * NORMALIZE_SPEED;
+//	_out_speed_x = PID_Speed_val_x.out * NORMALIZE_SPEED;
+//	
+//  //输出速度限位
+//	//y方向
+//	if(_out_speed_y > MAX_SPEED_XY)
+//		out_speed_y = MAX_SPEED_XY;
+//	else if(_out_speed_y < -1 * MAX_SPEED_XY)
+//		out_speed_y = -1 * MAX_SPEED_XY;
+//	else 
+//		out_speed_y = _out_speed_y;
+//	//z方向
+//	if(_out_speed_x > MAX_SPEED_XY)
+//		out_speed = MAX_SPEED_XY;
+//	else if(_out_speed_x < -1 * MAX_SPEED_XY)
+//		out_speed = -1 * MAX_SPEED_XY;
+//	else 
+//		out_speed = _out_speed_x;
+//	
+//  //发送对应输出指令
+//	RealTimeSpeedControlSend(out_speed_y, Direction_y);
+//	RealTimeSpeedControlSend(out_speed, Direction_x);
+//	
+//	return 1;
+//}
 
 /*
 *@fn:			u8 RealTimeSpeedControl(s16 velocity, u8 direction)
