@@ -6,13 +6,18 @@
 #include "Drv_TFMini_Plus.h"
 #include "Drv_OpenMV.h"
 #include "Ano_Scheduler.h"
-#define TF_EXPECT_DIST  300.0f //期望距离
+#define TF_EXPECT_DIST  150.0f //期望距离
 #define NORMALIZE_DIST  500.0f //距离阈值
 #define NORMALIZE_SPEED 20.0f  //xy方向速度阈值
+#define NORMALIZE_SPEED_YAW 30.0f //yaw方向速度阈值
+
 #define MAX_SPEED_XY 20           //最大输出速度
 #define MAX_SPEED_Z 10
+#define MAX_SPEED_YAW 10 //yaw轴最大输出角速度
+
 #define NORMALIZE_MV_DIST_Y 40.0f
 #define NORMALIZE_MV_DIST_Z 35.0f
+#define NORMALIZE_MPU_ANGLE_YAW 200.0f //yaw轴角度归一化
 
 s16 THR_Val = 800;
 s16 CTRL_SPD_Z = 10;
@@ -210,6 +215,54 @@ u8 TFMini_Track(void){
 }
 
 /*
+*@fn:			u8 MPU6050_TRACK(void)
+*@brief:	利用MPU6050返回yaw轴偏移，实现yaw轴定位
+*@para:		none
+*@return:	1
+*@comment:
+*/
+u8 MPU6050_Track(void){
+	//测距所得与期望距离进行归一化处理
+	float fdb_angle = mpu6050.yaw.angle / NORMALIZE_MPU_ANGLE_YAW;
+	float exp_angle = 0;
+    
+	float fdb_speed = 0;
+	float exp_speed = 0;
+	s16 _out_speed = 0;
+	
+	//位置环pid计算
+	PID_calculate(0.02, 0, exp_angle, fdb_angle, &PID_Distance_arg_yaw, &PID_Distance_val_yaw, 0, 0);
+  //位置环pid输出作为速度环的期望速度输入
+	exp_speed = PID_Distance_val_yaw.out;
+    
+  //角速度反馈值归一化
+	if(mpu6050.yaw.speed > NORMALIZE_SPEED_YAW)
+		fdb_speed = 1.0f;
+	else if(mpu6050.yaw.speed < -1 * NORMALIZE_SPEED_YAW)
+		fdb_speed = -1.0f;
+	else
+		fdb_speed = mpu6050.yaw.speed / NORMALIZE_SPEED_YAW;
+	
+  //速度环pid计算
+	PID_calculate(0.02, 0, exp_speed, fdb_speed, &PID_Speed_arg_yaw, &PID_Speed_val_yaw, 0, 0);
+    
+	_out_speed = PID_Speed_val_yaw.out * NORMALIZE_SPEED_YAW;
+	
+  //输出速度限位
+	if(_out_speed > MAX_SPEED_YAW)
+		out_speed = MAX_SPEED_YAW;
+	else if(_out_speed < -1 * MAX_SPEED_YAW)
+		out_speed = -1 * MAX_SPEED_YAW;
+	else 
+		out_speed = _out_speed;
+	
+    //发送对应输出指令
+	RealTimeSpeedControlSend(out_speed, Direction_yaw);
+	
+	return 1;
+}
+
+/*
 *@fn:			u8 OpenMV_Track(void)
 *@brief:	利用OpenMV_Track返回在yz平面摄像头中心距标签的距离，实现yz方向的定位
 *@para:		none
@@ -304,6 +357,8 @@ u8 RealTimeSpeedControl(s16 velocity, u8 direction){
 		case Direction_z:
 			rt_tar.st_data.vel_z = velocity;
 			break;
+		case Direction_yaw:
+			rt_tar.st_data.yaw_dps = velocity;
 		default:
 			break;
 	}

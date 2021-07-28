@@ -115,8 +115,9 @@ static void Loop_20Hz(void) //50ms执行一次
 {
 	//////////////////////////////////////////////////////////////////////
   if(user_flag.tfmini_ctl_flag){
-		//TFMini_Track();
+		TFMini_Track();
 		OpenMV_Track();
+		//MPU6050_Track();
 	}
 	if(user_flag.openmv_clr_flag){
 		user_flag.openmv_clr_flag = 0;
@@ -197,7 +198,7 @@ void Init_PID(void){
 	PID_Speed_arg_z.k_ff = 0;
 	
 //z位置环
-	PID_Distance_arg_z.kp = 0.5f;
+	PID_Distance_arg_z.kp = 1.0f;
 	PID_Distance_arg_z.ki = 0;
 	PID_Distance_arg_z.kd_ex = 0;
 	PID_Distance_arg_z.fb_d_mode = 0;
