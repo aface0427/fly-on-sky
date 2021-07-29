@@ -10,7 +10,7 @@
 #include "ANO_DT_LX.h"
 #include "Drv_AnoOf.h"
 #include "Drv_TFMini_Plus.h"
-
+#include "User_Task.h"
 
 extern _ano_of_st ano_of;
 _user_flag_set user_flag = {0};
@@ -53,6 +53,14 @@ _PID_val_st PID_Speed_val_z;
 _PID_arg_st PID_Distance_arg_z;
 /*z位置环参数*/
 _PID_val_st PID_Distance_val_z;
+
+/*x期望*/
+_user_exp_fdb_set user_exp_fdb_x;
+/*x阈值*/
+_user_threshold_set user_threshold_x;
+/*x测试输出*/
+s16 test_output_x;
+
 
 //////////////////////////////////////////////////////////////////////
 //用户程序调度器
@@ -132,14 +140,20 @@ static void Loop_20Hz(void) //50ms执行一次
   if(user_flag.tfmini_ctl_flag){
 		TFMini_Track();
 		OpenMV_Track();
-		//MPU6050_Track();
+		//HWT101CT_TRACK();
 		//OpenMV_Circle_Track();
+		dt.fun[0x41].WTS = 1;
+		/*通用控制测试*/
+		//user_exp_fdb_x.exp_distance = 80;
+		//user_exp_fdb_x.fdb_distance = tfmini.Dist;
+		//GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Speed_arg_x, PID_Speed_val_x, user_threshold_x, &test_output_x, 1);
 	}
 	if(user_flag.openmv_clr_flag){
 		user_flag.openmv_clr_flag = 0;
-		RealTimeSpeedControlSend(0, Direction_x);
-		RealTimeSpeedControlSend(0, Direction_y);
-		RealTimeSpeedControlSend(0, Direction_z);
+		RealTimeSpeedControl(0, Direction_x);
+		RealTimeSpeedControl(0, Direction_y);
+		RealTimeSpeedControl(0, Direction_z);
+		dt.fun[0x41].WTS = 1;
 		//RealTimeSpeedControlSend(0, Direction_yaw);
 	}
 	//////////////////////////////////////////////////////////////////////
@@ -220,6 +234,20 @@ void Init_PID(void){
 	PID_Distance_arg_z.fb_d_mode = 0;
 	PID_Distance_arg_z.kd_fb = 0;
 	PID_Distance_arg_z.k_ff = 0;	
+}
+
+/*
+*@fn:			void Init_GeneralCtlArg(void)
+*@brief:	通用控制参数初始化
+*@para:		none
+*@return:	none
+*@comment:
+*/
+void Init_GeneralCtlArg(void){
+	/*x*/
+	user_threshold_x.max_speed = 20;
+	user_threshold_x.normalize_distance = 500.0f;
+	user_threshold_x.normalize_speed = 20.0f;
 }
 
 //////////////////////////////////////////////////////////////////////

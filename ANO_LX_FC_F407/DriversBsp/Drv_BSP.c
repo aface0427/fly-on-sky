@@ -50,6 +50,7 @@ u8 All_Init()
 	DrvTimerFcInit();
 	//pid参数初始化
 	Init_PID();
+	Init_GeneralCtlArg();
     //初始化完成，返回1
 	return (1);
 }

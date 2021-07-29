@@ -5,6 +5,7 @@ import Message
 Red_threshold =(65, 90, 53, 27, -18, 4)#  寻色块用 红色
 Blue_threshold =(0, 48, -20, 59, -66, -28)#  寻色块用 蓝色
 Green_threshold =(30, 100, -64, -8, -32, 32)#  寻色块用 蓝色
+Red_threshold_test = (0, 100, 22, 127, 13, 60)
 
 class Dot(object):
     flag = 0
@@ -36,21 +37,21 @@ def LineFilter(src, dst):
 #点检测
 def DotCheck():
     img = sensor.snapshot(line_filter = LineFilter)#拍一张图像
-    red_blobs = img.find_blobs([Red_threshold], pixels_threshold=3, area_threshold=3, merge=True, margin=5)#识别红色物体
+    red_blobs = img.find_blobs([Red_threshold_test], pixels_threshold=3, area_threshold=3, merge=True, margin=5)#识别红色物体
     max_blob=FindMax(red_blobs)#找到最大的那个
     if max_blob:
         img.draw_cross(max_blob.cx(), max_blob.cy())#物体中心画十字
         img.draw_rectangle(max_blob.rect())#画圈
-        Dot.flag = 1
-        #LED灯闪烁
-        LED(3).toggle()
-        #LED灯闪烁
-        LED(2).toggle()
-    else:
         Dot.flag = 0
+        print(max_blob.cx(), max_blob.cy())
+        Message.UartSendData(Message.DotDataPack(Dot.flag,max_blob.cx(),max_blob.cy()))
+        LED(3).on()
+        LED(2).on()
+    else:
+        Dot.flag = 1
         LED(2).off()
         LED(3).off()
-    Message.UartSendData(Message.DotDataPack(Dot.color,Dot.flag,Dot.x,Dot.y,Message.Ctr.T_ms))
+	Message.UartSendData(Message.DotDataPack(Dot.flag,0,0))
     return Dot.flag
     #串口发送数据给飞控
 

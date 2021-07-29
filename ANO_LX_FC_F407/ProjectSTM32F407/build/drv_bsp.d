@@ -38,3 +38,5 @@
 .\build\drv_bsp.o: ..\DriversBsp\Drv_AnoOf.h
 .\build\drv_bsp.o: ..\DriversBsp\Drv_UbloxGPS.h
 .\build\drv_bsp.o: ..\DriversMcu\STM32F407\Drivers\Drv_Uart.h
+.\build\drv_bsp.o: ..\FcSrc\Ano_Scheduler.h
+.\build\drv_bsp.o: ..\FcSrc\User_Task.h

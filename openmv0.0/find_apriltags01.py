@@ -27,6 +27,8 @@ def Find_Apriltags() :
     img = sensor.snapshot().lens_corr(strength=1.65, zoom=1)
     tags = img.find_apriltags(roi=[5,5,150,110],fx=f_x, fy=f_y, cx=c_x, cy=c_y)
     if len(tags)==1:
+        LED(3).on()
+        LED(2).on()
         for tag in tags : # 默认为TAG36H11
             img.draw_rectangle(tag.rect(), color = (255, 0, 0))
             img.draw_cross(tag.cx(), tag.cy(), color = (0, 255, 0))
@@ -38,4 +40,6 @@ def Find_Apriltags() :
             print("%f %f",tx,ty)
             Message.UartSendData(Message.AprilTagDataPack(0,tx,ty))
     else:
+        LED(2).off()
+        LED(3).off()
         Message.UartSendData(Message.AprilTagDataPack(1,1,1))

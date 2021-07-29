@@ -9,11 +9,9 @@
 typedef struct
 {
 	//
-	u8 color_flag;
-	u8 sta;
-	s16 pos_x;
+	u8 is_invalid;
 	s16 pos_y;
-	u8 dT_ms;
+	s16 pos_z;
 
 }_openmv_color_block_st;
 
@@ -47,6 +45,7 @@ typedef struct
 	_openmv_color_block_st cb;
 	_openmv_line_tracking_st lt;
     _openmv_apriltag_tracking_st at;
+    _openmv_apriltag_tracking_st mol;
 }_openmv_data_st;
 
 //==Êı¾İÉùÃ÷

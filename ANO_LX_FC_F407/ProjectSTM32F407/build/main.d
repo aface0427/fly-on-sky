@@ -30,3 +30,4 @@
 .\build\main.o: ..\DriversMcu\STM32F407\Drivers\Drv_Sys.h
 .\build\main.o: ..\FcSrc\ANO_LX.h
 .\build\main.o: ..\FcSrc\Ano_Scheduler.h
+.\build\main.o: ..\FcSrc\User_Task.h

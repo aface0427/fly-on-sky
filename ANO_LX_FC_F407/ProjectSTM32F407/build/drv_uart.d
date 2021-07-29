@@ -35,3 +35,4 @@
 .\build\drv_uart.o: ..\DriversBsp\Drv_UbloxGPS.h
 .\build\drv_uart.o: ..\DriversBsp\Drv_OpenMV.h
 .\build\drv_uart.o: ..\DriversBsp\Drv_TFMini_Plus.h
+.\build\drv_uart.o: ..\DriversBsp\Drv_HWT101CT.h
