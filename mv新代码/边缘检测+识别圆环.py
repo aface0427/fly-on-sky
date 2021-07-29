@@ -21,7 +21,7 @@ sensor.set_pixformat(sensor.GRAYSCALE) # or sensor.RGB565
 #设置图像色彩格式，有RGB565色彩图和GRAYSCALE灰度图两种
 
 sensor.set_framesize(sensor.QQVGA) # or sensor.QVGA (or others)
-sensor.set_windowing((120,120))
+sensor.set_windowing((160,160))
 #设置图像像素大小
 sensor.skip_frames(10) # 让新的设置生效
 clock = time.clock() # 跟踪FPS帧率
@@ -38,6 +38,7 @@ def cmp(x):
 while(True):
     clock.tick() # 追踪两个snapshots()之间经过的毫秒数.
     img = sensor.snapshot() # 拍一张照片，返回图像
+    img.laplacian(1,sharpen=True)
     img.morph(kernel_size,kernel,mul=1.9)
     #morph(size, kernel, mul=Auto, add=0)，morph变换，mul根据图像对比度
     #进行调整，mul使图像每个像素乘mul；add根据明暗度调整，使得每个像素值加上add值。
@@ -51,18 +52,58 @@ while(True):
     #侵蚀函数erode(size, threshold=Auto)，去除边缘相邻处多余的点。threshold
     #用来设置去除相邻点的个数，threshold数值越大，被侵蚀掉的边缘点越多，边缘旁边
     #白色杂点少；数值越小，被侵蚀掉的边缘点越少，边缘旁边的白色杂点越多。
+
     p=0
     a=[]
     a.append((0,0))
-    for c in img.find_circles(threshold = 4800, x_margin = 2, y_margin = 2, r_margin = 2,r_min = 20, r_max = 100, r_step = 2):
+    for c in img.find_circles(threshold = 5500, x_margin = 2, y_margin = 2, r_margin = 2,r_min = 20, r_max = 100, r_step = 2):
         p=p+1
-        a.append((c.x(),c.y()))
+        a.append((c.x(),c.y(),c.r()))
         img.draw_circle(c.x(), c.y(), c.r(), color = (255, 0, 0))
-        #print(c)
-    #print(a[1][0])
-    #print(p)
+    '''
+    q=0
+    for i in range(1,100):
+        xx=[0 for j in range(100)]
+        for k in range(1,p):
+            y=a[k][1],r=a[k][2]
+            t=int(sqrt(r*r-(y-i)*(y-i)))
+            if(y-t<=0):
+                xx[1]=xx[1]+1;
+            else:
+                xx[y-t]=xx[y-t]+1;
+            if(y+t+1>=120):
+                xx[120]=xx[120]-1;
+            else:
+                xx[y+t+1]=xx[y+t+1]-1;
+        a.clear()
+        a.append((0,0))
+        maxx=0
+        for l in range(1,100):
+            xx[l]=xx[l-1]+xx[l]
+            maxx=max(maxx,xx[l])
+        for l in range(1,100):
+            if(xx[l]==maxx):
+                a.append((i,l))
+                q=q+1
+    q1=0
+    q2=0
+    if(p<10):
+        print("%f,%f" %(0,0))
+    else:
+        q1=0
+        q2=0
+        for i in range(5,p-5):
+            q1=q1+b[i][0]
+            q2=q2+b[i][1]
+
+        q1=q1/(p-9)
+        q2=q2/(p-9)
+        print("%f,%f" %(q1,q2))
+    print(clock.fps())
+    '''
     b = sorted(a, key=cmp)
-    #print(b)
+    print(b)
+
     if(p<10):
         print("%f,%f" %(0,0))
     else:
