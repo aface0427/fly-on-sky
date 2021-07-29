@@ -45,9 +45,7 @@ float UserNormalize(float num, float max, float min);
 u8 GeneralPosCtl(_user_exp_fdb_set exp_fdb, 		//输入输出的期望与反馈
 									u8 direction, 								//控制方向
 									_PID_arg_st speed_arg, 			//pid速度参数结构体
-									_PID_arg_st distance_arg,		//pid位置参数结构体
 									_PID_val_st speed_val,			//pid速度数据结构体
-									_PID_val_st distance_val,		//pid位置数据结构体
 									_user_threshold_set threshold,//归一化与输出阈值
 									s16 * output,									//用于上位机输出
 									u8 invert											//输出取反(1或-1)

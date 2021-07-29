@@ -54,6 +54,14 @@ _PID_arg_st PID_Distance_arg_z;
 /*z位置环参数*/
 _PID_val_st PID_Distance_val_z;
 
+/*x期望*/
+_user_exp_fdb_set user_exp_fdb_x;
+/*x阈值*/
+_user_threshold_set user_threshold_x;
+/*x测试输出*/
+s16 test_output_x;
+
+
 //////////////////////////////////////////////////////////////////////
 //用户程序调度器
 //////////////////////////////////////////////////////////////////////
@@ -133,7 +141,12 @@ static void Loop_20Hz(void) //50ms执行一次
 		TFMini_Track();
 		//OpenMV_Track();
 		//HWT101CT_TRACK();
-		OpenMV_Circle_Track();
+		//OpenMV_Circle_Track();
+		
+		/*通用控制测试*/
+		user_exp_fdb_x.exp_distance = 80;
+		user_exp_fdb_x.fdb_distance = tfmini.Dist;
+		GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Speed_arg_x, PID_Speed_val_x, user_threshold_x, &test_output_x, 1);
 	}
 	if(user_flag.openmv_clr_flag){
 		user_flag.openmv_clr_flag = 0;
@@ -220,6 +233,20 @@ void Init_PID(void){
 	PID_Distance_arg_z.fb_d_mode = 0;
 	PID_Distance_arg_z.kd_fb = 0;
 	PID_Distance_arg_z.k_ff = 0;	
+}
+
+/*
+*@fn:			void Init_GeneralCtlArg(void)
+*@brief:	通用控制参数初始化
+*@para:		none
+*@return:	none
+*@comment:
+*/
+void Init_GeneralCtlArg(void){
+	/*x*/
+	user_threshold_x.max_speed = 20;
+	user_threshold_x.normalize_distance = 500.0f;
+	user_threshold_x.normalize_speed = 20.0f;
 }
 
 //////////////////////////////////////////////////////////////////////

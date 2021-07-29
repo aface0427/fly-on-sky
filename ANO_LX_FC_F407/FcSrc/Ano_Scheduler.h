@@ -90,8 +90,6 @@ typedef struct
 {
 	s16 exp_distance;
 	s16 fdb_distance;
-	s16 exp_speed;
-	s16 fdb_speed;
 } _user_exp_fdb_set;
 
 /*„–÷µºØ∫œ*/
@@ -107,8 +105,11 @@ extern _user_flag_set user_flag;
 extern s16 dx, dy;
 extern s16 dis_fix_x, dis_fix_y;
 extern s16 dis_x, dis_y;
+extern s16 test_output_x;
+
 
 void Init_PID(void);
+void Init_GeneralCtlArg(void);
 void Scheduler_Setup(void);
 void Scheduler_Run(void);
 
