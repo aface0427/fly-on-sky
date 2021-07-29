@@ -14,10 +14,10 @@ import Message
 # c_x 是图像的x中心位置
 # c_y 是图像的y中心位置
 
-f_x = (2.8 / 3.984) * 160 # 默认值
-f_y = (2.8 / 2.952) * 120 # 默认值
+f_x = (2.8 / 3.984) * 240 # 默认值
+f_y = (2.8 / 2.952) * 160 # 默认值
 c_x = 160 * 0.5 # 默认值(image.w * 0.5)
-c_y = 120 * 0.5 # 默认值(image.h * 0.5)
+c_y = 160 * 0.5 # 默认值(image.h * 0.5)
 
 
 def degrees(radians):
@@ -26,6 +26,7 @@ def degrees(radians):
 def Find_Apriltags() :
     img = sensor.snapshot().lens_corr(strength=1.65, zoom=1)
     tags = img.find_apriltags(roi=[5,5,150,110],fx=f_x, fy=f_y, cx=c_x, cy=c_y)
+    img.gaussian(1)
     if len(tags)==1:
         LED(3).on()
         LED(2).on()

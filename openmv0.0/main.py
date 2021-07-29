@@ -23,10 +23,13 @@ sensor.skip_frames(10) # 让新的设置生效
 sensor.set_auto_gain(False)
 sensor.set_auto_whitebal(False)#若想追踪颜色则关闭白平衡
 clock = time.clock()#初始化时钟
+'''6
 Message.Ctr.WorkMode=6 #测试Molcircle用
 if (sensor.get_id() == sensor.OV7725):
     sensor.__write_reg(0xAC, 0xDF)
     sensor.__write_reg(0x8F, 0xFF)
+'''
+Message.Ctr.WorkMode=2 #AprilTag检测
 
 #主循环
 while(True):
