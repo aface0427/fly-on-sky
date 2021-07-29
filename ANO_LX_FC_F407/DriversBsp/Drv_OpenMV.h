@@ -9,11 +9,9 @@
 typedef struct
 {
 	//
-	u8 color_flag;
-	u8 sta;
-	s16 pos_x;
+	u8 is_invalid;
 	s16 pos_y;
-	u8 dT_ms;
+	s16 pos_z;
 
 }_openmv_color_block_st;
 

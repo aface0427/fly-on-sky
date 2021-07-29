@@ -40,7 +40,7 @@ extern enum AxialDirection axialdirection;
 u8 TFMini_Track(void);
 u8 OpenMV_Track(void);
 u8 OpenMV_Circle_Track(void);
-u8 MPU6050_Tack(void);
+u8 HWT101CT_TRACK(void);
 float UserNormalize(float num, float max, float min);
 u8 GeneralPosCtl(_user_exp_fdb_set exp_fdb, 		//输入输出的期望与反馈
 									u8 direction, 								//控制方向

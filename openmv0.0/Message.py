@@ -19,11 +19,10 @@ def UartSendData(Data):
     uart.write(Data)
 
 #点检测数据打包
-def DotDataPack(color,flag,x,y,T_ms):
-    print("found: x=",x,"  y=",-y)
-    pack_data=bytearray([0xAA,0x29,0x05,0x41,0x00,color,flag,x>>8,x,(-y)>>8,(-y),T_ms,0x00])
+def DotDataPack(flag,x,y):
+    pack_data=bytearray([0xAA,0x29,0x05,0x41,0x00,flag,x>>8,x,y>>8,y,0x00])
     lens = len(pack_data)#数据包大小
-    pack_data[4] = 7;#有效数据个数
+    pack_data[4] = 5;#有效数据个数
     i = 0
     sum = 0
     #和校验

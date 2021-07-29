@@ -120,16 +120,17 @@ void OpenMV_Byte_Get(uint8_t bytedata)
 **********************************************************************************************************/
 static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
 {
-    
-    
 	if(*(buf_data+3)==0x41)
 	{
-		opmv.cb.color_flag = *(buf_data+5);
-		opmv.cb.sta = *(buf_data+6);
-		opmv.cb.pos_x = (s16)((*(buf_data+7)<<8)|*(buf_data+8));
-		opmv.cb.pos_y = (s16)((*(buf_data+9)<<8)|*(buf_data+10));
-		opmv.cb.dT_ms = *(buf_data+11);
-		//
+		opmv.cb.is_invalid = *(buf_data+5);
+        if (!opmv.cb.is_invalid){
+            opmv.cb.pos_y = 80 - (s16)((*(buf_data+6)<<8)|*(buf_data+7));
+            opmv.cb.pos_z = 60 - (s16)((*(buf_data+8)<<8)|*(buf_data+9));
+        }
+		else{
+            opmv.cb.pos_y = 0;
+            opmv.cb.pos_z = 0 ;
+        }
 		opmv.mode_sta = 1;
 	}
 	else if(*(buf_data+3)==0x42)    
