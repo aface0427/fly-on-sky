@@ -10,7 +10,7 @@
 #include "ANO_DT_LX.h"
 #include "Drv_AnoOf.h"
 #include "Drv_TFMini_Plus.h"
-
+#include "User_Task.h"
 
 extern _ano_of_st ano_of;
 _user_flag_set user_flag = {0};

@@ -6,6 +6,7 @@
 #include "Drv_TFMini_Plus.h"
 #include "Drv_OpenMV.h"
 #include "Ano_Scheduler.h"
+
 #define TF_EXPECT_DIST  150.0f //期望距离
 #define NORMALIZE_DIST  500.0f //距离阈值
 #define NORMALIZE_SPEED 20.0f  //xy方向速度阈值
@@ -489,5 +490,67 @@ u8 RealTimeSpeedControl_Angle(s16 velocity, u8 direction, u16 degree){
 	return 1;
 }
 
+/*
+*@fn:			u8 GeneralPosCtl()
+*@brief:	通用定位函数
+*@para:		
+*@return:	1
+*@comment:
+*/
+u8 GeneralPosCtl(_user_exp_fdb_set exp_fdb, 		//输入输出的期望与反馈
+									u8 direction, 								//控制方向
+									_PID_arg_st speed_arg, 			//pid速度参数结构体
+									_PID_arg_st distance_arg,		//pid位置参数结构体
+									_PID_val_st speed_val,			//pid速度数据结构体
+									_PID_val_st distance_val,		//pid位置数据结构体
+									_user_threshold_set threshold,//归一化与输出阈值
+									s16 * output,									//用于上位机输出
+									u8 invert											//输出取反(1或-1)
+								)
+{
+	
+	float fdb_distance = exp_fdb.fdb_distance / threshold.normalize_distance;
+	float exp_distance = exp_fdb.exp_distance / threshold.normalize_distance;
+	float fdb_speed = exp_fdb.fdb_speed / threshold.normalize_speed;
+	float exp_speed = 0;
+	s16 _out_speed = 0;
+	
+  //位置环pid计算
+	PID_calculate(0.02, 0, exp_distance, fdb_distance, &distance_arg, &distance_val, 0, 0);
+	
+	//输出取反
+	exp_speed = distance_val.out * invert;
+	
+	//阈值保护
+	fdb_speed = UserNormalize(fdb_speed, 1, -1);
+	
+	//速度环计算
+	PID_calculate(0.02, 0, exp_speed, fdb_speed, &speed_arg, &speed_val, 0, 0);
+	_out_speed = speed_val.out * threshold.normalize_speed;
+	
+  //输出速度限位
+	_out_speed = UserNormalize(_out_speed, threshold.max_speed, -1 * threshold.max_speed);
+	*output = _out_speed;
+	
+  //发送对应输出指令
+	RealTimeSpeedControlSend(_out_speed, direction);
+	
+	return 1;
+}
 
+/*
+*@fn:			float UserNormalize(float num, float max, float min)
+*@brief:	阈值保护函数
+*@para:		float num 数据	，	float max 最大阈值 ， float min 最小阈值
+*@return:	1
+*@comment:
+*/
+float UserNormalize(float num, float max, float min){
+	if(num > max)
+		return max;
+	else if(num < min)
+		return min;
+	else
+		return num;
+}
 
