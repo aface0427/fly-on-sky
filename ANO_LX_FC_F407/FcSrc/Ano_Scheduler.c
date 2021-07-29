@@ -139,9 +139,9 @@ static void Loop_20Hz(void) //50ms执行一次
 	//////////////////////////////////////////////////////////////////////
   if(user_flag.tfmini_ctl_flag){
 		TFMini_Track();
-		//OpenMV_Track();
+		OpenMV_Track();
 		//HWT101CT_TRACK();
-		OpenMV_Circle_Track();
+		//OpenMV_Circle_Track();
 		dt.fun[0x41].WTS = 1;
 		/*通用控制测试*/
 		//user_exp_fdb_x.exp_distance = 80;

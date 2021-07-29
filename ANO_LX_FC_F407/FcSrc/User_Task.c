@@ -251,7 +251,7 @@ u8 HWT101CT_TRACK(void){
 		out_speed = _out_speed;
 	
     //发送对应输出指令
-	RealTimeSpeedControlSend(out_speed, Direction_yaw);
+	RealTimeSpeedControl(out_speed, Direction_yaw);
 	
 	return 1;
 }
@@ -268,8 +268,8 @@ u8 OpenMV_Track(void){
 	if(opmv.cb.is_invalid){
 		out_speed_y = 0;
 		out_speed_z = 0;
-		RealTimeSpeedControlSend(out_speed_y, Direction_y);
-		RealTimeSpeedControlSend(out_speed_z, Direction_z);
+		RealTimeSpeedControl(out_speed_y, Direction_y);
+		RealTimeSpeedControl(out_speed_z, Direction_z);
 		return 0;
 	}
 		
@@ -294,16 +294,6 @@ u8 OpenMV_Track(void){
 	exp_speed_y = PID_Distance_val_y.out * -1;
 	exp_speed_z = PID_Distance_val_z.out * -1;
 	
-	//阈值保护
-	if(ano_of.of1_dy > NORMALIZE_SPEED)
-		fdb_speed_y = 1.0f;
-	else if(ano_of.of1_dy < -1 * NORMALIZE_SPEED)
-		fdb_speed_y = -1.0f;
-	else fdb_speed_y = (float)ano_of.of1_dy / NORMALIZE_SPEED;
-	
-	//速度环计算(Z方向只有位置环)
-	PID_calculate(0.02, 0, exp_speed_y, fdb_speed_y, &PID_Speed_arg_y, &PID_Speed_val_y, 0, 0);
-	//PID_calculate(0.02, 0, exp_speed_z, fdb_speed_z, &PID_Speed_arg_z, &PID_Speed_val_z, 0, 0);
 	_out_speed_y = exp_speed_y * NORMALIZE_SPEED;
 	_out_speed_z = exp_speed_z * NORMALIZE_SPEED;
 	
@@ -324,8 +314,8 @@ u8 OpenMV_Track(void){
 		out_speed_z = _out_speed_z;
 	
   //发送对应输出指令
-	RealTimeSpeedControlSend(out_speed_y, Direction_y);
-	RealTimeSpeedControlSend(out_speed_z, Direction_z);
+	RealTimeSpeedControl(out_speed_y, Direction_y);
+	RealTimeSpeedControl(out_speed_z, Direction_z);
 	
 	return 1;
 }
@@ -461,7 +451,7 @@ u8 RealTimeSpeedControl_Angle(s16 velocity, u8 direction, u16 degree){
 		RealTimeSpeedControl(velocity * my_cos(degree / 360 * 3.14159265), Direction_x);
 		RealTimeSpeedControl(velocity * my_sin(degree / 360 * 3.14159265), Direction_z);
 	}
-	dt.fun[0x41].WTS = 1;
+	//dt.fun[0x41].WTS = 1;
 	
 	return 1;
 }
