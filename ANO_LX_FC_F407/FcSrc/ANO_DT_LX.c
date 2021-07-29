@@ -398,10 +398,10 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
 		send_buffer[(*_cnt)++] = BYTE1(out_speed);
         
         /*opmv-yz方向数据*/
-		send_buffer[(*_cnt)++] = BYTE0(opmv.cb.pos_y);
-		send_buffer[(*_cnt)++] = BYTE1(opmv.cb.pos_y);
-		send_buffer[(*_cnt)++] = BYTE0(opmv.cb.pos_z);
-		send_buffer[(*_cnt)++] = BYTE1(opmv.cb.pos_z);
+		send_buffer[(*_cnt)++] = BYTE0(opmv.mol.pos_y);
+		send_buffer[(*_cnt)++] = BYTE1(opmv.mol.pos_y);
+		send_buffer[(*_cnt)++] = BYTE0(opmv.mol.pos_z);
+		send_buffer[(*_cnt)++] = BYTE1(opmv.mol.pos_z);
 		
 		/*opmv-pid-yz方向数据*/
 		send_buffer[(*_cnt)++] = BYTE0(out_speed_y);

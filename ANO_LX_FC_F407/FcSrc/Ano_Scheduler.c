@@ -141,12 +141,12 @@ static void Loop_20Hz(void) //50ms执行一次
 		TFMini_Track();
 		//OpenMV_Track();
 		//HWT101CT_TRACK();
-		//OpenMV_Circle_Track();
+		OpenMV_Circle_Track();
 		
 		/*通用控制测试*/
 		user_exp_fdb_x.exp_distance = 80;
 		user_exp_fdb_x.fdb_distance = tfmini.Dist;
-		GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Speed_arg_x, PID_Speed_val_x, user_threshold_x, &test_output_x, 1);
+		//GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Speed_arg_x, PID_Speed_val_x, user_threshold_x, &test_output_x, 1);
 	}
 	if(user_flag.openmv_clr_flag){
 		user_flag.openmv_clr_flag = 0;
