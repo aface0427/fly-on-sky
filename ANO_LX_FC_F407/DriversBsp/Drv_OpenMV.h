@@ -45,6 +45,7 @@ typedef struct
 	_openmv_color_block_st cb;
 	_openmv_line_tracking_st lt;
     _openmv_apriltag_tracking_st at;
+    _openmv_apriltag_tracking_st mol;
 }_openmv_data_st;
 
 //==Êı¾İÉùÃ÷
