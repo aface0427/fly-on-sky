@@ -20,7 +20,7 @@
 #define NORMALIZE_MV_DIST_Y 80.0f
 #define NORMALIZE_MV_DIST_Z 60.0f
 #define NORMALIZE_MPU_ANGLE_YAW 200.0f //yaw轴角度归一化
-#define NORMALIZE_MOLCIRCLE_DIST_XY 80.0f //摩尔环xy方向阈值
+#define NORMALIZE_MOLCIRCLE_DIST_XY 120.0f //摩尔环xy方向阈值
 
 s16 THR_Val = 800;
 s16 CTRL_SPD_Z = 10;
@@ -192,16 +192,6 @@ u8 TFMini_Track(void){
     //位置环pid输出作为速度环的期望速度输入
 	exp_speed = PID_Distance_val_x.out * -1;
     
-    //光流数据输入归一化处理得出实际速度输入
-	if(ano_of.of1_dx > NORMALIZE_SPEED)
-		fdb_speed = 1.0f;
-	else if(ano_of.of1_dx < -1 * NORMALIZE_SPEED)
-		fdb_speed = -1.0f;
-	else fdb_speed = (float)ano_of.of1_dx / NORMALIZE_SPEED;
-	
-    //速度环pid计算
-	PID_calculate(0.02, 0, exp_speed, fdb_speed, &PID_Speed_arg_x, &PID_Speed_val_x, 0, 0);
-    
 	_out_speed = exp_speed * NORMALIZE_SPEED;
 	
     //输出速度限位
@@ -213,7 +203,7 @@ u8 TFMini_Track(void){
 		out_speed = _out_speed;
 	
     //发送对应输出指令
-	RealTimeSpeedControlSend(out_speed, Direction_x);
+	RealTimeSpeedControl(out_speed, Direction_x);
 	
 	return 1;
 }
@@ -352,8 +342,8 @@ u8 OpenMV_Circle_Track(void){
 	if(opmv.mol.is_invalid){
 		out_speed_y = 0;
 		out_speed_z = 0;
-		RealTimeSpeedControlSend(out_speed_y, Direction_y);
-		RealTimeSpeedControlSend(out_speed_z, Direction_z);
+		RealTimeSpeedControl(out_speed_y, Direction_y);
+		RealTimeSpeedControl(out_speed_z, Direction_z);
 		return 0;
 	}
 		
@@ -399,8 +389,8 @@ u8 OpenMV_Circle_Track(void){
 		out_speed_z = _out_speed_z;
 	
   //发送对应输出指令
-	RealTimeSpeedControlSend(out_speed_y, Direction_y);
-	RealTimeSpeedControlSend(out_speed_z, Direction_z);
+	RealTimeSpeedControl(out_speed_y, Direction_y);
+	RealTimeSpeedControl(out_speed_z, Direction_z);
 	
 	return 1;
 }

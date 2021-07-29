@@ -142,17 +142,18 @@ static void Loop_20Hz(void) //50ms执行一次
 		//OpenMV_Track();
 		//HWT101CT_TRACK();
 		OpenMV_Circle_Track();
-		
+		dt.fun[0x41].WTS = 1;
 		/*通用控制测试*/
-		user_exp_fdb_x.exp_distance = 80;
-		user_exp_fdb_x.fdb_distance = tfmini.Dist;
+		//user_exp_fdb_x.exp_distance = 80;
+		//user_exp_fdb_x.fdb_distance = tfmini.Dist;
 		//GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Speed_arg_x, PID_Speed_val_x, user_threshold_x, &test_output_x, 1);
 	}
 	if(user_flag.openmv_clr_flag){
 		user_flag.openmv_clr_flag = 0;
-		RealTimeSpeedControlSend(0, Direction_x);
-		RealTimeSpeedControlSend(0, Direction_y);
-		RealTimeSpeedControlSend(0, Direction_z);
+		RealTimeSpeedControl(0, Direction_x);
+		RealTimeSpeedControl(0, Direction_y);
+		RealTimeSpeedControl(0, Direction_z);
+		dt.fun[0x41].WTS = 1;
 		//RealTimeSpeedControlSend(0, Direction_yaw);
 	}
 	//////////////////////////////////////////////////////////////////////
