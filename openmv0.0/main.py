@@ -10,7 +10,7 @@ sensor.set_vflip(True)
 sensor.set_hmirror(True)
 sensor.set_transpose(False)
 sensor.set_pixformat(sensor.RGB565)#设置相机模块的像素模式
-sensor.set_framesize(sensor.QQVGA)#设置相机分辨率320*240
+sensor.set_framesize(sensor.QQVGA)#设置相机分辨率240*160
 sensor.skip_frames(30)
 sensor.set_auto_gain(False)
 sensor.set_auto_whitebal(False)#若想追踪颜色则关闭白平衡
