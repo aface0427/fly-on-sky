@@ -527,6 +527,16 @@
               <FileType>5</FileType>
               <FilePath>..\DriversBsp\Drv_HC08.h</FilePath>
             </File>
+            <File>
+              <FileName>Drv_HWT101CT.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DriversBsp\Drv_HWT101CT.c</FilePath>
+            </File>
+            <File>
+              <FileName>Drv_HWT101CT.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\DriversBsp\Drv_HWT101CT.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

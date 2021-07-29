@@ -34,3 +34,7 @@
 .\build\user_task.o: ..\FcSrc\LX_FC_Fun.h
 .\build\user_task.o: ..\FcSrc\ANO_DT_LX.h
 .\build\user_task.o: ..\DriversBsp\Drv_AnoOf.h
+.\build\user_task.o: ..\DriversBsp\Ano_Math.h
+.\build\user_task.o: ..\DriversBsp\Drv_TFMini_Plus.h
+.\build\user_task.o: ..\DriversBsp\Drv_OpenMV.h
+.\build\user_task.o: ..\FcSrc\Ano_Scheduler.h

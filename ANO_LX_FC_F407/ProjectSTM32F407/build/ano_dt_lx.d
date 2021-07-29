@@ -36,3 +36,7 @@
 .\build\ano_dt_lx.o: ..\DriversMcu\STM32F407\Drivers\Drv_led.h
 .\build\ano_dt_lx.o: ..\FcSrc\LX_FC_State.h
 .\build\ano_dt_lx.o: ..\DriversMcu\STM32F407\Drivers\Drv_Uart.h
+.\build\ano_dt_lx.o: ..\DriversBsp\Drv_TFMini_Plus.h
+.\build\ano_dt_lx.o: ..\FcSrc\User_Task.h
+.\build\ano_dt_lx.o: ..\DriversBsp\Drv_OpenMV.h
+.\build\ano_dt_lx.o: ..\FcSrc\Ano_Scheduler.h

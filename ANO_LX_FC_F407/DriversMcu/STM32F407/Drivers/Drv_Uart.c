@@ -11,12 +11,13 @@
 #include "Drv_AnoOf.h"
 #include "Drv_OpenMV.h"
 #include "Drv_TFMini_Plus.h"
+#include "Drv_HWT101CT.h"
 
 void NoUse(u8 data){}
 //串口接收发送快速定义，直接修改此处的函数名称宏，修改成自己的串口解析和发送函数名称即可，注意函数参数格式需统一
 #define U1GetOneByte	OpenMV_Byte_Get
 #define U2GetOneByte	TFMini_Byte_Get
-#define U3GetOneByte	NoUse
+#define U3GetOneByte	HWT101CT_Byte_Get
 #define U4GetOneByte	AnoOF_GetOneByte
 #define U5GetOneByte	ANO_DT_LX_Data_Receive_Prepare	
 	
@@ -374,7 +375,7 @@ void Usart3_IRQ(void)
     {
         USART_ClearITPendingBit(USART3, USART_IT_RXNE); //清除中断标志
         com_data = USART3->DR;
-        drvU2GetByte(com_data);
+        drvU3GetByte(com_data);
 		
     }
     //发送（进入移位）中断
