@@ -275,13 +275,13 @@ u8 OpenMV_Track(void){
 		
 	//根据openmv返回的数据作归一化处理
 	//y方向
-	float fdb_distance_y = opmv.cb.pos_y / NORMALIZE_MV_DIST_Y; //NORMALIZE_MV_DIST_Y = 80.0f
+	float fdb_distance_y = opmv.at.pos_y / NORMALIZE_MV_DIST_Y; //NORMALIZE_MV_DIST_Y = 80.0f
 	float exp_distance_y = 0;
 	float fdb_speed_y = 0;
 	float exp_speed_y = 0;
 	s16 _out_speed_y = 0;
 	//z方向
-	float fdb_distance_z = opmv.cb.pos_z / NORMALIZE_MV_DIST_Z; //NORMALIZE_MV_DIST_Z = 60.0f
+	float fdb_distance_z = opmv.at.pos_z / NORMALIZE_MV_DIST_Z; //NORMALIZE_MV_DIST_Z = 60.0f
 	float exp_distance_z= 0;
 	float fdb_speed_z = 0;
 	float exp_speed_z = 0;
