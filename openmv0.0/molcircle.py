@@ -38,6 +38,7 @@ def cmp(x):
 
 def Molcircle():
     img = sensor.snapshot() # 拍一张照片，返回图像
+    img.laplacian(1,sharpen=True)
     img.morph(kernel_size,kernel,mul=1.9)
     #morph(size, kernel, mul=Auto, add=0)，morph变换，mul根据图像对比度
     #进行调整，mul使图像每个像素乘mul；add根据明暗度调整，使得每个像素值加上add值。
@@ -54,7 +55,7 @@ def Molcircle():
     p=0
     a=[]
     a.append((0,0))
-    for c in img.find_circles(threshold = 4800, x_margin = 2, y_margin = 2, r_margin = 2,r_min = 20, r_max = 100, r_step = 2):
+    for c in img.find_circles(threshold = 5400, x_margin = 2, y_margin = 2, r_margin = 2,r_min = 20, r_max = 100, r_step = 2):
         p=p+1
         a.append((c.x(),c.y()))
         img.draw_circle(c.x(), c.y(), c.r(), color = (255, 0, 0))
