@@ -61,6 +61,12 @@ _user_threshold_set user_threshold_x;
 /*x测试输出*/
 s16 test_output_x;
 
+/*绕杆x阈值*/
+_user_threshold_set user_threshold_pole_x;
+/*绕杆x测试输出*/
+s16 test_output_pole_x;
+
+
 /*y期望*/
 _user_exp_fdb_set user_exp_fdb_y;
 /*y阈值*/
@@ -162,7 +168,7 @@ static void Loop_20Hz(void) //50ms执行一次
 	//////////////////////////////////////////////////////////////////////
   if(user_flag.tfmini_ctl_flag){
 		//TFMini_Track();
-		OpenMV_Track();
+		//OpenMV_Track();
 		//HWT101CT_TRACK();
 		//OpenMV_Circle_Track();
 		
@@ -180,7 +186,18 @@ static void Loop_20Hz(void) //50ms执行一次
 		user_exp_fdb_z.fdb_distance = opmv.at.pos_z;
 		test_output_z = GeneralPosCtl(user_exp_fdb_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_z, 1);
 		
+		/*绕杆*/
+//		user_exp_fdb_x.exp_distance = 30;
+//		user_exp_fdb_x.fdb_distance = opmv.xx.pos_x;
+//		test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_pole_x, 1);
+//		
+//		user_exp_fdb_yaw.exp_distance = 0;
+//		user_exp_fdb_yaw.fdb_distance = opmv.xx.angle_yaw;
+//		test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+//		
+//		rt_tar.st_data.vel_y = 5;
 		
+		/*发送实时控制帧*/
 		dt.fun[0x41].WTS = 1;
 	}
 	if(user_flag.openmv_clr_flag){
@@ -283,6 +300,11 @@ void Init_GeneralCtlArg(void){
 	user_threshold_x.max_speed = 20;
 	user_threshold_x.normalize_distance = 500.0f;
 	user_threshold_x.normalize_speed = 20.0f;
+	
+	/*x绕杆*/
+	user_threshold_pole_x.max_speed = 10;
+	user_threshold_pole_x.normalize_distance = 50.0f;
+	user_threshold_pole_x.normalize_speed = 10.0f;
 	
 	/*y*/
 	user_threshold_y.max_speed = 20;

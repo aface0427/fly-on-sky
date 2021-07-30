@@ -119,6 +119,7 @@ extern s16 test_output_x;
 extern s16 test_output_y;
 extern s16 test_output_z;
 extern s16 test_output_yaw;
+extern s16 test_output_pole_x;
 
 void Init_PID(void);
 void Init_GeneralCtlArg(void);
