@@ -42,6 +42,13 @@ typedef struct
 	float out;
 }_PID_val_st;
 
+typedef struct{
+	s16 pitch;
+	s16 yaw;
+	s16 rol;
+	s16 fusion_sta;
+}_user_eula_set;
+
 /*xy速度环参数*/
 extern _PID_arg_st PID_Speed_arg_x; 
 extern _PID_arg_st PID_Speed_arg_y; 
@@ -75,6 +82,9 @@ extern _PID_val_st PID_Speed_val_z;
 extern _PID_arg_st PID_Distance_arg_z;
 /*z位置环参数*/
 extern _PID_val_st PID_Distance_val_z;
+
+/*imu欧拉角数据*/
+extern _user_eula_set user_eula;;
 
 /*flag集*/
 typedef struct

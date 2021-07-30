@@ -213,6 +213,13 @@ static void ANO_DT_LX_Data_Receive_Anl(u8 *data, u8 len)
 	else if (*(data + 2) == 0X07)
 	{
 	}
+	//imu欧拉角
+	else if (*(data + 2) == 0x03){
+		user_eula.rol = *(data + 4) | *(data + 5) << 8;
+		user_eula.pitch = *(data + 6) | *(data + 7) << 8;;
+		user_eula.yaw = *(data + 8) | *(data + 9) << 8;;
+		user_eula.fusion_sta = *(data + 10) | *(data + 11) << 8;;
+	}
 	//命令E0，具体命令格式及功能，参见匿名通信协议V7版
 	else if (*(data + 2) == 0XE0)
 	{
@@ -422,6 +429,14 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
 		send_buffer[(*_cnt)++] = BYTE1(test_output_z);
 		send_buffer[(*_cnt)++] = BYTE0(test_output_yaw);
 		send_buffer[(*_cnt)++] = BYTE1(test_output_yaw);
+		
+		/*欧拉角数据*/
+		send_buffer[(*_cnt)++] = BYTE0(user_eula.pitch);
+		send_buffer[(*_cnt)++] = BYTE1(user_eula.pitch);
+		send_buffer[(*_cnt)++] = BYTE0(user_eula.yaw);
+		send_buffer[(*_cnt)++] = BYTE1(user_eula.yaw);
+		send_buffer[(*_cnt)++] = BYTE0(user_eula.rol);
+		send_buffer[(*_cnt)++] = BYTE1(user_eula.rol);
 	}
 	break;
 	default:
