@@ -14,7 +14,7 @@
 #define NORMALIZE_SPEED_YAW 30.0f //yaw方向速度阈值
 
 #define MAX_SPEED_XY 20           //最大输出速度
-#define MAX_SPEED_Z 10
+#define MAX_SPEED_Z 15
 #define MAX_SPEED_YAW 10 //yaw轴最大输出角速度
 
 #define NORMALIZE_MV_DIST_Y 80.0f
@@ -463,12 +463,11 @@ u8 RealTimeSpeedControl_Angle(s16 velocity, u8 direction, u16 degree){
 *@return:	1
 *@comment:
 */
-u8 GeneralPosCtl(_user_exp_fdb_set exp_fdb, 		//输入输出的期望与反馈
+s16 GeneralPosCtl(_user_exp_fdb_set exp_fdb, 		//输入输出的期望与反馈
 									u8 direction, 								//控制方向
 									_PID_arg_st distance_arg, 			//pid位置参数结构体
 									_PID_val_st distance_val,			//pid位置数据结构体
 									_user_threshold_set threshold,//归一化与输出阈值
-									s16 * output,									//用于上位机输出
 									u8 isInvert											//输出取反
 								)
 {
@@ -489,12 +488,11 @@ u8 GeneralPosCtl(_user_exp_fdb_set exp_fdb, 		//输入输出的期望与反馈
   //输出速度限位
 	_out_speed = _out * threshold.max_speed;
 	_out_speed = UserNormalize(_out_speed, threshold.max_speed, -1 * threshold.max_speed);
-	*output = _out_speed;
 	
   //发送对应输出指令
-	RealTimeSpeedControlSend(_out_speed, direction);
+	RealTimeSpeedControl(_out_speed, direction);
 	
-	return 1;
+	return _out_speed;
 }
 
 /*

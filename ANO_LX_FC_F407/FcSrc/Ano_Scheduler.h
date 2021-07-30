@@ -106,7 +106,9 @@ extern s16 dx, dy;
 extern s16 dis_fix_x, dis_fix_y;
 extern s16 dis_x, dis_y;
 extern s16 test_output_x;
-
+extern s16 test_output_y;
+extern s16 test_output_z;
+extern s16 test_output_yaw;
 
 void Init_PID(void);
 void Init_GeneralCtlArg(void);

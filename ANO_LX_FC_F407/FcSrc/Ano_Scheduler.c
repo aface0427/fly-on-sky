@@ -61,6 +61,26 @@ _user_threshold_set user_threshold_x;
 /*x测试输出*/
 s16 test_output_x;
 
+/*y期望*/
+_user_exp_fdb_set user_exp_fdb_y;
+/*y阈值*/
+_user_threshold_set user_threshold_y;
+/*y测试输出*/
+s16 test_output_y;
+
+/*z期望*/
+_user_exp_fdb_set user_exp_fdb_z;
+/*z阈值*/
+_user_threshold_set user_threshold_z;
+/*z测试输出*/
+s16 test_output_z;
+
+/*yaw期望*/
+_user_exp_fdb_set user_exp_fdb_yaw;
+/*yaw阈值*/
+_user_threshold_set user_threshold_yaw;
+/*yaw测试输出*/
+s16 test_output_yaw;
 
 //////////////////////////////////////////////////////////////////////
 //用户程序调度器
@@ -138,15 +158,27 @@ static void Loop_20Hz(void) //50ms执行一次
 {
 	//////////////////////////////////////////////////////////////////////
   if(user_flag.tfmini_ctl_flag){
-		TFMini_Track();
+		//TFMini_Track();
 		OpenMV_Track();
 		//HWT101CT_TRACK();
 		//OpenMV_Circle_Track();
+		
+		/*TFmini控制x轴*/
+		user_exp_fdb_x.exp_distance = 100;
+		user_exp_fdb_x.fdb_distance = tfmini.Dist;
+		test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_x, 1);
+		
+		/*OpenMV控制yz*/
+		user_exp_fdb_y.exp_distance = 0;
+		user_exp_fdb_y.fdb_distance = opmv.at.pos_y;
+		test_output_y = GeneralPosCtl(user_exp_fdb_y, Direction_y, PID_Distance_arg_y, PID_Distance_val_y, user_threshold_y, 1);
+		
+		user_exp_fdb_z.exp_distance = 0;
+		user_exp_fdb_z.fdb_distance = opmv.at.pos_z;
+		test_output_z = GeneralPosCtl(user_exp_fdb_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_z, 1);
+		
+		
 		dt.fun[0x41].WTS = 1;
-		/*通用控制测试*/
-		//user_exp_fdb_x.exp_distance = 80;
-		//user_exp_fdb_x.fdb_distance = tfmini.Dist;
-		//GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Speed_arg_x, PID_Speed_val_x, user_threshold_x, &test_output_x, 1);
 	}
 	if(user_flag.openmv_clr_flag){
 		user_flag.openmv_clr_flag = 0;
@@ -248,6 +280,21 @@ void Init_GeneralCtlArg(void){
 	user_threshold_x.max_speed = 20;
 	user_threshold_x.normalize_distance = 500.0f;
 	user_threshold_x.normalize_speed = 20.0f;
+	
+	/*y*/
+	user_threshold_y.max_speed = 20;
+	user_threshold_y.normalize_distance = 80.0f;
+	user_threshold_y.normalize_speed = 20.0f;
+	
+	/*z*/
+	user_threshold_z.max_speed = 15;
+	user_threshold_z.normalize_distance = 40.0f;
+	user_threshold_z.normalize_speed = 15.0f;
+	
+	/*yaw*/
+	user_threshold_yaw.max_speed = 20;
+	user_threshold_yaw.normalize_distance = 200.0f;
+	user_threshold_yaw.normalize_speed = 20.0f;
 }
 
 //////////////////////////////////////////////////////////////////////
