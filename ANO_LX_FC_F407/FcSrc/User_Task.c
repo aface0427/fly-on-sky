@@ -52,12 +52,12 @@ void UserTask_OneKeyCmd(void)
             //还没有执行
             if (one_key_takeoff_f == 0)
             {
-//								one_key_takeoff_f = 1;
+								one_key_takeoff_f = 1;
 //								mission_task = 1;
 //								mission_step = 1;
 							
-								user_flag.tfmini_ctl_flag = 1;
-								user_flag.opmv_ctl_flag = 1;
+								//user_flag.tfmini_ctl_flag = 1;
+								//user_flag.opmv_ctl_flag = 1;
 								user_flag.hwt101_ctl_flag = 1;
 							
 								user_flag.openmv_clr_flag = 0;

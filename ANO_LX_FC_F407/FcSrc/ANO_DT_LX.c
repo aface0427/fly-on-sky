@@ -396,6 +396,10 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
 		send_buffer[(*_cnt)++] = BYTE1(hwt101ct.yaw_speed);
 		send_buffer[(*_cnt)++] = BYTE0(hwt101ct.yaw_angle);
 		send_buffer[(*_cnt)++] = BYTE1(hwt101ct.yaw_angle);
+		
+		send_buffer[(*_cnt)++] = BYTE0(Position_incre);
+		send_buffer[(*_cnt)++] = BYTE1(Position_incre);
+		
 	}
 	break;
 	case 0xf2: 

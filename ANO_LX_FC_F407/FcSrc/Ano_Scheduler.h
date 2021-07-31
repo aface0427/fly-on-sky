@@ -124,6 +124,10 @@ extern s16 test_output_z;
 extern s16 test_output_yaw;
 extern s16 test_output_pole_x;
 
+extern s16 Position_now;
+extern s16 Position_pre;
+extern s16 Position_incre;
+
 void Init_PID(void);
 void Init_GeneralCtlArg(void);
 void Scheduler_Setup(void);

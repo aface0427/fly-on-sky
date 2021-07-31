@@ -92,6 +92,9 @@ s16 test_output_yaw;
 /*imu欧拉角数据*/
 _user_eula_set user_eula;
 
+s16 Position_now;
+s16 Position_pre;
+s16 Position_incre;
 //////////////////////////////////////////////////////////////////////
 //用户程序调度器
 //////////////////////////////////////////////////////////////////////
@@ -196,15 +199,30 @@ static void Loop_20Hz(void) //50ms执行一次
 			user_exp_fdb_yaw.exp_distance = hwt101ct.yaw_angle;
 			user_flag.yaw_set_flag = 0;
 		}
-		else{
-			if(hwt101ct.offline){
-				user_exp_fdb_yaw.fdb_distance = user_exp_fdb_yaw.exp_distance;
-			}
-			else{
-				user_exp_fdb_yaw.fdb_distance = hwt101ct.yaw_angle;
-			}
-			test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+		
+		if(hwt101ct.offline){
+			user_exp_fdb_yaw.fdb_distance = user_exp_fdb_yaw.exp_distance;
 		}
+		else{
+			/*过零点判断*/
+			Position_now = hwt101ct.yaw_angle;
+			if((Position_now - Position_pre) > 180)
+			{
+				Position_incre  += (Position_now - Position_pre) - 359;
+			}
+			else if((Position_now - Position_pre) < -180)
+			{
+				Position_incre  += 359 + (Position_now - Position_pre);
+			}
+			else
+			{
+				Position_incre  += (Position_now - Position_pre);
+			}
+			Position_pre = Position_now;
+			
+			user_exp_fdb_yaw.fdb_distance = Position_incre;
+		}
+		test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
 	}
 		
 		/*绕杆*/
@@ -223,6 +241,9 @@ static void Loop_20Hz(void) //50ms执行一次
 		RealTimeSpeedControl(0, Direction_x);
 		RealTimeSpeedControl(0, Direction_y);
 		RealTimeSpeedControl(0, Direction_z);
+		RealTimeSpeedControl(0, Direction_yaw);
+		Position_incre = 0;
+		Position_pre = 0;
 		//RealTimeSpeedControlSend(0, Direction_yaw);
 	}
 	
@@ -285,7 +306,7 @@ void Init_PID(void){
 	PID_Speed_arg_yaw.k_ff = 0;
 	
 //yaw位置环
-	PID_Distance_arg_yaw.kp = 0.5f;
+	PID_Distance_arg_yaw.kp = 5.0f;
 	PID_Distance_arg_yaw.ki = 0;
 	PID_Distance_arg_yaw.kd_ex = 0;
 	PID_Distance_arg_yaw.fb_d_mode = 0;
@@ -338,9 +359,9 @@ void Init_GeneralCtlArg(void){
 	user_threshold_z.normalize_speed = 15.0f;
 	
 	/*yaw*/
-	user_threshold_yaw.max_speed = 15;
+	user_threshold_yaw.max_speed = 5;
 	user_threshold_yaw.normalize_distance = 200.0f;
-	user_threshold_yaw.normalize_speed = 15.0f;
+	user_threshold_yaw.normalize_speed = 5.0f;
 }
 
 //////////////////////////////////////////////////////////////////////

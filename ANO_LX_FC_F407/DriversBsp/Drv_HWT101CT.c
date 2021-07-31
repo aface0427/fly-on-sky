@@ -70,14 +70,12 @@ static void HWT101CT_Data_Analysis(u8 *buf_data)
 {
     s16 yaw_speed,yaw_angle ;
     if (*(buf_data+1)==0x52){
-        yaw_speed = (s16)((*(buf_data+7)<<8)|*(buf_data+6));
+        yaw_speed = (s16)(((short)*(buf_data+7)<<8)|(short)*(buf_data+6));
         hwt101ct.yaw_speed = yaw_speed * 2000 / 32768; //单位为°/s
-        hwt101ct.yaw_speed = yaw_speed * 2000 / 32768 ; //单位为°/s
     }
     if(*(buf_data+1)==0x53){
-        yaw_angle = (s16)((*(buf_data+7)<<8)|*(buf_data+6));
+        yaw_angle = (s16)((((short)*(buf_data+7))<<8)|((short)*(buf_data+6)));
         hwt101ct.yaw_angle = yaw_angle * 180 / 32768; //单位为°
-        hwt101ct.yaw_angle = yaw_angle * 180/ 32768  ; //单位为°
     }
 	HWT101CT_Check_Reset();
 }
