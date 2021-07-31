@@ -174,12 +174,19 @@ static void Loop_20Hz(void) //50ms执行一次
 		test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_x, 1);
 		
 		/*OpenMV控制yz*/
+		if(opmv.at.is_invalid){
+			user_exp_fdb_y.fdb_distance = 0;
+			user_exp_fdb_z.fdb_distance = 0;
+		}
+		else{
+			user_exp_fdb_y.fdb_distance = opmv.at.pos_y;
+			user_exp_fdb_z.fdb_distance = opmv.at.pos_z;
+		}
+		
 		user_exp_fdb_y.exp_distance = 0;
-		user_exp_fdb_y.fdb_distance = opmv.at.pos_y;
 		test_output_y = GeneralPosCtl(user_exp_fdb_y, Direction_y, PID_Distance_arg_y, PID_Distance_val_y, user_threshold_y, 1);
 		
 		user_exp_fdb_z.exp_distance = 0;
-		user_exp_fdb_z.fdb_distance = opmv.at.pos_z;
 		test_output_z = GeneralPosCtl(user_exp_fdb_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_z, 1);
 		
 		/*hwt101保证yaw轴平稳*/
@@ -188,7 +195,12 @@ static void Loop_20Hz(void) //50ms执行一次
 			user_flag.yaw_set_flag = 0;
 		}
 		else{
-			user_exp_fdb_yaw.fdb_distance = hwt101ct.yaw_angle;
+			if(hwt101ct.offline){
+				user_exp_fdb_yaw.fdb_distance = user_exp_fdb_yaw.exp_distance;
+			}
+			else{
+				user_exp_fdb_yaw.fdb_distance = hwt101ct.yaw_angle;
+			}
 			test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
 		}
 		

@@ -9,6 +9,7 @@
 #include "User_Task.h"
 #include "Drv_OpenMV.h"
 #include "Ano_Scheduler.h"
+#include "Drv_HWT101CT.h"
 
 /*==========================================================================
  * ÃèÊö    £ºÁèÏö·É¿ØÍ¨ĞÅÖ÷³ÌĞò
@@ -390,8 +391,11 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
 		send_buffer[(*_cnt)++] = BYTE0(dy);
 		send_buffer[(*_cnt)++] = BYTE1(dy);
 
-				
-		
+		/*yawÖá*/
+		send_buffer[(*_cnt)++] = BYTE0(hwt101ct.yaw_speed);
+		send_buffer[(*_cnt)++] = BYTE1(hwt101ct.yaw_speed);
+		send_buffer[(*_cnt)++] = BYTE0(hwt101ct.yaw_angle);
+		send_buffer[(*_cnt)++] = BYTE1(hwt101ct.yaw_angle);
 	}
 	break;
 	case 0xf2: 
