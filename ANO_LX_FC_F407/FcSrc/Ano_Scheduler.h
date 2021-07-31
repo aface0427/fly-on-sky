@@ -92,6 +92,8 @@ typedef struct
 	u8 of_dis_clear_cmd; //清空位移数据
 	u8 init_pid_flag; //pid初始化标志位
 	u8 tfmini_ctl_flag;
+	u8 opmv_ctl_flag;
+	u8 hwt101_ctl_flag;
 	u8 openmv_clr_flag;
 	u8 yaw_set_flag; //yaw轴角度确定位
 } _user_flag_set;

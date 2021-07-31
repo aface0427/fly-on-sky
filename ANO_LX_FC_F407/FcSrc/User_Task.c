@@ -55,7 +55,11 @@ void UserTask_OneKeyCmd(void)
 //								one_key_takeoff_f = 1;
 //								mission_task = 1;
 //								mission_step = 1;
+							
 								user_flag.tfmini_ctl_flag = 1;
+								user_flag.opmv_ctl_flag = 1;
+								user_flag.hwt101_ctl_flag = 1;
+							
 								user_flag.openmv_clr_flag = 0;
 								user_flag.yaw_set_flag = 1;
             }
@@ -78,9 +82,14 @@ void UserTask_OneKeyCmd(void)
                 //Add_Send_Data(0x41, );
 								//FC_Lock();
 //								OneKey_Hold();
+							
 								user_flag.tfmini_ctl_flag = 0;
+								user_flag.opmv_ctl_flag = 0;
+								user_flag.hwt101_ctl_flag = 0;
+							
 								user_flag.openmv_clr_flag = 1;
 								user_flag.yaw_set_flag = 0;
+							
 							  mission_task = 0;
 								mission_step = 0;
 								one_key_land_f = 1;

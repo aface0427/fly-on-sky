@@ -172,7 +172,8 @@ static void Loop_20Hz(void) //50ms执行一次
 		user_exp_fdb_x.exp_distance = 100;
 		user_exp_fdb_x.fdb_distance = tfmini.Dist;
 		test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_x, 1);
-		
+	}
+	if(user_flag.opmv_ctl_flag){
 		/*OpenMV控制yz*/
 		if(opmv.at.is_invalid){
 			user_exp_fdb_y.fdb_distance = 0;
@@ -188,7 +189,8 @@ static void Loop_20Hz(void) //50ms执行一次
 		
 		user_exp_fdb_z.exp_distance = 0;
 		test_output_z = GeneralPosCtl(user_exp_fdb_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_z, 1);
-		
+	}
+	if(user_flag.hwt101_ctl_flag){
 		/*hwt101保证yaw轴平稳*/
 		if(user_flag.yaw_set_flag){
 			user_exp_fdb_yaw.exp_distance = hwt101ct.yaw_angle;
@@ -203,6 +205,7 @@ static void Loop_20Hz(void) //50ms执行一次
 			}
 			test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
 		}
+	}
 		
 		/*绕杆*/
 //		user_exp_fdb_x.exp_distance = 30;
@@ -215,17 +218,17 @@ static void Loop_20Hz(void) //50ms执行一次
 //		
 //		rt_tar.st_data.vel_y = 5;
 		
-		/*发送实时控制帧*/
-		dt.fun[0x41].WTS = 1;
-	}
 	if(user_flag.openmv_clr_flag){
 		user_flag.openmv_clr_flag = 0;
 		RealTimeSpeedControl(0, Direction_x);
 		RealTimeSpeedControl(0, Direction_y);
 		RealTimeSpeedControl(0, Direction_z);
-		dt.fun[0x41].WTS = 1;
 		//RealTimeSpeedControlSend(0, Direction_yaw);
 	}
+	
+	/*发送实时控制帧*/
+		dt.fun[0x41].WTS = 1;
+
 	//////////////////////////////////////////////////////////////////////
 }
 
