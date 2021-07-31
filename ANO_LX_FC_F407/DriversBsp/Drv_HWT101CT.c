@@ -35,7 +35,7 @@ void HWT101CT_Byte_Get(uint8_t bytedata)
 	else if(rec_sta==10)
 	{
 		//
-		for(u8 i=0;i<8;i++)
+		for(u8 i=0;i<10;i++)
 		{
 			check_val += hwt101ct_buf[i];
 		}
@@ -71,11 +71,19 @@ static void HWT101CT_Data_Analysis(u8 *buf_data)
     s16 yaw_speed,yaw_angle ;
     if (*(buf_data+1)==0x52){
         yaw_speed = (s16)((*(buf_data+7)<<8)|*(buf_data+6));
+<<<<<<< Updated upstream
         hwt101ct.yaw_speed = yaw_speed * 2000 / 32768; //单位为°/s
+=======
+        hwt101ct.yaw_speed = yaw_speed * 2000 / 32768 ; //单位为°/s
+>>>>>>> Stashed changes
     }
-    else if(*(buf_data+1)==0x53){
+    if(*(buf_data+1)==0x53){
         yaw_angle = (s16)((*(buf_data+7)<<8)|*(buf_data+6));
+<<<<<<< Updated upstream
         hwt101ct.yaw_angle = yaw_angle * 180 / 32768; //单位为°
+=======
+        hwt101ct.yaw_angle = yaw_angle * 180/ 32768  ; //单位为°
+>>>>>>> Stashed changes
     }
 	HWT101CT_Check_Reset();
 }
