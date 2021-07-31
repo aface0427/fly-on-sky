@@ -93,6 +93,7 @@ typedef struct
 	u8 init_pid_flag; //pid初始化标志位
 	u8 tfmini_ctl_flag;
 	u8 openmv_clr_flag;
+	u8 yaw_set_flag; //yaw轴角度确定位
 } _user_flag_set;
 
 /*期望与反馈*/

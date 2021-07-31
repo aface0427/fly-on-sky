@@ -10,6 +10,7 @@
 #include "ANO_DT_LX.h"
 #include "Drv_AnoOf.h"
 #include "Drv_TFMini_Plus.h"
+#include "Drv_HWT101CT.h"
 #include "User_Task.h"
 
 extern _ano_of_st ano_of;
@@ -167,11 +168,6 @@ static void Loop_20Hz(void) //50ms执行一次
 {
 	//////////////////////////////////////////////////////////////////////
   if(user_flag.tfmini_ctl_flag){
-		//TFMini_Track();
-		//OpenMV_Track();
-		//HWT101CT_TRACK();
-		//OpenMV_Circle_Track();
-		
 		/*TFmini控制x轴*/
 		user_exp_fdb_x.exp_distance = 100;
 		user_exp_fdb_x.fdb_distance = tfmini.Dist;
@@ -185,6 +181,16 @@ static void Loop_20Hz(void) //50ms执行一次
 		user_exp_fdb_z.exp_distance = 0;
 		user_exp_fdb_z.fdb_distance = opmv.at.pos_z;
 		test_output_z = GeneralPosCtl(user_exp_fdb_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_z, 1);
+		
+		/*hwt101保证yaw轴平稳*/
+		if(user_flag.yaw_set_flag){
+			user_exp_fdb_yaw.exp_distance = hwt101ct.yaw_angle;
+			user_flag.yaw_set_flag = 0;
+		}
+		else{
+			user_exp_fdb_yaw.fdb_distance = hwt101ct.yaw_angle;
+			test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+		}
 		
 		/*绕杆*/
 //		user_exp_fdb_x.exp_distance = 30;
@@ -317,9 +323,9 @@ void Init_GeneralCtlArg(void){
 	user_threshold_z.normalize_speed = 15.0f;
 	
 	/*yaw*/
-	user_threshold_yaw.max_speed = 20;
+	user_threshold_yaw.max_speed = 15;
 	user_threshold_yaw.normalize_distance = 200.0f;
-	user_threshold_yaw.normalize_speed = 20.0f;
+	user_threshold_yaw.normalize_speed = 15.0f;
 }
 
 //////////////////////////////////////////////////////////////////////
