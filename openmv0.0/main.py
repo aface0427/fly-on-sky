@@ -3,33 +3,46 @@ import sensor, image, time, math, struct
 import json
 from pyb import LED,Timer
 from struct import pack, unpack
-import Message,LineFollowing,DotFollowing,ColorRecognition,QRcode,Photography,find_apriltags01,molcircle
+import Message,LineFollowing,DotFollowing,ColorRecognition,find_apriltags01,molcircle
+
 #初始化镜头
 sensor.reset()
 sensor.set_vflip(True)
 sensor.set_hmirror(True)
 sensor.set_transpose(False)
-#sensor.set_pixformat(sensor.RGB565)#设置相机模块的像素模式
-#sensor.set_framesize(sensor.QVGA)#设置相机分辨率240*160
+sensor.set_pixformat(sensor.RGB565)#设置相机模块的像素模式
+sensor.set_framesize(sensor.QVGA)#设置相机分辨率240*160
+Message.Ctr.WorkMode=0 #测试
 
+'''2
+#sensor.reset()
+#sensor.set_vflip(True)
+#sensor.set_hmirror(True)
+#sensor.set_transpose(False)
+#sensor.set_pixformat(sensor.GRAYSCALE)
+#sensor.set_framesize(sensor.HQVGA) # we run out of memory if the resolution is much bigger...
+#sensor.set_windowing((160,160))
+#sensor.skip_frames(10)
+#sensor.set_auto_gain(False)  # must turn this off to prevent image washout...
+#sensor.set_auto_whitebal(False)  # must turn this off to prevent image washout...
+#clock = time.clock()
+#Message.Ctr.WorkMode=2 #测试AprilTag检测用
+'''
 
+'''3
+sensor.reset() # 初始化 sensor.#初始化摄像头
 sensor.set_pixformat(sensor.GRAYSCALE) # or sensor.RGB565#设置图像色彩格式，有RGB565色彩图和GRAYSCALE灰度图两种
-sensor.set_framesize(sensor.HQVGA) # or sensor.QVGA (or others)
+sensor.set_framesize(sensor.QQVGA) # or sensor.QVGA (or others)
 sensor.set_windowing((160,160))#设置图像像素大小
 sensor.skip_frames(10) # 让新的设置生效
-
-
-#sensor.skip_frames(30)
-sensor.set_auto_gain(False)
-sensor.set_auto_whitebal(False)#若想追踪颜色则关闭白平衡
-clock = time.clock()#初始化时钟
-'''6
-Message.Ctr.WorkMode=6 #测试Molcircle用
+clock = time.clock() # 跟踪FPS帧率
+# 在OV7725 sensor上, 边缘检测可以通过设置sharpness/edge寄存器来增强。
+# 注意:这将在以后作为一个函数实现
 if (sensor.get_id() == sensor.OV7725):
     sensor.__write_reg(0xAC, 0xDF)
     sensor.__write_reg(0x8F, 0xFF)
+Message.Ctr.WorkMode=3 #测试Molcircle用
 '''
-Message.Ctr.WorkMode=2 #AprilTag检测
 
 #主循环
 while(True):
@@ -41,13 +54,7 @@ while(True):
         LineFollowing.LineCheck()
     elif Message.Ctr.WorkMode==2:#AprilTag检测
         find_apriltags01.Find_Apriltags()
-    elif Message.Ctr.WorkMode==3:#颜色识别
-        ColorRecognition.ColorRecognition()
-    elif Message.Ctr.WorkMode==4:#二维码识别
-        QRcode.ScanQRcode()
-    elif Message.Ctr.WorkMode==5:#拍照
-        Photography.Photography('IMG.jpg',10)
-    elif Message.Ctr.WorkMode==6:#摩尔环
+    elif Message.Ctr.WorkMode==3:#摩尔环
         molcircle.Molcircle()
 
     #Message.Ctr.WorkMode += 1
