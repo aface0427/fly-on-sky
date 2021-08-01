@@ -97,6 +97,7 @@ typedef struct
 	u8 openmv_clr_flag;
 	u8 yaw_set_flag; //yaw轴角度确定位
 	u8 pole_ctl_flag; //绕杆模式
+	u8 of_alt_ctl_flag; //光流定高
 } _user_flag_set;
 
 /*期望与反馈*/

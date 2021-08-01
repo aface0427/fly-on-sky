@@ -82,6 +82,13 @@ _user_threshold_set user_threshold_z;
 /*z测试输出*/
 s16 test_output_z;
 
+/*定高期望*/
+_user_exp_fdb_set user_exp_fdb_alt_z;
+/*定高阈值*/
+_user_threshold_set user_threshold_alt_z;
+/*定高测试输出*/
+s16 test_output_alt_z;
+
 /*yaw期望*/
 _user_exp_fdb_set user_exp_fdb_yaw;
 /*yaw阈值*/
@@ -171,7 +178,6 @@ static void Loop_20Hz(void) //50ms执行一次
 {
 	/*********************************TFmini x轴定位*******************************************/
   if(user_flag.tfmini_ctl_flag){
-		/*TFmini控制x轴*/
 		user_exp_fdb_x.exp_distance = 100;
 		user_exp_fdb_x.fdb_distance = tfmini.Dist;
 		test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_x, 1);
@@ -179,7 +185,6 @@ static void Loop_20Hz(void) //50ms执行一次
 	
 	/*********************************OpenMV yz轴定位*******************************************/
 	if(user_flag.opmv_ctl_flag){
-		/*OpenMV控制yz*/
 		if(opmv.at.is_invalid){
 			user_exp_fdb_y.fdb_distance = 0;
 			user_exp_fdb_z.fdb_distance = 0;
@@ -231,16 +236,37 @@ static void Loop_20Hz(void) //50ms执行一次
 		
 	/*********************************绕杆*******************************************/
 	if(user_flag.pole_ctl_flag){
+		static u8 last_pos = 0;
 		user_exp_fdb_x.exp_distance = 30;
 		user_exp_fdb_x.fdb_distance = opmv.pole.pos_x;
 		test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_pole_x, 1);
 		
 		user_exp_fdb_yaw.exp_distance = 0;
 		user_exp_fdb_yaw.fdb_distance = opmv.pole.angle_yaw;
+		
+		/*防跟丢*/
+//		if(user_exp_fdb_yaw.fdb_distance < -10){
+//			last_pos = 1; //上次位置在左
+//		}
+//		else if(user_exp_fdb_yaw.fdb_distance > 10){
+//			last_pos = 2; //上次位置在右
+//		}
+//		else{
+//			last_pos = 0;
+//		}
+		
 		test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
 		
 		rt_tar.st_data.vel_y = 10;
 	}
+	
+	/*********************************光流激光定高*******************************************/
+	if(user_flag.of_alt_ctl_flag){
+		user_exp_fdb_alt_z.exp_distance = 100;
+		user_exp_fdb_alt_z.fdb_distance = ano_of.of_alt_cm;
+		test_output_alt_z = GeneralPosCtl(user_exp_fdb_alt_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_alt_z, 1);
+	}
+	
 	
 	/*********************************数据位清零*******************************************/
 	if(user_flag.openmv_clr_flag){
@@ -364,6 +390,11 @@ void Init_GeneralCtlArg(void){
 	user_threshold_z.max_speed = 15;
 	user_threshold_z.normalize_distance = 40.0f;
 	user_threshold_z.normalize_speed = 15.0f;
+	
+	/*定高*/
+	user_threshold_alt_z.max_speed = 15;
+	user_threshold_alt_z.normalize_distance = 200;
+	user_threshold_alt_z.normalize_speed = 15.0f;
 	
 	/*yaw*/
 	user_threshold_yaw.max_speed = 20;
