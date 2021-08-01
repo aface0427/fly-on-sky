@@ -323,7 +323,7 @@ void Init_PID(void){
 	PID_Speed_arg_y.k_ff = 0;
 	
 //y位置环
-	PID_Distance_arg_y.kp = 3.0f;
+	PID_Distance_arg_y.kp = 5.0f;
 	PID_Distance_arg_y.ki = 0;
 	PID_Distance_arg_y.kd_ex = 0;
 	PID_Distance_arg_y.fb_d_mode = 0;
@@ -339,7 +339,7 @@ void Init_PID(void){
 	PID_Speed_arg_yaw.k_ff = 0;
 	
 //yaw位置环
-	PID_Distance_arg_yaw.kp = 5.0f;
+	PID_Distance_arg_yaw.kp = 7.0f;
 	PID_Distance_arg_yaw.ki = 0;
 	PID_Distance_arg_yaw.kd_ex = 0;
 	PID_Distance_arg_yaw.fb_d_mode = 0;
@@ -355,7 +355,7 @@ void Init_PID(void){
 	PID_Speed_arg_z.k_ff = 0;
 	
 //z位置环
-	PID_Distance_arg_z.kp = 1.0f;
+	PID_Distance_arg_z.kp = 3.0f;
 	PID_Distance_arg_z.ki = 0;
 	PID_Distance_arg_z.kd_ex = 0;
 	PID_Distance_arg_z.fb_d_mode = 0;
