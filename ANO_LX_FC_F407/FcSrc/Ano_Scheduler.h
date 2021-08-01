@@ -96,6 +96,7 @@ typedef struct
 	u8 hwt101_ctl_flag;
 	u8 openmv_clr_flag;
 	u8 yaw_set_flag; //yaw轴角度确定位
+	u8 pole_ctl_flag; //绕杆模式
 } _user_flag_set;
 
 /*期望与反馈*/

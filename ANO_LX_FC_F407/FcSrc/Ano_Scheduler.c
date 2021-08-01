@@ -169,13 +169,15 @@ static void Loop_50Hz(void) //20ms执行一次
 
 static void Loop_20Hz(void) //50ms执行一次
 {
-	//////////////////////////////////////////////////////////////////////
+	/*********************************TFmini x轴定位*******************************************/
   if(user_flag.tfmini_ctl_flag){
 		/*TFmini控制x轴*/
 		user_exp_fdb_x.exp_distance = 100;
 		user_exp_fdb_x.fdb_distance = tfmini.Dist;
 		test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_x, 1);
 	}
+	
+	/*********************************OpenMV yz轴定位*******************************************/
 	if(user_flag.opmv_ctl_flag){
 		/*OpenMV控制yz*/
 		if(opmv.at.is_invalid){
@@ -193,6 +195,8 @@ static void Loop_20Hz(void) //50ms执行一次
 		user_exp_fdb_z.exp_distance = 0;
 		test_output_z = GeneralPosCtl(user_exp_fdb_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_z, 1);
 	}
+	
+	/*********************************HWT101 yaw轴定位*******************************************/
 	if(user_flag.hwt101_ctl_flag){
 		/*hwt101保证yaw轴平稳*/
 		if(user_flag.yaw_set_flag){
@@ -225,17 +229,20 @@ static void Loop_20Hz(void) //50ms执行一次
 		test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
 	}
 		
-		/*绕杆*/
-//		user_exp_fdb_x.exp_distance = 30;
-//		user_exp_fdb_x.fdb_distance = opmv.xx.pos_x;
-//		test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_pole_x, 1);
-//		
-//		user_exp_fdb_yaw.exp_distance = 0;
-//		user_exp_fdb_yaw.fdb_distance = opmv.xx.angle_yaw;
-//		test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
-//		
-//		rt_tar.st_data.vel_y = 5;
+	/*********************************绕杆*******************************************/
+	if(user_flag.pole_ctl_flag){
+		user_exp_fdb_x.exp_distance = 30;
+		user_exp_fdb_x.fdb_distance = opmv.pole.pos_x;
+		test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_pole_x, 1);
 		
+		user_exp_fdb_yaw.exp_distance = 0;
+		user_exp_fdb_yaw.fdb_distance = opmv.pole.angle_yaw;
+		test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+		
+		rt_tar.st_data.vel_y = 10;
+	}
+	
+	/*********************************数据位清零*******************************************/
 	if(user_flag.openmv_clr_flag){
 		user_flag.openmv_clr_flag = 0;
 		RealTimeSpeedControl(0, Direction_x);
@@ -359,9 +366,9 @@ void Init_GeneralCtlArg(void){
 	user_threshold_z.normalize_speed = 15.0f;
 	
 	/*yaw*/
-	user_threshold_yaw.max_speed = 5;
+	user_threshold_yaw.max_speed = 20;
 	user_threshold_yaw.normalize_distance = 200.0f;
-	user_threshold_yaw.normalize_speed = 5.0f;
+	user_threshold_yaw.normalize_speed = 20.0f;
 }
 
 //////////////////////////////////////////////////////////////////////
