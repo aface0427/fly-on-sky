@@ -12,7 +12,7 @@ blue_threshold   = (29, 68, 22, 89, -5, 37)
 # You may need to tweak the above settings for tracking green things...
 # Select an area in the Framebuffer to copy the color settings.
 White=(0,0,0,0,0,0)
-
+llength=0
 
 K=60*44#the value should be measured
 T=0
@@ -33,7 +33,14 @@ def findingpole():
             length = K/Lm
             #if(length>100):
                 #print(b.h(),b.w())
-            print(length,b.x()+b.w()/2)
+            if(llength==0 or abs(llength-length)<=3):
+                print(length,b.x()+b.w()/2)
+                llength=length
+                T=0
+            else:
+                T=T+1
+                if(T>=100)llength=length
+                continue
             LED(2).on()
             LED(3).on()
             Message.UartSendData(Message.PoleDataPack(0,int(length),int(b.x()+b.w()/2)))
