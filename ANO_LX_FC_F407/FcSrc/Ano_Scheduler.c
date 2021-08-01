@@ -237,7 +237,7 @@ static void Loop_20Hz(void) //50ms执行一次
 	/*********************************绕杆*******************************************/
 	if(user_flag.pole_ctl_flag){
 		static u8 last_pos = 0;
-		user_exp_fdb_x.exp_distance = 30;
+		user_exp_fdb_x.exp_distance = 50;
 		user_exp_fdb_x.fdb_distance = opmv.pole.Dist;
 		test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_pole_x, 1);
 		
@@ -257,14 +257,17 @@ static void Loop_20Hz(void) //50ms执行一次
 		
 		test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
 		
-		rt_tar.st_data.vel_y = 10;
+		rt_tar.st_data.vel_y = -10;
 	}
 	
 	/*********************************光流激光定高*******************************************/
 	if(user_flag.of_alt_ctl_flag){
-		user_exp_fdb_alt_z.exp_distance = 100;
+		user_exp_fdb_alt_z.exp_distance = 130;
 		user_exp_fdb_alt_z.fdb_distance = ano_of.of_alt_cm;
-		test_output_alt_z = GeneralPosCtl(user_exp_fdb_alt_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_alt_z, 0);
+		if(user_exp_fdb_alt_z.fdb_distance < 30)
+			rt_tar.st_data.vel_z = 0;
+		else
+			test_output_alt_z = GeneralPosCtl(user_exp_fdb_alt_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_alt_z, 0);
 	}
 	
 	
@@ -377,9 +380,9 @@ void Init_GeneralCtlArg(void){
 	user_threshold_x.normalize_speed = 20.0f;
 	
 	/*x绕杆*/
-	user_threshold_pole_x.max_speed = 10;
-	user_threshold_pole_x.normalize_distance = 50.0f;
-	user_threshold_pole_x.normalize_speed = 10.0f;
+	user_threshold_pole_x.max_speed = 2;
+	user_threshold_pole_x.normalize_distance = 60.0f;
+	user_threshold_pole_x.normalize_speed = 2.0f;
 	
 	/*y*/
 	user_threshold_y.max_speed = 20;
@@ -397,9 +400,9 @@ void Init_GeneralCtlArg(void){
 	user_threshold_alt_z.normalize_speed = 15.0f;
 	
 	/*yaw*/
-	user_threshold_yaw.max_speed = 20;
+	user_threshold_yaw.max_speed = 10;
 	user_threshold_yaw.normalize_distance = 200.0f;
-	user_threshold_yaw.normalize_speed = 20.0f;
+	user_threshold_yaw.normalize_speed = 10.0f;
 }
 
 //////////////////////////////////////////////////////////////////////

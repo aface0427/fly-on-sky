@@ -59,7 +59,7 @@ void UserTask_OneKeyCmd(void)
 								//user_flag.tfmini_ctl_flag = 1;
 								//user_flag.opmv_ctl_flag = 1;
 								//user_flag.hwt101_ctl_flag = 1;
-								user_flag.pole_ctl_flag = 1;
+								//user_flag.pole_ctl_flag = 1;
 								user_flag.of_alt_ctl_flag = 1;
 							
 								user_flag.openmv_clr_flag = 0;

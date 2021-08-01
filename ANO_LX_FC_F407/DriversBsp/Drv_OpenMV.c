@@ -176,7 +176,7 @@ static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
 		opmv.pole.is_invalid = *(buf_data+5);
         if (!opmv.pole.is_invalid){
             opmv.pole.Dist = (s16)((*(buf_data+6)<<8)|*(buf_data+7));
-            opmv.pole.pos_y = (s16)((*(buf_data+8)<<8)|*(buf_data+9)) - 150;
+            opmv.pole.pos_y = 150 - (s16)((*(buf_data+8)<<8)|*(buf_data+9));
         }
 		else{
             opmv.pole.Dist = 0;
