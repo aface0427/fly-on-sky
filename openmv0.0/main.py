@@ -61,8 +61,8 @@ Message.Ctr.WorkMode=4 #测试红色杆检测用
 '''
 
 Message.Ctr.WorkMode = 5
-rp=[30, 71, 45, 87, -15, 38]
-blue_threshold   = [30, 71, 45, 87, -15, 38]
+rp=[30, 70, 45, 82, -15, 38]
+blue_threshold   = [30, 70, 45, 82, -15, 38]
 White=(0,0,0,0,0,0)
 T = 0
 sensor.reset() # Initialize the camera sensor.

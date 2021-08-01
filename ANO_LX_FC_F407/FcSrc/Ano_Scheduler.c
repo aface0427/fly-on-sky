@@ -12,6 +12,8 @@
 #include "Drv_TFMini_Plus.h"
 #include "Drv_HWT101CT.h"
 #include "User_Task.h"
+#include "Drv_OpenMV.h"
+#include "Drv_Uart.h"
 
 extern _ano_of_st ano_of;
 _user_flag_set user_flag = {0};
@@ -295,6 +297,7 @@ static void Loop_20Hz(void) //50ms执行一次
 
 static void Loop_2Hz(void) //500ms执行一次
 {
+    DrvUart1SendBuf(&opmv.mode_sta,1);
 }
 
 /*

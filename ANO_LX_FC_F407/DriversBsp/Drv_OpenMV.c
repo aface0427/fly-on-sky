@@ -131,7 +131,6 @@ static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
             opmv.cb.pos_y = 0;
             opmv.cb.pos_z = 0 ;
         }
-		opmv.mode_sta = 1;
 	}
 	else if(*(buf_data+3)==0x42)    
 	{
@@ -143,7 +142,6 @@ static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
 		opmv.lt.pos_y = (s16)((*(buf_data+13)<<8)|*(buf_data+14));
 		opmv.lt.dT_ms = *(buf_data+15);
 		//
-		opmv.mode_sta = 2;
 	}
     else if(*(buf_data+3)==0x43)//AprilTag识别码    
 	{
@@ -156,7 +154,6 @@ static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
             opmv.at.pos_y = 0;
             opmv.at.pos_z = 0 ;
         }
-		opmv.mode_sta = 3;
 	}
     else if(*(buf_data+3)==0x44)//摩尔环识别
 	{
@@ -169,7 +166,6 @@ static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
             opmv.mol.pos_y = 0;
             opmv.mol.pos_z = 0 ;
         }
-		opmv.mode_sta = 4;
 	}
     else if(*(buf_data+3)==0x45)//红色杆
 	{
@@ -182,7 +178,6 @@ static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
             opmv.pole.Dist = 0;
             opmv.pole.pos_y = 0 ;
         }
-		opmv.mode_sta = 5;
 	}
 	//
 	OpenMV_Check_Reset();
