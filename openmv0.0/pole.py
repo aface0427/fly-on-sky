@@ -8,13 +8,13 @@ from pyb import LED
 import Message
 # For color tracking to work really well you should ideally be in a very, very,
 # very, controlled enviroment where the lighting is constant...
-blue_threshold   = (29, 68, 7, 51, -5, 22)
+blue_threshold   = (29, 68, 22, 89, -5, 37)
 # You may need to tweak the above settings for tracking green things...
 # Select an area in the Framebuffer to copy the color settings.
 White=(0,0,0,0,0,0)
 
 
-K=62*55#the value should be measured
+K=60*44#the value should be measured
 T=0
 
 def findingpole():
