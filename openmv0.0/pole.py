@@ -39,7 +39,8 @@ def findingpole():
                 T=0
             else:
                 T=T+1
-                if(T>=100)llength=length
+                if(T>=100):
+                    llength=length
                 continue
             LED(2).on()
             LED(3).on()
