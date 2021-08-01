@@ -185,19 +185,19 @@ static void Loop_20Hz(void) //50ms执行一次
 	
 	/*********************************OpenMV yz轴定位*******************************************/
 	if(user_flag.opmv_ctl_flag){
+		user_exp_fdb_z.exp_distance = 0;
+		user_exp_fdb_y.exp_distance = 0;
+		
 		if(opmv.at.is_invalid){
-			user_exp_fdb_y.fdb_distance = 0;
-			user_exp_fdb_z.fdb_distance = 0;
+			user_exp_fdb_y.fdb_distance = user_exp_fdb_y.exp_distance;
+			user_exp_fdb_z.fdb_distance = user_exp_fdb_z.exp_distance;
 		}
 		else{
 			user_exp_fdb_y.fdb_distance = opmv.at.pos_y;
 			user_exp_fdb_z.fdb_distance = opmv.at.pos_z;
 		}
 		
-		user_exp_fdb_y.exp_distance = 0;
 		test_output_y = GeneralPosCtl(user_exp_fdb_y, Direction_y, PID_Distance_arg_y, PID_Distance_val_y, user_threshold_y, 1);
-		
-		user_exp_fdb_z.exp_distance = 0;
 		test_output_z = GeneralPosCtl(user_exp_fdb_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_z, 1);
 	}
 	
@@ -236,14 +236,19 @@ static void Loop_20Hz(void) //50ms执行一次
 		
 	/*********************************绕杆*******************************************/
 	if(user_flag.pole_ctl_flag){
-		static u8 last_pos = 0;
 		user_exp_fdb_x.exp_distance = 50;
-		user_exp_fdb_x.fdb_distance = opmv.pole.Dist;
-		test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_pole_x, 1);
-		
 		user_exp_fdb_yaw.exp_distance = 0;
-		user_exp_fdb_yaw.fdb_distance = opmv.pole.pos_y;
+		//static u8 last_pos = 0;
 		
+		if(opmv.pole.is_invalid){
+			user_exp_fdb_x.fdb_distance = user_exp_fdb_x.exp_distance;
+			user_exp_fdb_yaw.fdb_distance = user_exp_fdb_yaw.exp_distance;
+		}
+		else{
+			user_exp_fdb_x.fdb_distance = opmv.pole.Dist;
+			user_exp_fdb_yaw.fdb_distance = opmv.pole.pos_y;
+		}
+			
 		/*防跟丢*/
 //		if(user_exp_fdb_yaw.fdb_distance < -10){
 //			last_pos = 1; //上次位置在左
@@ -254,10 +259,9 @@ static void Loop_20Hz(void) //50ms执行一次
 //		else{
 //			last_pos = 0;
 //		}
-		
+		test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_pole_x, 1);
 		test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
-		
-		rt_tar.st_data.vel_y = -10;
+//		rt_tar.st_data.vel_y = -5;
 	}
 	
 	/*********************************光流激光定高*******************************************/
