@@ -3,17 +3,54 @@ from pyb import UART
 import LineFollowing
 uart = UART(1,115200)#初始化串口 波特率 500000
 
-# WorkMode=1为寻点模式
-# WorkMode=2为寻线模式 包括直线 转角
-# WorkMode=3为颜色识别模式
-# WorkMode=4为识别二维码模式
-# WorkMode=5为拍照模式
 class Ctrl(object):
     WorkMode = 2   #工作模式
     IsDebug = 1     #不为调试状态时关闭某些图形显示等，有利于提高运行速度
     T_ms = 0
 #类的实例化
 Ctr=Ctrl()
+
+#串口数据解析
+def ReceiveAnl(data_buf,num):
+    #和校验
+    sum = 0
+    i = 0
+    while i<(num-1):
+        sum = sum + data_buf[i]
+        i = i + 1
+    sum = sum%256 #求余
+    if sum != data_buf[num-1]:
+        return
+    #和校验通过
+    Ctr.WorkMode = data_buf[1]
+
+#串口通信协议接收
+def ReceivePrepare(data):
+    if R.state==0:
+        if data == 0xAB:#帧头
+            R.uart_buf.append(data)
+            R.state = 1
+        else:
+            R.state = 0
+    elif R.state==1:
+        R.uart_buf.append(data)
+        R.state = 2
+    elif R.state==2:
+        R.state = 0
+        R.uart_buf.append(data)
+        ReceiveAnl(R.uart_buf,3)
+        R.uart_buf=[]#清空缓冲区，准备下次接收数据
+    else:
+        R.state = 0
+
+#读取串口缓存
+def UartReadBuffer():
+    i = 0
+    Buffer_size = uart.any()
+    while i<Buffer_size:
+        ReceivePrepare(uart.readchar())
+        i = i + 1
+
 
 def UartSendData(Data):
     uart.write(Data)

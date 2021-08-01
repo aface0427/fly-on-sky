@@ -53,7 +53,6 @@ u8 All_Init()
 	Init_PID();
 	Init_GeneralCtlArg();
     //初始化完成，返回1
-    opmv.mode_sta = 5;
 	return (1);
 }
 

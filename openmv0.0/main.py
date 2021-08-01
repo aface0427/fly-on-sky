@@ -89,17 +89,21 @@ aa1=0
 aa2=0
 bb1=0
 bb2=0
+
+
 #主循环
 while(True):
     clock.tick()#时钟初始化
     flag = 0
     #接收串口数据
+    Message.UartReadBuffer()
     if Message.Ctr.WorkMode==0:#点检测
         DotFollowing.DotCheck()
     elif Message.Ctr.WorkMode==1:#线检测
         LineFollowing.LineCheck()
     elif Message.Ctr.WorkMode==2:#AprilTag检测
         find_apriltags01.Find_Apriltags()
+        print('b',h)
     elif Message.Ctr.WorkMode==3:#摩尔环
         molcircle.Molcircle()
     elif Message.Ctr.WorkMode==4:#红色杆

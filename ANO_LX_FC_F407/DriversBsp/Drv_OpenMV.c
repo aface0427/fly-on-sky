@@ -198,7 +198,6 @@ void OpenMV_Offline_Check(u8 dT_ms)
 	else
 	{
 		opmv.offline = 1;
-		opmv.mode_sta = 0;
 	}
 	
 }

@@ -46,7 +46,7 @@ typedef struct
 {
 	u8 offline;
 	u8 mode_cmd;
-	u8 mode_sta;
+	u8 mode_sta[3];
 	//
 	_openmv_color_block_st cb;
 	_openmv_line_tracking_st lt;

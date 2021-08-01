@@ -297,7 +297,10 @@ static void Loop_20Hz(void) //50ms执行一次
 
 static void Loop_2Hz(void) //500ms执行一次
 {
-    DrvUart1SendBuf(&opmv.mode_sta,1);
+    opmv.mode_sta[0] = 0x0A;
+    opmv.mode_sta[1] = 2;
+    opmv.mode_sta[2] = opmv.mode_sta[1] + opmv.mode_sta[0];
+    DrvUart1SendBuf(&opmv.mode_sta[0],3);
 }
 
 /*
