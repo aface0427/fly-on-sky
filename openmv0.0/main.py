@@ -49,6 +49,8 @@ Message.Ctr.WorkMode=3 #测试Molcircle用
 sensor.reset() # Initialize the camera sensor.
 sensor.set_pixformat(sensor.RGB565) # use RGB565.
 sensor.set_framesize(sensor.VGA) # use QQVGA for speed.
+sensor.set_vflip(True)
+sensor.set_hmirror(True)
 sensor.set_windowing(300,70)
 sensor.skip_frames(10) # Let new settings take affect.
 sensor.set_auto_whitebal(False) # turn this off.
