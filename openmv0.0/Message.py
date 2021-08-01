@@ -70,8 +70,22 @@ def AprilTagDataPack(flag,crossx,crossy):
     return AprilTag_data
 
 #摩尔环中心检测数据打包
-def DotDataPack(flag,x,y):
+def MolDataPack(flag,x,y):
     pack_data=bytearray([0xAA,0x29,0x05,0x44,0x00,flag,x>>8,x,y>>8,y,0x00])
+    lens = len(pack_data)#数据包大小
+    pack_data[4] = 5;#有效数据个数
+    i = 0
+    sum = 0
+    #和校验
+    while i<(lens-1):
+        sum = sum + pack_data[i]
+        i = i+1
+    pack_data[lens-1] = sum;
+    return pack_data
+
+#红色杆检测数据打包
+def PoleDataPack(flag,x,y):
+    pack_data=bytearray([0xAA,0x29,0x05,0x45,0x00,flag,x>>8,x,y>>8,y,0x00])
     lens = len(pack_data)#数据包大小
     pack_data[4] = 5;#有效数据个数
     i = 0

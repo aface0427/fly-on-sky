@@ -3,8 +3,9 @@ import sensor, image, time, math, struct
 import json
 from pyb import LED,Timer
 from struct import pack, unpack
-import Message,LineFollowing,DotFollowing,ColorRecognition,find_apriltags01,molcircle
+import Message,LineFollowing,DotFollowing,find_apriltags01,molcircle,pole
 
+'''
 #初始化镜头
 sensor.reset()
 sensor.set_vflip(True)
@@ -13,6 +14,7 @@ sensor.set_transpose(False)
 sensor.set_pixformat(sensor.RGB565)#设置相机模块的像素模式
 sensor.set_framesize(sensor.QVGA)#设置相机分辨率240*160
 Message.Ctr.WorkMode=0 #测试
+'''
 
 '''2
 #sensor.reset()
@@ -44,6 +46,16 @@ if (sensor.get_id() == sensor.OV7725):
 Message.Ctr.WorkMode=3 #测试Molcircle用
 '''
 
+sensor.reset() # Initialize the camera sensor.
+sensor.set_pixformat(sensor.RGB565) # use RGB565.
+sensor.set_framesize(sensor.VGA) # use QQVGA for speed.
+sensor.set_windowing(300,70)
+sensor.skip_frames(10) # Let new settings take affect.
+sensor.set_auto_whitebal(False) # turn this off.
+sensor.set_auto_gain(True)
+clock = time.clock() # Tracks FPS.
+Message.Ctr.WorkMode=4 #测试红色杆检测用
+
 #主循环
 while(True):
     clock.tick()#时钟初始化
@@ -56,6 +68,8 @@ while(True):
         find_apriltags01.Find_Apriltags()
     elif Message.Ctr.WorkMode==3:#摩尔环
         molcircle.Molcircle()
+    elif Message.Ctr.WorkMode==4:#红色杆
+        pole.findingpole()
 
     #Message.Ctr.WorkMode += 1
     #Message.Ctr.WorkMode = Message.Ctr.WorkMode %3

@@ -36,6 +36,12 @@ typedef struct{
     s16 pos_z;
 }_openmv_apriltag_tracking_st;
 
+typedef struct{
+    u8 is_invalid;
+	s16 Dist;
+    s16 pos_y;   //0-300
+}_openmv_pole_tracking_st;
+
 typedef struct
 {
 	u8 offline;
@@ -46,6 +52,7 @@ typedef struct
 	_openmv_line_tracking_st lt;
     _openmv_apriltag_tracking_st at;
     _openmv_apriltag_tracking_st mol;
+    _openmv_pole_tracking_st pole;
 }_openmv_data_st;
 
 //==Êı¾İÉùÃ÷

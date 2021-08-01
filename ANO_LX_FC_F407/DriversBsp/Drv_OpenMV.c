@@ -171,6 +171,19 @@ static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
         }
 		opmv.mode_sta = 4;
 	}
+    else if(*(buf_data+3)==0x45)//ºìÉ«¸Ë
+	{
+		opmv.pole.is_invalid = *(buf_data+5);
+        if (!opmv.pole.is_invalid){
+            opmv.pole.Dist = (s16)((*(buf_data+6)<<8)|*(buf_data+7));
+            opmv.pole.pos_y = (s16)((*(buf_data+8)<<8)|*(buf_data+9)) - 150;
+        }
+		else{
+            opmv.pole.Dist = 0;
+            opmv.pole.pos_y = 0 ;
+        }
+		opmv.mode_sta = 5;
+	}
 	//
 	OpenMV_Check_Reset();
 }
