@@ -45,7 +45,8 @@ while(True):
                 T=0
             else:
                 T=T+1
-                if(T>=100)llength=length
+                if(T>=100):
+                    llength=length
                 continue
             #if(length>100):
                 #print(b.h(),b.w())
