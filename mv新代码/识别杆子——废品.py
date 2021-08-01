@@ -50,17 +50,36 @@ while(True):
     p=0
     a = [[0 for i in range(30)] for j in range(17)]
     cnt=[]
+    b=[]
+    b.append(0)
+    mx0=0
+    mn0=9999
     for i in range(0,16):
         cnt.append(0)
-    for l in img.find_line_segments(roi=(0,50,160,20),merge_distance = 0, max_theta_diff = 5):
+    for l in img.find_line_segments(roi=(0,30,160,60),merge_distance = 0, max_theta_diff = 5):
         if (min_degree <= l.theta()) and (l.theta() <= max_degree):
             #print(l.x1())
+            if(70>=l.x1()>=50):
+                p=p+1
+                b.append(l.x1())
+                mx0=max(mx0,l.x1())
+                mn0=min(mn0,l.x1())
             cnt[int(l.x1()/10)]=cnt[int(l.x1()/10)]+1
             a[int(l.x1()/10)][cnt[int(l.x1()/10)]]=l.x1()
-            mx=maxx(mx,l.x1())
-            mn=minn(mn,l.x1())
             img.draw_line(l.line(), color = (255, 0, 0))
         # print(l)
+    ave=0
+    if(p>=6):
+        if(T%3==0):
+            lmx=mx
+            lmn=mn
+            mx=0
+            mn=9999
+        for i in range(1,p):
+            ave+=b[i]
+        ave/=p
+        print(ave,lmn,lmx)
+        continue
     mxx=0
     mxnum=0
     for i in range(0,15):
@@ -70,9 +89,10 @@ while(True):
     print(mxnum)
     if(mxnum==0):
         continue
-    ave=0
     for i in range(1,cnt[mxx]):
         ave=ave+a[mxx][i]
+        mx=maxx(mx,a[mxx][i])
+        mn=minn(mn,a[mxx][i])
     ave=ave/cnt[mxx]
     #ave应在80处，lmx-lmn应等于15左右
     print(ave,lmn,lmx)
