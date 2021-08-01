@@ -39,10 +39,13 @@ while(True):
             img.draw_cross(b[5], b[6]) # cx, cy
             Lm = b.w()
             length = K/Lm
-            if(llength==0 or abs(llength-length<=3)):
+            if(llength==0 or abs(llength-length)<=3):
                 print(length,b.x()+b.w()/2)
                 llength=length
+                T=0
             else:
+                T=T+1
+                if(T>=100)llength=length
                 continue
             #if(length>100):
                 #print(b.h(),b.w())
