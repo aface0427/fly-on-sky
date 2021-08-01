@@ -386,16 +386,16 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
 		send_buffer[(*_cnt)++] = BYTE1(ano_of.of2_dy);
 	
 		/*位移*/
-		send_buffer[(*_cnt)++] = BYTE0(dx);
-		send_buffer[(*_cnt)++] = BYTE1(dx);
+		send_buffer[(*_cnt)++] = BYTE0(ano_of.of_alt_cm);
+		send_buffer[(*_cnt)++] = BYTE1(ano_of.of_alt_cm);
 		send_buffer[(*_cnt)++] = BYTE0(dy);
 		send_buffer[(*_cnt)++] = BYTE1(dy);
 
 		/*yaw轴*/
-		send_buffer[(*_cnt)++] = BYTE0(hwt101ct.yaw_speed);
-		send_buffer[(*_cnt)++] = BYTE1(hwt101ct.yaw_speed);
-		send_buffer[(*_cnt)++] = BYTE0(hwt101ct.yaw_angle);
-		send_buffer[(*_cnt)++] = BYTE1(hwt101ct.yaw_angle);
+		send_buffer[(*_cnt)++] = BYTE0(opmv.pole.pos_y);
+		send_buffer[(*_cnt)++] = BYTE1(opmv.pole.pos_y);
+		send_buffer[(*_cnt)++] = BYTE0(opmv.pole.Dist);
+		send_buffer[(*_cnt)++] = BYTE1(opmv.pole.Dist);
 		
 		send_buffer[(*_cnt)++] = BYTE0(Position_incre);
 		send_buffer[(*_cnt)++] = BYTE1(Position_incre);
@@ -409,14 +409,14 @@ static void Add_Send_Data(u8 frame_num, u8 *_cnt, u8 send_buffer[])
 		send_buffer[(*_cnt)++] = BYTE1(tfmini.Dist);
         
 		/*TFminiPlus-pid-x方向数据*/
-		send_buffer[(*_cnt)++] = BYTE0(out_speed);
-		send_buffer[(*_cnt)++] = BYTE1(out_speed);
+		send_buffer[(*_cnt)++] = BYTE0(test_output_x);
+		send_buffer[(*_cnt)++] = BYTE1(test_output_x);
         
     /*opmv-yz方向数据*/
-		send_buffer[(*_cnt)++] = BYTE0(opmv.at.pos_y);
-		send_buffer[(*_cnt)++] = BYTE1(opmv.at.pos_y);
-		send_buffer[(*_cnt)++] = BYTE0(opmv.at.pos_z);
-		send_buffer[(*_cnt)++] = BYTE1(opmv.at.pos_z);
+		send_buffer[(*_cnt)++] = BYTE0(test_output_yaw);
+		send_buffer[(*_cnt)++] = BYTE1(test_output_yaw);
+		send_buffer[(*_cnt)++] = BYTE0(test_output_alt_z);
+		send_buffer[(*_cnt)++] = BYTE1(test_output_alt_z);
 		
 		/*opmv-pid-yz方向数据*/
 		send_buffer[(*_cnt)++] = BYTE0(out_speed_y);

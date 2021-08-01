@@ -238,11 +238,11 @@ static void Loop_20Hz(void) //50ms执行一次
 	if(user_flag.pole_ctl_flag){
 		static u8 last_pos = 0;
 		user_exp_fdb_x.exp_distance = 30;
-		user_exp_fdb_x.fdb_distance = opmv.pole.pos_x;
+		user_exp_fdb_x.fdb_distance = opmv.pole.Dist;
 		test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_pole_x, 1);
 		
 		user_exp_fdb_yaw.exp_distance = 0;
-		user_exp_fdb_yaw.fdb_distance = opmv.pole.angle_yaw;
+		user_exp_fdb_yaw.fdb_distance = opmv.pole.pos_y;
 		
 		/*防跟丢*/
 //		if(user_exp_fdb_yaw.fdb_distance < -10){
@@ -264,7 +264,7 @@ static void Loop_20Hz(void) //50ms执行一次
 	if(user_flag.of_alt_ctl_flag){
 		user_exp_fdb_alt_z.exp_distance = 100;
 		user_exp_fdb_alt_z.fdb_distance = ano_of.of_alt_cm;
-		test_output_alt_z = GeneralPosCtl(user_exp_fdb_alt_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_alt_z, 1);
+		test_output_alt_z = GeneralPosCtl(user_exp_fdb_alt_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_alt_z, 0);
 	}
 	
 	
