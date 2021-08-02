@@ -37,6 +37,7 @@ def cmp(x):
 
 
 def Molcircle():
+    global flag
     img = sensor.snapshot() # 拍一张照片，返回图像
     img.laplacian(1,sharpen=True)
     img.morph(kernel_size,kernel,mul=1.9)
@@ -63,8 +64,6 @@ def Molcircle():
     b = sorted(a, key=cmp)
     if(p<10):
         print("%f,%f" %(0,0))
-        Message.UartSendData(Message.DotDataPack(1,0,0))
-        LED(2).off()
     else:
         q1=0
         q2=0
@@ -74,6 +73,7 @@ def Molcircle():
         q1=int(q1/(p-9))
         q2=int(q2/(p-9))
         print("%f,%f" %(q1,q2))
+        flag = 1
         Message.UartSendData(Message.DotDataPack(0,q1,q2))
         LED(2).on()
 
