@@ -27,7 +27,8 @@ s16 CTRL_SPD_Z = 10;
 s16 out_speed = 0;
 s16 out_speed_y = 0;
 s16 out_speed_z = 0;
-
+u8 mission_step;
+u8 mission_task = 0;
 
 enum AxialDirection axialdirection;
 
@@ -39,8 +40,6 @@ void UserTask_OneKeyCmd(void)
     //////////////////////////////////////////////////////////////////////
     //用静态变量记录一键起飞/降落指令已经执行。
     static u8 one_key_takeoff_f = 1, one_key_land_f = 1, one_key_mission_f = 0;
-    static u8 mission_step; 
-		static u8 mission_task = 0;
 		static u16 _cnt = 0;
     //判断有遥控信号才执行
     if (rc_in.no_signal == 0)
@@ -52,18 +51,18 @@ void UserTask_OneKeyCmd(void)
             //还没有执行
             if (one_key_takeoff_f == 0)
             {
-								one_key_takeoff_f = 1;
-//								mission_task = 1;
-//								mission_step = 1;
+							one_key_takeoff_f = 1;
+							mission_task = 1;
+							mission_step = 1;
+						
+							//user_flag.tfmini_ctl_flag = 1;
+							//user_flag.opmv_ctl_flag = 1;
+							//user_flag.hwt101_ctl_flag = 1;
+							user_flag.pole_ctl_flag = 1;
+							user_flag.of_alt_ctl_flag = 1;
 							
-								//user_flag.tfmini_ctl_flag = 1;
-								//user_flag.opmv_ctl_flag = 1;
-								//user_flag.hwt101_ctl_flag = 1;
-								user_flag.pole_ctl_flag = 1;
-								user_flag.of_alt_ctl_flag = 1;
-							
-								user_flag.openmv_clr_flag = 0;
-								user_flag.yaw_set_flag = 1;
+							user_flag.openmv_clr_flag = 0;
+							user_flag.yaw_set_flag = 1;
             }
 						
         }
@@ -80,25 +79,19 @@ void UserTask_OneKeyCmd(void)
             //还没有执行
             if (one_key_land_f == 0)
             {
-                //标记已经执行
-                //Add_Send_Data(0x41, );
-								//FC_Lock();
-//								OneKey_Hold();
+							user_flag.tfmini_ctl_flag = 0;
+							user_flag.opmv_ctl_flag = 0;
+							user_flag.hwt101_ctl_flag = 0;
+							user_flag.pole_ctl_flag = 0;
+							user_flag.of_alt_ctl_flag = 0;
 							
-								user_flag.tfmini_ctl_flag = 0;
-								user_flag.opmv_ctl_flag = 0;
-								user_flag.hwt101_ctl_flag = 0;
-								user_flag.pole_ctl_flag = 0;
-								user_flag.of_alt_ctl_flag = 0;
+							user_flag.openmv_clr_flag = 1;
+							user_flag.yaw_set_flag = 0;
 							
-								user_flag.openmv_clr_flag = 1;
-								user_flag.yaw_set_flag = 0;
-							
-							  mission_task = 0;
-								mission_step = 0;
-								one_key_land_f = 1;
-								_cnt = 0;
-								
+							mission_task = 0;
+							mission_step = 0;
+							one_key_land_f = 1;
+							_cnt = 0;
             }
         }
         else
@@ -106,34 +99,8 @@ void UserTask_OneKeyCmd(void)
             //复位标记，以便再次执行
             one_key_land_f = 0;
         }
-				
-				if(mission_task){
-						switch(mission_step){
-							case 0:
-									break;
-							case 1:
-									
-								
-									break;
-							case 2: 
-								
-									break;
-									
-							case 3:
-						
-									break;
-							case 4:
-							
-									break;
-							case 5:
-
-									break;
-							default:
-									break;
-						}
-				}
 			}
-    ////////////////////////////////////////////////////////////////////////
+ ////////////////////////////////////////////////////////////////////////
 }
 
 //pid计算函数

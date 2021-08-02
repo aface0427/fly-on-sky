@@ -5,15 +5,15 @@
 #include "stm32f4xx.h"
 #include "Ano_Scheduler.h"
 
-#define safe_div(numerator,denominator,safe_value) ( (denominator == 0)? (safe_value) : ((numerator)/(denominator)) )
+#define safe_div(numerator,denominator,safe_value) ( (denominator == 0)? (safe_value) : ((numerator)/(denominator)))
 #define LIMIT( x,min,max ) ( ((x) <= (min)) ? (min) : ( ((x) > (max))? (max) : (x) ) )
 #define SAFE_SPEED 200
 
 void UserTask_OneKeyCmd(void);
 u8 Vertical_Up(u16 height_cm, u16 velocity_cms);
-extern float PID_calculate( float dT_s,            //周期（单位：秒）
+float PID_calculate( float dT_s,            //周期（单位：秒）
 										float in_ff,				//前馈值
-										float expect,				//期望值（设定值）
+										float expect,			//期望值（设定值）
 										float feedback,			//反馈值（）
 										_PID_arg_st *pid_arg, //PID参数结构体
 										_PID_val_st *pid_val,	//PID数据结构体
@@ -24,6 +24,8 @@ extern float PID_calculate( float dT_s,            //周期（单位：秒）
 extern s16 out_speed;
 extern s16 out_speed_y;
 extern s16 out_speed_z;
+extern u8 mission_step; 
+extern u8 mission_task;
 
 enum AxialDirection{
 	Direction_x = 1,

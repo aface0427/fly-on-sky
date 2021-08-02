@@ -12,12 +12,14 @@
 #include "Drv_TFMini_Plus.h"
 #include "Drv_HWT101CT.h"
 #include "User_Task.h"
+#include "LX_FC_Fun.h"
 #include "Drv_OpenMV.h"
 #include "Drv_Uart.h"
 
 extern _ano_of_st ano_of;
 _user_flag_set user_flag = {0};
 s16 dx, dy;
+u16 cnt = 0;
 
 //低通滤波测试参数
 s16 dis_fix_x, dis_fix_y;
@@ -104,6 +106,11 @@ _user_eula_set user_eula;
 s16 Position_now;
 s16 Position_pre;
 s16 Position_incre;
+
+static s16 pos_now;
+static s16 pos_pre;
+static s16 pos_incre;
+static s16 pos_start;
 //////////////////////////////////////////////////////////////////////
 //用户程序调度器
 //////////////////////////////////////////////////////////////////////
@@ -178,6 +185,10 @@ static void Loop_50Hz(void) //20ms执行一次
 
 static void Loop_20Hz(void) //50ms执行一次
 {
+	/*********************************任务集*******************************************/
+	if(mission_task){
+		TaskSet(50);
+	}
 	/*********************************TFmini x轴定位*******************************************/
   if(user_flag.tfmini_ctl_flag){
 		TFMiniPosCtl(100); //x方向定距离
@@ -414,7 +425,24 @@ u8 OpMVPosCtl(s16 expect1, s16 expect2){
 	
 	return 1;
 }
-
+u8 OpMVPosCtl_Down(s16 expect1, s16 expect2){
+	user_exp_fdb_x.exp_distance = expect1;
+	user_exp_fdb_y.exp_distance = expect2;
+		
+	if(opmv.mol.is_invalid){
+		user_exp_fdb_x.fdb_distance = user_exp_fdb_x.exp_distance;
+		user_exp_fdb_y.fdb_distance = user_exp_fdb_y.exp_distance;
+	}
+	else{
+		user_exp_fdb_x.fdb_distance = opmv.mol.pos_y;
+		user_exp_fdb_y.fdb_distance = opmv.mol.pos_z;
+	}
+		
+	test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_y, 1);
+	test_output_y = GeneralPosCtl(user_exp_fdb_y, Direction_y, PID_Distance_arg_x, PID_Distance_val_y, user_threshold_y, 1);
+	
+	return 1;
+}
 u8 HWT101PosCtl(s16 expect){
 	/*hwt101保证yaw轴平稳*/
 	if(user_flag.yaw_set_flag){
@@ -486,11 +514,168 @@ u8 DataClr(void){
 	RealTimeSpeedControl(0, Direction_yaw);
 	Position_incre = 0;
 	Position_pre = 0;
+	cnt = 0;
 	//RealTimeSpeedControlSend(0, Direction_yaw);
 	
 	return 1;
 }	
+
+//任务集
+u8 TaskSet(s16 dT){
+	switch(mission_step){
+		case 0:
+			cnt = 0;
+			break;
+		
+		case 1:
+			/*3s延时*/
+			//FC_Unlock();
+			cnt += dT;
+			if(cnt >= 3000){
+				cnt = 0;
+				mission_step += 1;
+			}
+			break;
+			
+		case 2:
+			/*一键起飞*/
+			//mission_step += OneKey_Takeoff(100);
+			break;
+		
+		case 3:
+			user_flag.yaw_set_flag = 1;
+			Position_incre = 0;
+			Position_pre = 0;
+			mission_step += 1;
+			break;
+		
+		case 4:
+			/*识别停机坪的摩尔环并悬停8s*/
+			opmv.mode_sta[1] = 2; //摩尔环识别模式
+			
+			OpMVPosCtl_Down(0, 0);
+			HWT101PosCtl(0);
+			
+			cnt += dT;
+			if(cnt >= 8000){
+				cnt = 0;
+				mission_step += 1;
+			}
+			break;
+			
+		case 5:
+			/*升高到130cm*/
+			OFAltCtl(130);
+			if(ano_of.of_alt_cm > 120 && ano_of.of_alt_cm < 140){
+				cnt += dT;
+			}
+			if(cnt >= 1000){
+				cnt = 0;
+				mission_step += 1;
+			}
+			break;
+			
+		case 6:
+			/*开启yaw轴自稳*/
+			user_flag.yaw_set_flag = 1;
+			Position_incre = 0;
+			Position_pre = 0;
+		
+			mission_step += 1;
+			break;
+		
+		case 7:
+			HWT101PosCtl(0);
+			/*以10cm/s速度向前移动10s*/
+			RealTimeSpeedControl(10, Direction_x);
+			cnt += dT;
+		
+			/*没识别到目标*/
+			if(cnt >= 10000){
+				cnt = 0;
+				mission_step += 1;
+			}
+			
+			/*识别到目标*/
+			if(!opmv.mol.is_invalid){
+				RealTimeSpeedControl(0, Direction_x);
+				mission_step = 9;
+			}
+			break;
+			
+		/*未识别到杆*/
+		case 8:
+			/*原地自旋直到识别到杆*/
+			RealTimeSpeedControl(15, Direction_yaw);
+			if(!opmv.mol.is_invalid){
+				mission_step += 1;
+			}
+			break;
+		
+		/*识别到杆*/
+		case 9:
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			pos_pre = pos_now;
+			pos_start = pos_incre;
+			mission_step += 1;	
+			break;
+		
+		case 10:
+			PolePosCtl(50, -10, 0);
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			pos_pre = pos_now;
+			if(UserAbs(pos_incre - pos_start) > 360){
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+			}
+			break;
+		
+		case 11:
+			RealTimeSpeedControl(-10, Direction_x);
+			cnt += dT;
+			if(cnt > 3000){
+				cnt = 0;
+				mission_step += 1;
+			}
+			break;
+			
+		case 12:
+			OneKey_Land();
+			mission_step = 0;
+			break;
+		default:
+			break;
+	}
 	
+	return 1;
+}
+
+s16 ZeroPointCross(s16 pos_now, s16 pos_pre, s16 pos_incre){
+	if((pos_now - pos_pre) > 180)
+	{
+		pos_incre  += (pos_now - pos_pre) - 359;
+	}
+	else if((pos_now - pos_pre) < -180)
+	{
+		pos_incre  += 359 + (pos_now - pos_pre);
+	}
+	else
+	{
+		pos_incre  += (pos_now - pos_pre);
+	}
+	
+	return pos_incre;
+}
+
+s16 UserAbs(s16 num){
+	if(num < 0)
+		return -1 * num;
+	else	
+		return num;
+}
 /******************* (C) COPYRIGHT 2014 ANO TECH *****END OF FILE************/
 
 

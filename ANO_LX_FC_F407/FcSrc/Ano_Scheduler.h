@@ -131,6 +131,7 @@ extern s16 test_output_alt_z;
 extern s16 Position_now;
 extern s16 Position_pre;
 extern s16 Position_incre;
+extern u16 cnt;
 
 void Init_PID(void);
 void Init_GeneralCtlArg(void);
@@ -138,10 +139,14 @@ void Scheduler_Setup(void);
 void Scheduler_Run(void);
 u8 TFMiniPosCtl(s16 expect);
 u8 OpMVPosCtl(s16 expect1, s16 expect2);
+u8 OpMVPosCtl_Down(s16 expect1, s16 expect2);
 u8 HWT101PosCtl(s16 expect);
 u8 PolePosCtl(s16 exp_x, s16 exp_y, s16 exp_yaw);
 u8 OFAltCtl(u16 expect);
 u8 DataClr(void);
+u8 TaskSet(s16 dT);
+s16 ZeroPointCross(s16 pos_now, s16 pos_pre, s16 pos_incre);
+s16 UserAbs(s16 num);
 
 #endif
 
