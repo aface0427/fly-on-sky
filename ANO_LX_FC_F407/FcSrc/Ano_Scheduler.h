@@ -136,6 +136,12 @@ void Init_PID(void);
 void Init_GeneralCtlArg(void);
 void Scheduler_Setup(void);
 void Scheduler_Run(void);
+u8 TFMiniPosCtl(s16 expect);
+u8 OpMVPosCtl(s16 expect1, s16 expect2);
+u8 HWT101PosCtl(s16 expect);
+u8 PolePosCtl(s16 exp_x, s16 exp_y, s16 exp_yaw);
+u8 OFAltCtl(u16 expect);
+u8 DataClr(void);
 
 #endif
 
