@@ -28,7 +28,7 @@ Message.Ctr.WorkMode=0 #测试
 #sensor.set_auto_gain(False)  # must turn this off to prevent image washout...
 #sensor.set_auto_whitebal(False)  # must turn this off to prevent image washout...
 #clock = time.clock()
-#Message.Ctr.WorkMode=2 #测试AprilTag检测用
+#Message.Ctr.WorkMode=3 #测试AprilTag检测用
 '''
 
 '''3
@@ -43,11 +43,11 @@ clock = time.clock() # 跟踪FPS帧率
 if (sensor.get_id() == sensor.OV7725):
     sensor.__write_reg(0xAC, 0xDF)
     sensor.__write_reg(0x8F, 0xFF)
-Message.Ctr.WorkMode=3 #测试Molcircle用
+Message.Ctr.WorkMode=4 #测试Molcircle用
 '''
 
 
-Message.Ctr.WorkMode = 4
+Message.Ctr.WorkMode = 5
 sensor.reset() # Initialize the camera sensor.
 sensor.set_pixformat(sensor.RGB565) # use RGB565.
 sensor.set_framesize(sensor.VGA) # use QQVGA for speed.
@@ -70,12 +70,12 @@ while(True):
         DotFollowing.DotCheck()
     elif Message.Ctr.WorkMode==1:#线检测
         LineFollowing.LineCheck()
-    elif Message.Ctr.WorkMode==2:#AprilTag检测
+    elif Message.Ctr.WorkMode==3:#AprilTag检测
         find_apriltags01.Find_Apriltags()
         print('b',h)
-    elif Message.Ctr.WorkMode==3:#摩尔环
+    elif Message.Ctr.WorkMode==4:#摩尔环
         molcircle.Molcircle()
-    elif Message.Ctr.WorkMode==4:#红色杆
+    elif Message.Ctr.WorkMode==5:#红色杆
         pole2.findingpole2()
     if flag == 0 :
         LED(2).off()

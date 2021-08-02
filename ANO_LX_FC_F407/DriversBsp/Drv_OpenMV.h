@@ -45,8 +45,8 @@ typedef struct{
 typedef struct
 {
 	u8 offline;
-	u8 mode_cmd;
-	u8 mode_sta[3];
+	u8 mode_cmd[3];
+	u8 mode_sta; // 3:apirltag识别 4:摩尔环识别 5:红色杆识别
 	//
 	_openmv_color_block_st cb;
 	_openmv_line_tracking_st lt;
@@ -57,7 +57,7 @@ typedef struct
 
 //==数据声明
 extern _openmv_data_st opmv;
-
+extern _openmv_data_st opmv2;
 //==函数声明
 
 //static
@@ -68,6 +68,12 @@ static void OpenMV_Check_Reset(void);
 void OpenMV_Offline_Check(u8 dT_ms);
 void OpenMV_Byte_Get(uint8_t bytedata);
 
+//static
+static void OpenMV2_Data_Analysis(uint8_t *buf_data,uint8_t len);
+static void OpenMV2_Check_Reset(void);
 
+//public
+void OpenMV2_Offline_Check(u8 dT_ms);
+void OpenMV2_Byte_Get(uint8_t bytedata);
 #endif
 
