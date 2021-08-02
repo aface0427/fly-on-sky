@@ -30,8 +30,10 @@
 .\build\ano_scheduler.o: ..\FcSrc\SysConfig.h
 .\build\ano_scheduler.o: ..\DriversMcu\STM32F407\Drivers\Drv_Sys.h
 .\build\ano_scheduler.o: ..\FcSrc\ANO_LX.h
-.\build\ano_scheduler.o: ..\FcSrc\User_Task.h
 .\build\ano_scheduler.o: ..\DriversBsp\Drv_OpenMV.h
 .\build\ano_scheduler.o: ..\FcSrc\ANO_DT_LX.h
 .\build\ano_scheduler.o: ..\DriversBsp\Drv_AnoOf.h
 .\build\ano_scheduler.o: ..\DriversBsp\Drv_TFMini_Plus.h
+.\build\ano_scheduler.o: ..\DriversBsp\Drv_HWT101CT.h
+.\build\ano_scheduler.o: ..\FcSrc\User_Task.h
+.\build\ano_scheduler.o: ..\DriversMcu\STM32F407\Drivers\Drv_Uart.h

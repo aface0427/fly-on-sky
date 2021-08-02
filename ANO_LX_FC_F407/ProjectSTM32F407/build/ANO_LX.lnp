@@ -22,6 +22,7 @@
 ".\build\drv_rcin.o"
 ".\build\drv_timer.o"
 ".\build\drv_uart.o"
+".\build\drv_gpio.o"
 ".\build\startup_stm32f4xx.o"
 ".\build\system_stm32f4xx.o"
 ".\build\misc.o"

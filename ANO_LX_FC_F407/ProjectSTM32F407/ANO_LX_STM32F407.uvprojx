@@ -627,6 +627,16 @@
               <FileType>5</FileType>
               <FilePath>..\DriversMcu\STM32F407\Drivers\Drv_Uart.h</FilePath>
             </File>
+            <File>
+              <FileName>Drv_GPIO.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\DriversMcu\STM32F407\Drivers\Drv_GPIO.c</FilePath>
+            </File>
+            <File>
+              <FileName>Drv_GPIO.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\DriversMcu\STM32F407\Drivers\Drv_GPIO.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
