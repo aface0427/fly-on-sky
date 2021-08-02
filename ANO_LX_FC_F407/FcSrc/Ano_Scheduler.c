@@ -216,6 +216,7 @@ static void Loop_20Hz(void) //50ms执行一次
 	/*********************************数据位清零*******************************************/
 	if(user_flag.openmv_clr_flag){
 		DataClr();
+		user_flag.openmv_clr_flag = 0;
 	}
 	
 	/*发送实时控制帧*/
@@ -507,13 +508,15 @@ u8 OFAltCtl(u16 expect){
 	return 1;
 }
 u8 DataClr(void){
-	user_flag.openmv_clr_flag = 0;
+	
 	RealTimeSpeedControl(0, Direction_x);
 	RealTimeSpeedControl(0, Direction_y);
 	RealTimeSpeedControl(0, Direction_z);
 	RealTimeSpeedControl(0, Direction_yaw);
 	Position_incre = 0;
 	Position_pre = 0;
+	pos_incre = 0;
+	pos_pre = 0;
 	cnt = 0;
 	//RealTimeSpeedControlSend(0, Direction_yaw);
 	
@@ -560,31 +563,29 @@ u8 TaskSet(s16 dT){
 			if(cnt >= 8000){
 				cnt = 0;
 				mission_step += 1;
+				DataClr();
+				user_flag.yaw_set_flag = 1;
 			}
 			break;
-			
 		case 5:
 			/*升高到130cm*/
+			HWT101PosCtl(0);
 			OFAltCtl(130);
 			if(ano_of.of_alt_cm > 120 && ano_of.of_alt_cm < 140){
 				cnt += dT;
 			}
+			else{
+				cnt = 0;
+			}
 			if(cnt >= 1000){
 				cnt = 0;
 				mission_step += 1;
+				user_flag.yaw_set_flag = 1;
+				DataClr();
 			}
 			break;
-			
+		
 		case 6:
-			/*开启yaw轴自稳*/
-			user_flag.yaw_set_flag = 1;
-			Position_incre = 0;
-			Position_pre = 0;
-		
-			mission_step += 1;
-			break;
-		
-		case 7:
 			HWT101PosCtl(0);
 			/*以10cm/s速度向前移动10s*/
 			RealTimeSpeedControl(10, Direction_x);
@@ -599,12 +600,12 @@ u8 TaskSet(s16 dT){
 			/*识别到目标*/
 			if(!opmv.mol.is_invalid){
 				RealTimeSpeedControl(0, Direction_x);
-				mission_step = 9;
+				mission_step = 8;
 			}
 			break;
 			
 		/*未识别到杆*/
-		case 8:
+		case 7:
 			/*原地自旋直到识别到杆*/
 			RealTimeSpeedControl(15, Direction_yaw);
 			if(!opmv.mol.is_invalid){
@@ -613,7 +614,7 @@ u8 TaskSet(s16 dT){
 			break;
 		
 		/*识别到杆*/
-		case 9:
+		case 8:
 			pos_now = hwt101ct.yaw_angle;
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			pos_pre = pos_now;
@@ -621,7 +622,7 @@ u8 TaskSet(s16 dT){
 			mission_step += 1;	
 			break;
 		
-		case 10:
+		case 9:
 			PolePosCtl(50, -10, 0);
 			pos_now = hwt101ct.yaw_angle;
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
@@ -630,19 +631,21 @@ u8 TaskSet(s16 dT){
 				mission_step += 1;
 				pos_incre = 0;
 				pos_pre = 0;
+				DataClr();
 			}
 			break;
 		
-		case 11:
+		case 10:
 			RealTimeSpeedControl(-10, Direction_x);
 			cnt += dT;
 			if(cnt > 3000){
 				cnt = 0;
+				DataClr();
 				mission_step += 1;
 			}
 			break;
 			
-		case 12:
+		case 11:
 			OneKey_Land();
 			mission_step = 0;
 			break;
