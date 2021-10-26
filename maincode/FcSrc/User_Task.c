@@ -377,6 +377,7 @@ u8 OpenMV_Circle_Track(void){
 u8 RealTimeSpeedControl(s16 velocity, u8 direction){
 //	if(velocity > SAFE_SPEED)
 //		velocity = SAFE_SPEED;
+	//speed_zz=velocity,direction_z=direction;
 	
 	switch(direction){
 		case Direction_x:

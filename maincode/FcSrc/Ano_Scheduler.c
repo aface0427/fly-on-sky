@@ -19,19 +19,19 @@
 extern _ano_of_st ano_of;
 _user_flag_set user_flag = {0};
 s16 dx, dy;
-s16 pp;
 u16 cnt = 0;
 u8 user_send_buffer[50];
+s16 pp;
 static void ANO_DT_LX_Send_Data(u8 *dataToSend, u8 length)
 {
 	//
 	UartSendLXIMU(dataToSend, length);
 }
-static u8 change1(u16 a)
+static u8 change1(s16 a)
 {
 	return a&((1<<8)-1);
 }
-static u8 change2(u16 a)
+static u8 change2(s16 a)
 {
 	return (a^change1(a))>>8;
 }
@@ -214,12 +214,13 @@ static void Loop_50Hz(void) //20ms执行一次
 	dt.fun[0xf2].WTS = 1;
 	dt.fun[0xf3].WTS = 1;
 //		/*数据发送*/
-	user_send(0xf1,dx+1000,dy+1000);
+	user_send(0xf1,mission_step,0);
 	//////////////////////////////////////////////////////////////////////
 }
 
 static void Loop_20Hz(void) //50ms执行一次
 {
+	//user_send(0xf2,speed_zz,direction_z);
 	/*********************************任务集*******************************************/
 	if(mission_task){
 		TaskSet(50);
@@ -245,7 +246,7 @@ static void Loop_20Hz(void) //50ms执行一次
 	
 	/*********************************光流激光定高*******************************************/
 	if(user_flag.of_alt_ctl_flag){
-		OFAltCtl(130); //期望高度
+		OFAltCtl(150); //期望高度
 	}
 	
 	/*********************************数据位清零*******************************************/
@@ -325,7 +326,7 @@ void Init_PID(void){
 	
 //z速度环
 	PID_Speed_arg_z.kp = 0.5f;
-	PID_Speed_arg_z.ki = 0;
+	PID_Speed_arg_z.ki = 0.15f;
 	PID_Speed_arg_z.kd_ex = 0;
 	PID_Speed_arg_z.fb_d_mode = 0;
 	PID_Speed_arg_z.kd_fb = 0;
@@ -333,7 +334,7 @@ void Init_PID(void){
 	
 //z位置环
 	PID_Distance_arg_z.kp = 3.0f;
-	PID_Distance_arg_z.ki = 0;
+	PID_Distance_arg_z.ki = 0.15f;
 	PID_Distance_arg_z.kd_ex = 0;
 	PID_Distance_arg_z.fb_d_mode = 0;
 	PID_Distance_arg_z.kd_fb = 0;
@@ -534,12 +535,13 @@ u8 PolePosCtl(s16 exp_x, s16 exp_y, s16 exp_yaw){
 }
 u8 OFAltCtl(u16 expect){
 	user_exp_fdb_alt_z.exp_distance = expect;
-	user_exp_fdb_alt_z.fdb_distance = ano_of.of_alt_cm;
+	user_exp_fdb_alt_z.fdb_distance = ano_of.of_alt_cm;	
+	user_send(0xf3,Direction_z,ano_of.of_alt_cm);
 	if(user_exp_fdb_alt_z.fdb_distance < 30)
 		rt_tar.st_data.vel_z = 0;
 	else
-		test_output_alt_z = GeneralPosCtl(user_exp_fdb_alt_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_alt_z, 0);	
-
+		test_output_alt_z = GeneralPosCtl(user_exp_fdb_alt_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_alt_z, 0);
+	//user_send(0xf3,Direction_z,ano_of.of_alt_cm);
 	return 1;
 }
 u8 DataClr(void){
@@ -567,7 +569,7 @@ u8 TaskSet(s16 dT){
 		
 		case 1:
 			/*飞控解锁 */
-			//FC_Unlock();
+			 FC_Unlock();
 		
 			/*3s延时*/
 			cnt += dT;
@@ -579,7 +581,7 @@ u8 TaskSet(s16 dT){
 			
 		case 2:
 			/*一键起飞*/
-			//mission_step += OneKey_Takeoff(100);
+			mission_step += OneKey_Takeoff(100);
 			break;
 		
 		case 3:
@@ -587,7 +589,7 @@ u8 TaskSet(s16 dT){
 			user_flag.yaw_set_flag = 1;
 			Position_incre = 0;
 			Position_pre = 0;
-			mission_step += 1;
+			mission_step += 2;
 			break;
 		
 		case 4:
@@ -616,7 +618,6 @@ u8 TaskSet(s16 dT){
 			/*升高到130cm*/
 			HWT101PosCtl(0);
 			OFAltCtl(130);
-		
 			if(ano_of.of_alt_cm > 120 && ano_of.of_alt_cm < 140){
 				cnt += dT;
 			}
@@ -642,7 +643,7 @@ u8 TaskSet(s16 dT){
 			/*没识别到目标*/
 			if(cnt >= 10000){
 				cnt = 0;
-				mission_step += 1;
+				mission_step += 4;
 				DataClr();
 			}
 			
@@ -705,7 +706,7 @@ u8 TaskSet(s16 dT){
 			break;
 			
 		case 11:
-			//OneKey_Land();
+			OneKey_Land();
 			mission_step = 0;
 			break;
 		default:
