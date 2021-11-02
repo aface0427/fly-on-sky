@@ -9,6 +9,7 @@
 #include "Drv_OpenMV.h"
 #include "ANO_DT_LX.h"
 #include "Drv_AnoOf.h"
+#include "Drv_US42V2.h"
 #include "Drv_TFMini_Plus.h"
 #include "Drv_HWT101CT.h"
 #include "User_Task.h"
@@ -35,7 +36,12 @@ static u8 change2(s16 a)
 {
 	return (a^change1(a))>>8;
 }
-static void user_send(u8 frame_num,u16 data1,u16 data2)
+int myabs(int x)
+{
+	if(x<0)return -x;
+	return x;
+}
+static void user_send(u8 frame_num,s16 data1,s16 data2)
 {
 	u8 cnt=0;
 	user_send_buffer[cnt++]=0xAA;
@@ -141,11 +147,17 @@ _user_eula_set user_eula;
 s16 Position_now;
 s16 Position_pre;
 s16 Position_incre;
-
+int test11,test22;
 static s16 pos_now;
 static s16 pos_pre;
 static s16 pos_incre;
 static s16 pos_start;
+int p=1000;
+bool timejudge(int s)
+{
+	if(cnt/p>=s)return 1;
+	return 0;
+}
 //////////////////////////////////////////////////////////////////////
 //用户程序调度器
 //////////////////////////////////////////////////////////////////////
@@ -214,41 +226,52 @@ static void Loop_50Hz(void) //20ms执行一次
 	dt.fun[0xf2].WTS = 1;
 	dt.fun[0xf3].WTS = 1;
 //		/*数据发送*/
-	user_send(0xf1,mission_step,0);
+	//user_send(0xf1,mission_step,0);
 	//////////////////////////////////////////////////////////////////////
 }
 
 static void Loop_20Hz(void) //50ms执行一次
 {
+	//OFAltCtl(150);
 	//user_send(0xf2,speed_zz,direction_z);
-	/*********************************任务集*******************************************/
-	if(mission_task){
-		TaskSet(50);
+	user_send(0xf1,tfmini.Dist,opmv.pole.Dist);
+	user_send(0xf2,mission_step,mission_step);
+	//user_send(0xf3,mission_step,ano_of.of_alt_cm);
+	/*********************************绕杆*******************************************/
+	if(user_flag.pole_ctl_flag&&opmv.pole.is_invalid&&opmv.pole.pos_y>30&&opmv.pole.pos_y<70){
+		PolePosCtl(50, -10, 0); //x方向保持距离、y方向移动速度、yaw期望位置
 	}
-	/*********************************TFmini x轴定位*******************************************/
-  if(user_flag.tfmini_ctl_flag){
-		TFMiniPosCtl(100); //x方向定距离
-	}
+	else if(user_flag.pole_ctl_flag)PolePosCtl(50, 0, 0);
+	
 	/*********************************OpenMV yz轴定位*******************************************/
 	if(user_flag.opmv_ctl_flag){
-		OpMVPosCtl(0, 0); //y方向期望、z方向期望
+		OpMVPosCtl_pole(0, 0); //y方向期望、z方向期望
 	}
-	
+	test11=rt_tar.st_data.vel_y;
 	/*********************************HWT101 yaw轴定位*******************************************/
 	if(user_flag.hwt101_ctl_flag){
 		HWT101PosCtl(0); //无用参数
+		//RealTimeSpeedControl(-15,Direction_yaw);
 	}
-		
-	/*********************************绕杆*******************************************/
-	if(user_flag.pole_ctl_flag){
-		PolePosCtl(50, -10, 0); //x方向保持距离、y方向移动速度、yaw期望位置
-	}
+	/*********************************TFmini x轴定位*******************************************/
+  if(user_flag.tfmini_ctl_flag){
+		TFMiniPosCtl(50); //x方向定距离
+	}	
+	
 	
 	/*********************************光流激光定高*******************************************/
-	if(user_flag.of_alt_ctl_flag){
-		OFAltCtl(150); //期望高度
+	if(user_flag.of_alt_ctl_flag==1){
+		OFAltCtl(130); //期望高度
 	}
-	
+	else if(user_flag.of_alt_ctl_flag==1){
+		OFAltCtl(10); //期望高度
+	}
+	/*********************************任务集*******************************************/
+	if(mission_task){
+		TaskSet(50);
+		//taskset2(50);
+	}
+	test22=rt_tar.st_data.vel_y;
 	/*********************************数据位清零*******************************************/
 	if(user_flag.openmv_clr_flag){
 		DataClr();
@@ -256,6 +279,7 @@ static void Loop_20Hz(void) //50ms执行一次
 	}
 	
 	/*发送实时控制帧*/
+		
 		dt.fun[0x41].WTS = 1;
 	//////////////////////////////////////////////////////////////////////
 }
@@ -285,7 +309,7 @@ void Init_PID(void){
 	PID_Speed_arg_x.k_ff = 0;
 	
 //x位置环
-	PID_Distance_arg_x.kp = 10.0f;
+	PID_Distance_arg_x.kp = 8.0f;
 	PID_Distance_arg_x.ki = 0;
 	PID_Distance_arg_x.kd_ex = 0;
 	PID_Distance_arg_x.fb_d_mode = 0;
@@ -301,7 +325,7 @@ void Init_PID(void){
 	PID_Speed_arg_y.k_ff = 0;
 	
 //y位置环
-	PID_Distance_arg_y.kp = 5.0f;
+	PID_Distance_arg_y.kp = 2.5f;
 	PID_Distance_arg_y.ki = 0;
 	PID_Distance_arg_y.kd_ex = 0;
 	PID_Distance_arg_y.fb_d_mode = 0;
@@ -317,7 +341,7 @@ void Init_PID(void){
 	PID_Speed_arg_yaw.k_ff = 0;
 	
 //yaw位置环
-	PID_Distance_arg_yaw.kp = 3.0f;
+	PID_Distance_arg_yaw.kp = 6.0f;
 	PID_Distance_arg_yaw.ki = 0;
 	PID_Distance_arg_yaw.kd_ex = 0;
 	PID_Distance_arg_yaw.fb_d_mode = 0;
@@ -326,7 +350,7 @@ void Init_PID(void){
 	
 //z速度环
 	PID_Speed_arg_z.kp = 0.5f;
-	PID_Speed_arg_z.ki = 0.15f;
+	PID_Speed_arg_z.ki = 0;
 	PID_Speed_arg_z.kd_ex = 0;
 	PID_Speed_arg_z.fb_d_mode = 0;
 	PID_Speed_arg_z.kd_fb = 0;
@@ -334,7 +358,7 @@ void Init_PID(void){
 	
 //z位置环
 	PID_Distance_arg_z.kp = 3.0f;
-	PID_Distance_arg_z.ki = 0.15f;
+	PID_Distance_arg_z.ki = 0;
 	PID_Distance_arg_z.kd_ex = 0;
 	PID_Distance_arg_z.fb_d_mode = 0;
 	PID_Distance_arg_z.kd_fb = 0;
@@ -350,7 +374,7 @@ void Init_PID(void){
 */
 void Init_GeneralCtlArg(void){
 	/*x*/
-	user_threshold_x.max_speed = 20;
+	user_threshold_x.max_speed = 12;
 	user_threshold_x.normalize_distance = 500.0f;
 	user_threshold_x.normalize_speed = 20.0f;
 	
@@ -360,7 +384,7 @@ void Init_GeneralCtlArg(void){
 	user_threshold_pole_x.normalize_speed = 3.0f;
 	
 	/*y*/
-	user_threshold_y.max_speed = 20;
+	user_threshold_y.max_speed = 12;
 	user_threshold_y.normalize_distance = 80.0f;
 	user_threshold_y.normalize_speed = 20.0f;
 	
@@ -371,11 +395,11 @@ void Init_GeneralCtlArg(void){
 	
 	/*定高*/
 	user_threshold_alt_z.max_speed = 15;
-	user_threshold_alt_z.normalize_distance = 200;
+	user_threshold_alt_z.normalize_distance = 50.0f;
 	user_threshold_alt_z.normalize_speed = 15.0f;
 	
 	/*yaw*/
-	user_threshold_yaw.max_speed = 15;
+	user_threshold_yaw.max_speed = 30;
 	user_threshold_yaw.normalize_distance = 200.0f;
 	user_threshold_yaw.normalize_speed = 15.0f;
 }
@@ -437,10 +461,10 @@ void Scheduler_Run(void)
 
 u8 TFMiniPosCtl(s16 expect){
 	user_exp_fdb_x.exp_distance = expect;
-	user_exp_fdb_x.fdb_distance = tfmini.Dist;
-	
+	if(mission_step==8&&tfmini.Dist>100)user_exp_fdb_x.fdb_distance = expect;
+	else user_exp_fdb_x.fdb_distance = tfmini.Dist;
+	if(opmv.pole.is_invalid)user_exp_fdb_x.fdb_distance=opmv.pole.pos_y;
 	test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_x, 1);
-	
 	return 1;
 }
 
@@ -480,6 +504,25 @@ u8 OpMVPosCtl_Down(s16 expect1, s16 expect2){
 	
 	return 1;
 }
+u8 OpMVPosCtl_pole(s16 expect1, s16 expect2){
+	//user_exp_fdb_z.exp_distance = expect2;
+	user_exp_fdb_y.exp_distance = expect1;
+		
+	if(!opmv.pole.flag){
+		user_exp_fdb_y.fdb_distance = user_exp_fdb_y.exp_distance;
+		//user_exp_fdb_z.fdb_distance = user_exp_fdb_z.exp_distance;
+	}
+	else{
+		user_exp_fdb_y.fdb_distance = opmv.pole.Dist;
+		//user_exp_fdb_z.fdb_distance = opmv.pole.pos_y;
+	}
+
+	test_output_y = GeneralPosCtl(user_exp_fdb_y, Direction_y, PID_Distance_arg_y, PID_Distance_val_y, user_threshold_y, 1);
+	//test_output_z = GeneralPosCtl(user_exp_fdb_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_z, 1);
+	if(myabs(test_output_y)<=5)user_flag.tfmini_ctl_flag=1;
+	else user_flag.tfmini_ctl_flag=0,rt_tar.st_data.vel_x=0;
+	return 1;
+}
 u8 HWT101PosCtl(s16 expect){
 	/*hwt101保证yaw轴平稳*/
 	if(user_flag.yaw_set_flag){
@@ -514,34 +557,36 @@ u8 HWT101PosCtl(s16 expect){
 	return 1;
 }	
 
-u8 PolePosCtl(s16 exp_x, s16 exp_y, s16 exp_yaw){
+u8 PolePosCtl(s16 exp_x, s16 exp_y, s16 exp_yaw){	
 	user_exp_fdb_x.exp_distance = exp_x;
 	user_exp_fdb_yaw.exp_distance = exp_yaw;
 		
-	if(opmv.pole.is_invalid){
-		user_exp_fdb_x.fdb_distance = user_exp_fdb_x.exp_distance;
+	if(!opmv.pole.is_invalid){
+		//user_exp_fdb_x.fdb_distance = user_exp_fdb_x.exp_distance;
 		user_exp_fdb_yaw.fdb_distance = user_exp_fdb_yaw.exp_distance;
 	}
 	else{
-		user_exp_fdb_x.fdb_distance = opmv.pole.Dist;
-		user_exp_fdb_yaw.fdb_distance = opmv.pole.pos_y;
+		//user_exp_fdb_x.fdb_distance = opmv.pole.Dist;
+		user_exp_fdb_yaw.fdb_distance = opmv.pole.Dist;
 	}
 			
-	test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_pole_x, 1);
+	//test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_pole_x, 1);
 	test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
 	rt_tar.st_data.vel_y = exp_y;	
-	
+	if(opmv.pole.Dist>-30||opmv.pole.Dist<30)user_flag.tfmini_ctl_flag=1;
+	else user_flag.tfmini_ctl_flag=0,rt_tar.st_data.vel_x=0;
 	return 1;
 }
 u8 OFAltCtl(u16 expect){
 	user_exp_fdb_alt_z.exp_distance = expect;
 	user_exp_fdb_alt_z.fdb_distance = ano_of.of_alt_cm;	
-	user_send(0xf3,Direction_z,ano_of.of_alt_cm);
+	//user_send(0xf2,test1,test2);
 	if(user_exp_fdb_alt_z.fdb_distance < 30)
 		rt_tar.st_data.vel_z = 0;
 	else
 		test_output_alt_z = GeneralPosCtl(user_exp_fdb_alt_z, Direction_z, PID_Distance_arg_z, PID_Distance_val_z, user_threshold_alt_z, 0);
 	//user_send(0xf3,Direction_z,ano_of.of_alt_cm);
+	//user_send(0xf3,test_output_alt_z,ano_of.of_alt_cm);
 	return 1;
 }
 u8 DataClr(void){
@@ -560,162 +605,151 @@ u8 DataClr(void){
 	return 1;
 }	
 
-//任务集
+	//任务集
 u8 TaskSet(s16 dT){
-	switch(mission_step){
+	int now=0;
+	int cnt2=0;
+	switch(mission_step)
+	{
 		case 0:
-			cnt = 0;
+			cnt=0;
 			break;
-		
 		case 1:
-			/*飞控解锁 */
-			 FC_Unlock();
-		
-			/*3s延时*/
-			cnt += dT;
-			if(cnt >= 3000){
-				cnt = 0;
-				mission_step += 1;
-			}
+			FC_Unlock();
+			cnt+=dT;
+			if(timejudge(3))
+			mission_step+=1,cnt=0;
 			break;
-			
 		case 2:
-			/*一键起飞*/
 			mission_step += OneKey_Takeoff(100);
 			break;
-		
 		case 3:
-			/*开启yaw轴自稳*/
 			user_flag.yaw_set_flag = 1;
 			Position_incre = 0;
 			Position_pre = 0;
-			mission_step += 2;
+			cnt+=dT;
+			if(timejudge(3))
+				mission_step += 1,cnt=0;
 			break;
-		
 		case 4:
-			/*识别停机坪的摩尔环并悬停8s*/
-			opmv.mode_cmd[1] = 4; //摩尔环识别模式
-			HWT101PosCtl(0);
-			
-			/*当mv返回的模式为摩尔环时，开启定位函数，同时计时*/
-			if(opmv.mode_sta == 4){
-				OpMVPosCtl_Down(0, 0);
-				cnt += dT;
+			user_flag.of_alt_ctl_flag = 1;
+			if(ano_of.of_alt_cm>125&&ano_of.of_alt_cm<135)
+			{
+				cnt+=dT;
 			}
-			else{
-				DataClr();
-			}
-			
-			if(cnt >= 8000){
-				cnt = 0;
-				mission_step += 1;
+			else cnt=0;
+			if(timejudge(3))
+			{
+				mission_step++;
 				DataClr();
 				user_flag.yaw_set_flag = 1;
+				cnt=0;
 			}
 			break;
-			
 		case 5:
-			/*升高到130cm*/
-			HWT101PosCtl(0);
-			OFAltCtl(130);
-			if(ano_of.of_alt_cm > 120 && ano_of.of_alt_cm < 140){
-				cnt += dT;
+			opmv.mode_cmd[1] = 5; 
+			user_flag.yaw_set_flag=0;
+			RealTimeSpeedControl(20, Direction_yaw);
+			if(opmv.pole.flag==1){
+				cnt+=dT;
 			}
-			else{
-				cnt = 0;
-			}
+			else cnt=0;
 			
-			if(cnt >= 1000){
-				cnt = 0;
-				mission_step += 1;
-				user_flag.yaw_set_flag = 1;
+			if(cnt>=300)
+			{
 				DataClr();
+				user_flag.yaw_set_flag=1;
+				mission_step += 1;
+				cnt=0;
+			}
+			if(now!=0)
+			{
+				mission_step=now;
+				now=0;
 			}
 			break;
-		
 		case 6:
-			HWT101PosCtl(0);
-			/*以10cm/s速度向前移动10s*/
-			RealTimeSpeedControl(10, Direction_x);
-			opmv.mode_cmd[1] = 5; //红色杆识别模式
-			cnt += dT;
-		
-			/*没识别到目标*/
-			if(cnt >= 10000){
-				cnt = 0;
-				mission_step += 4;
-				DataClr();
+			user_flag.opmv_ctl_flag=1;
+			if(opmv.pole.pos_y>40&&opmv.pole.pos_y<60)
+			{
+				cnt+=dT;cnt2=0;
 			}
-			
-			/*识别到目标*/
-			if(!opmv.pole.is_invalid){
-				DataClr();
-				mission_step = 8;
+			else cnt=0,cnt2+=dT;
+			if(cnt2>=5000)
+			{
+				cnt2=0;
+				mission_step=5;
+				now=6;
+				user_flag.opmv_ctl_flag=0;
+				break;
+			}
+			if(timejudge(2))
+			{
+				mission_step+=1;
+				user_flag.opmv_ctl_flag=0;
+				cnt=0;
 			}
 			break;
-			
-		/*未识别到杆*/
 		case 7:
-			/*原地自旋直到识别到杆*/
-			opmv.mode_cmd[1] = 5; //红色杆识别模式
-			RealTimeSpeedControl(15, Direction_yaw);
-			if(!opmv.mol.is_invalid){
-				DataClr();
-				mission_step += 1;
-			}
-			break;
-		
-		/*识别到杆*/
-		case 8:
-			/*记录开始时的yaw角度*/
 			pos_now = hwt101ct.yaw_angle;
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			pos_pre = pos_now;
 			pos_start = pos_incre;
+			user_flag.yaw_set_flag=0;
 			mission_step += 1;	
 			break;
-		
-		case 9:
-			opmv.mode_cmd[1] = 5; //红色杆识别模式
+		case 8:
+			opmv.mode_cmd[1] = 5; 
 			if(opmv.mode_sta == 5)
-				PolePosCtl(50, -10, 0);
+				user_flag.pole_ctl_flag=1;
 			pos_now = hwt101ct.yaw_angle;
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			pos_pre = pos_now;
-			
-			if(UserAbs(pos_incre - pos_start) > 360){
+		if(UserAbs(pos_incre - pos_start) > 360){
 				mission_step += 1;
+				cnt=0;	
 				pos_incre = 0;
 				pos_pre = 0;
 				DataClr();
 				user_flag.yaw_set_flag = 1;
+				user_flag.pole_ctl_flag=0;
 			}
 			break;
 		
-		case 10:
+		case 9:
 			/*yaw轴自稳，以-10cm/s速度沿x轴后退3s*/
-			RealTimeSpeedControl(-10, Direction_x);
+			RealTimeSpeedControl(-20, Direction_x);
 			HWT101PosCtl(0);
 			
 			cnt += dT;
-			if(cnt > 3000){
+			if(timejudge(3)){
 				cnt = 0;
 				DataClr();
 				mission_step += 1;
 			}
 			break;
 			
-		case 11:
-			OneKey_Land();
-			mission_step = 0;
+		case 10:
+			user_flag.of_alt_ctl_flag = 2;
+			cnt += dT;
+			if(timejudge(3)){
+				cnt = 0;
+				DataClr();
+				mission_step += 1;
+			}
 			break;
+		case 11:
+			FC_Lock();
+			mission_step =0;
 		default:
 			break;
 	}
-	
-	return 1;
 }
-
+u8 taskset2(s16 dT)
+{
+	
+	
+}
 s16 ZeroPointCross(s16 pos_now, s16 pos_pre, s16 pos_incre){
 	if((pos_now - pos_pre) > 180)
 	{

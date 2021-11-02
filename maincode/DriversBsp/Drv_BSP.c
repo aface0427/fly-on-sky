@@ -41,6 +41,7 @@ u8 All_Init()
 	//电池电压采集初始化
 	DrvAdcInit();
 	MyDelayMs(100);
+	;
 	//数传模块初始化
 	ANO_DT_Init();
 	MyDelayMs(800);

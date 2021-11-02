@@ -127,19 +127,21 @@ extern s16 test_output_z;
 extern s16 test_output_yaw;
 extern s16 test_output_pole_x;
 extern s16 test_output_alt_z;
-
 extern s16 Position_now;
 extern s16 Position_pre;
 extern s16 Position_incre;
 extern u16 cnt;
-
+extern u8 test1;
+extern float test2,test3,test4,test5,test6,test7;
 void Init_PID(void);
 void Init_GeneralCtlArg(void);
 void Scheduler_Setup(void);
 void Scheduler_Run(void);
+u8 taskset2(s16 dT);
 u8 TFMiniPosCtl(s16 expect);
 u8 OpMVPosCtl(s16 expect1, s16 expect2);
 u8 OpMVPosCtl_Down(s16 expect1, s16 expect2);
+u8 OpMVPosCtl_pole(s16 expect1,s16 expect2);
 u8 HWT101PosCtl(s16 expect);
 u8 PolePosCtl(s16 exp_x, s16 exp_y, s16 exp_yaw);
 u8 OFAltCtl(u16 expect);

@@ -77,7 +77,7 @@ static void HWT101CT_Data_Analysis(u8 *buf_data)
         yaw_angle = (s16)((((short)*(buf_data+7))<<8)|((short)*(buf_data+6)));
         hwt101ct.yaw_angle = yaw_angle * 180 / 32768; //µ¥Î»Îª¡ã
     }
-	HWT101CT_Check_Reset();
+	HWT101CT_Check_Reset(); 
 }
 
 /**********************************************************************************************************

@@ -20,7 +20,6 @@
 *.dbg*
 *.uvguix.*
 .mxproject
-*.uvprojx
 !*.h
 !*.c
 *.ioc

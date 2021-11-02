@@ -139,7 +139,7 @@ static inline void RC_Data_Task(float dT_s)
 			rt_tar.st_data.rol = tmp_ch_dz[ch_1_rol] * 0.00217f * MAX_ANGLE;
 			rt_tar.st_data.pit = -tmp_ch_dz[ch_2_pit] * 0.00217f * MAX_ANGLE;		//因为摇杆俯仰方向和定义的俯仰方向相反，所以取负
 			rt_tar.st_data.thr = (rc_in.rc_ch.st_data.ch_[ch_3_thr] - 1000);		//0.1%
-			rt_tar.st_data.yaw_dps = -tmp_ch_dz[ch_4_yaw] * 0.00238f * MAX_YAW_DPS; //因为摇杆航向方向和定义的航向方向相反，所以取负		
+			//rt_tar.st_data.yaw_dps = -tmp_ch_dz[ch_4_yaw] * 0.00238f * MAX_YAW_DPS; //因为摇杆航向方向和定义的航向方向相反，所以取负		
 //		}
 		//实时XYZ-YAW期望速度
 //		rt_tar.st_data.yaw_dps = 0;

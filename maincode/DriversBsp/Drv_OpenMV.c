@@ -1,6 +1,6 @@
 //默认引用：
 #include "Drv_OpenMV.h"
-
+#include "Ano_Scheduler.h"
 //设定
 #define OPMV_OFFLINE_TIME_MS  1000  //毫秒
 
@@ -9,7 +9,6 @@ enum OpenMVmodeflag{
     Line_Following,
     AprilTag
 }OpenMVmodeflagdata;
-
 //全局变量
 u16 offline_check_time;
 u8 openmv_buf[20];
@@ -175,13 +174,15 @@ static void OpenMV_Data_Analysis(uint8_t *buf_data,uint8_t len)
     else if(*(buf_data+3)==0x45)//红色杆
 	{
 		opmv.pole.is_invalid = *(buf_data+5);
-        if (!opmv.pole.is_invalid){
+        if (opmv.pole.is_invalid){
+						opmv.pole.flag=	opmv.pole.is_invalid;
             opmv.pole.Dist = (s16)((*(buf_data+6)<<8)|*(buf_data+7));
-            opmv.pole.pos_y = 150 - (s16)((*(buf_data+8)<<8)|*(buf_data+9));
+            opmv.pole.pos_y = (s16)((*(buf_data+8)<<8)|*(buf_data+9));
         }
 		else{
             opmv.pole.Dist = 0;
             opmv.pole.pos_y = 0 ;
+						opmv.pole.flag=0;
         }
         opmv.mode_sta = 5;
 	}

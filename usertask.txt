@@ -1,0 +1,155 @@
+switch(mission_step){
+		case 0:
+			cnt = 0;
+			break;
+		
+		case 1:
+			/*·É¿Ø½âËø */
+			 FC_Unlock();
+		
+			/*3sÑÓÊ±*/
+			cnt += dT;
+			if(cnt >= 3000){
+				cnt = 0;
+				mission_step += 1;
+			}
+			break;
+			
+		case 2:
+			/*Ò»¼üÆð·É*/
+			mission_step += OneKey_Takeoff(130);
+			break;
+		
+		case 3:
+			/*¿ªÆôyawÖá×ÔÎÈ*/
+			user_flag.yaw_set_flag = 1;
+			Position_incre = 0;
+			Position_pre = 0;
+			cnt+=dT;
+			if(cnt>=6000)
+			mission_step += 2;
+			break;
+		
+		case 4:
+			/*Ê¶±ðÍ£»úÆºµÄÄ¦¶û»·²¢ÐüÍ£8s*/
+			opmv.mode_cmd[1] = 4; //Ä¦¶û»·Ê¶±ðÄ£Ê½
+			HWT101PosCtl(0);
+			
+			/*µ±mv·µ»ØµÄÄ£Ê½ÎªÄ¦¶û»·Ê±£¬¿ªÆô¶¨Î»º¯Êý£¬Í¬Ê±¼ÆÊ±*/
+			if(opmv.mode_sta == 4){
+				OpMVPosCtl_Down(0, 0);
+				cnt += dT;
+			}
+			else{
+				DataClr();
+			}
+			
+			if(cnt >= 800){
+				cnt = 0;
+				mission_step += 1;
+				DataClr();
+				user_flag.yaw_set_flag = 1;
+			}
+			break;
+			
+		case 5:
+			/*Éý¸ßµ½130cm*/
+			//HWT101PosCtl(0);
+			//RealTimeSpeedControl(10, Direction_x);
+			OFAltCtl(160);
+			if(ano_of.of_alt_cm > 140 && ano_of.of_alt_cm < 180){
+				cnt += dT;
+			}
+			else{
+				cnt = 0;
+			}
+			
+			if(cnt >= 20000){
+				cnt = 0;
+				mission_step += 1;
+				user_flag.yaw_set_flag = 1;
+				DataClr();
+			}
+			break;
+		
+		case 6:
+			HWT101PosCtl(0);
+			/*ÒÔ10cm/sËÙ¶ÈÏòÇ°ÒÆ¶¯10s*/
+			//RealTimeSpeedControl(10, Direction_x);
+			opmv.mode_cmd[1] = 5; //ºìÉ«¸ËÊ¶±ðÄ£Ê½
+			cnt += dT;
+		
+			/*Ã»Ê¶±ðµ½Ä¿±ê*/
+			if(cnt >= 10000){
+				cnt = 0;
+				mission_step += 4;
+				DataClr();
+			}
+			
+			/*Ê¶±ðµ½Ä¿±ê*/
+			if(!opmv.pole.is_invalid){
+				DataClr();
+				mission_step = 8;
+			}
+			break;
+			
+		/*Î´Ê¶±ðµ½¸Ë*/
+		case 7:
+			/*Ô­µØ×ÔÐýÖ±µ½Ê¶±ðµ½¸Ë*/
+			opmv.mode_cmd[1] = 5; //ºìÉ«¸ËÊ¶±ðÄ£Ê½
+			RealTimeSpeedControl(15, Direction_yaw);
+			if(!opmv.mol.is_invalid){
+				DataClr();
+				mission_step += 1;
+			}
+			break;
+		
+		/*Ê¶±ðµ½¸Ë*/
+		case 8:
+			/*¼ÇÂ¼¿ªÊ¼Ê±µÄyaw½Ç¶È*/
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			pos_pre = pos_now;
+			pos_start = pos_incre;
+			mission_step += 1;	
+			break;
+		
+		case 9:
+			opmv.mode_cmd[1] = 5; //ºìÉ«¸ËÊ¶±ðÄ£Ê½
+			if(opmv.mode_sta == 5)
+				PolePosCtl(50, -10, 0);
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			pos_pre = pos_now;
+			
+			if(UserAbs(pos_incre - pos_start) > 360){
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				DataClr();
+				user_flag.yaw_set_flag = 1;
+			}
+			break;
+		
+		case 10:
+			/*yawÖá×ÔÎÈ£¬ÒÔ-10cm/sËÙ¶ÈÑØxÖáºóÍË3s*/
+			//RealTimeSpeedControl(-10, Direction_x);
+			HWT101PosCtl(0);
+			
+			cnt += dT;
+			if(cnt > 3000){
+				cnt = 0;
+				DataClr();
+				mission_step += 1;
+			}
+			break;
+			
+		case 11:
+			OneKey_Land();
+			mission_step = 0;
+			break;
+		default:
+			break;
+	}
+	
+	return 1;

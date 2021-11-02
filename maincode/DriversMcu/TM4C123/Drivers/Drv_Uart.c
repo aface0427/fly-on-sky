@@ -6,6 +6,7 @@
 #include "Ano_DT_LX.h"
 #include "Drv_UbloxGPS.h"
 #include "Drv_AnoOf.h"
+#include "Ano_Scheduler.h"
 //TM4C的串口0对应底板串口1
 //TM4C的串口2对应底板串口5
 //TM4C的串口4对应底板串口2
@@ -16,7 +17,7 @@
 //串口接收发送快速定义，直接修改此处的函数名称宏，修改成自己的串口解析和发送函数名称即可，注意函数参数格式需统一
 void NoUse(u8 data){}
 #define U1GetOneByte	OpenMV_Byte_Get
-#define U2GetOneByte	TFMini_Byte_Get
+#define U2GetOneByte	TFMini_Byte_Get  
 #define U3GetOneByte	AnoOF_GetOneByte
 #define U4GetOneByte	HWT101CT_Byte_Get
 #define U5GetOneByte	ANO_DT_LX_Data_Receive_Prepare
@@ -24,6 +25,7 @@ void NoUse(u8 data){}
 u8 U1TxDataTemp[256];
 u8 U1TxInCnt = 0;
 u8 U1TxOutCnt = 0;
+u8 test1;
 void UART1_IRQHandler(void);
 void DrvUart1TxCheck(void);
 void DrvUart1Init(uint32_t baudrate)
@@ -73,6 +75,7 @@ void UART1_IRQHandler(void)
 	{			
 		com_data=ROM_UARTCharGet(UART0_BASE);
 		U1GetOneByte(com_data);
+		//test1=com_data;
 	}
 	if(flag & UART_INT_TX)
 	{

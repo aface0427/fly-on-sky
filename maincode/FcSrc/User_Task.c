@@ -15,7 +15,7 @@
 
 #define MAX_SPEED_XY 20           //最大输出速度
 #define MAX_SPEED_Z 15
-#define MAX_SPEED_YAW 10 //yaw轴最大输出角速度
+#define MAX_SPEED_YAW 20 //yaw轴最大输出角速度
 
 #define NORMALIZE_MV_DIST_Y 80.0f
 #define NORMALIZE_MV_DIST_Z 60.0f
@@ -29,7 +29,7 @@ s16 out_speed_y = 0;
 s16 out_speed_z = 0;
 u8 mission_step;
 u8 mission_task = 0;
-
+float test2,test3,test4,test5,test6,test7;
 enum AxialDirection axialdirection;
 
 //20ms执行一次
@@ -54,15 +54,13 @@ void UserTask_OneKeyCmd(void)
 							one_key_takeoff_f = 1;
 							mission_task = 1;
 							mission_step = 1;
-						
+							user_flag.openmv_clr_flag = 0;
 							//user_flag.tfmini_ctl_flag = 1;
 							//user_flag.opmv_ctl_flag = 1;
 							//user_flag.hwt101_ctl_flag = 1;
-							user_flag.pole_ctl_flag = 1;
-							user_flag.of_alt_ctl_flag = 1;
-							
-							user_flag.openmv_clr_flag = 0;
-							user_flag.yaw_set_flag = 1;
+							//user_flag.pole_ctl_flag = 1;
+							//user_flag.of_alt_ctl_flag = 1;
+							//user_flag.yaw_set_flag = 1;
             }
 						
         }
@@ -116,13 +114,13 @@ float PID_calculate( float dT_s,            //周期（单位：秒）
 {
 	float differential,hz;
 	hz = safe_div(1.0f,dT_s,0);
-	
+	//test1=hz;
 //	pid_arg->k_inc_d_norm = LIMIT(pid_arg->k_inc_d_norm,0,1);
 	
 
 	
 	pid_val->exp_d = (expect - pid_val->exp_old) *hz;
-	
+	//test3=pid_val->exp_d;
 	if(pid_arg->fb_d_mode == 0)
 	{
 		pid_val->fb_d = (feedback - pid_val->feedback_old) *hz;
@@ -132,24 +130,25 @@ float PID_calculate( float dT_s,            //周期（单位：秒）
 		pid_val->fb_d = pid_val->fb_d_ex;
 	}	
 	differential = (pid_arg->kd_ex *pid_val->exp_d - pid_arg->kd_fb *pid_val->fb_d);
-	
+	//test4=differential;
 	pid_val->err = (expect - feedback);	
-
+	//test5=pid_val->err;
 	pid_val->err_i += pid_arg->ki *LIMIT((pid_val->err ),-inte_d_lim,inte_d_lim )*dT_s;//)*T;//+ differential/pid_arg->kp
 	//pid_val->err_i += pid_arg->ki *(pid_val->err )*T;//)*T;//+ pid_arg->k_pre_d *pid_val->feedback_d
 	pid_val->err_i = LIMIT(pid_val->err_i,-inte_lim,inte_lim);
 	
 	
-	
+	//test6=pid_arg->kp;
 	pid_val->out = pid_arg->k_ff *in_ff 
 	    + pid_arg->kp *pid_val->err  
 			+	differential
 //	    + pid_arg->k_inc_d_norm *pid_val->err_d_lpf + (1.0f-pid_arg->k_inc_d_norm) *differential
     	+ pid_val->err_i;
-	
+	//test1=0.6;
+	//test2=expect;
 	pid_val->feedback_old = feedback;
 	pid_val->exp_old = expect;
-	
+	//test2=pid_val->out;
 	return (pid_val->out);
 }
 
@@ -456,22 +455,26 @@ s16 GeneralPosCtl(_user_exp_fdb_set exp_fdb, 		//输入输出的期望与反馈
 {
 	float fdb_distance = exp_fdb.fdb_distance / threshold.normalize_distance;
 	float exp_distance = exp_fdb.exp_distance / threshold.normalize_distance;
+	
 	float _out = 0;
 	s16 _out_speed = 0;
 	
   //位置环pid计算
 	PID_calculate(0.02, 0, exp_distance, fdb_distance, &distance_arg, &distance_val, 0, 0);
-	
 	//输出取反
 	if(isInvert == 1)
 		_out = distance_val.out * -1;
 	else
 		_out = distance_val.out;
-	
+	//test1=-exp_fdb.fdb_distance;
+	//if(direction==Direction_z)test2=55;
+	//dx=exp_fdb.fdb_distance;
+	//dy=exp_fdb.exp_distance;
   //输出速度限位
 	_out_speed = _out * threshold.max_speed;
 	_out_speed = UserNormalize(_out_speed, threshold.max_speed, -1 * threshold.max_speed);
 	
+	test2=exp_distance-fdb_distance;
   //发送对应输出指令
 	RealTimeSpeedControl(_out_speed, direction);
 	
