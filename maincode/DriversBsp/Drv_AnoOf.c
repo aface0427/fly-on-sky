@@ -153,6 +153,7 @@ static void AnoOF_DataAnl(uint8_t *data, uint8_t len)
 	else if (*(data + 2) == 0X34) //高度信息
 	{
 		ano_of.of_alt_cm = *((u32 *)(data + 7));
+		//ano_of.of_alt_cm = 360-ano_of.of_alt_cm;
 		//
 		check_time_ms[2] = 0;
 		ano_of.alt_update_cnt++;
