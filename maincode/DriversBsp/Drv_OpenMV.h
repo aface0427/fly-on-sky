@@ -40,6 +40,7 @@ typedef struct{
     u8 is_invalid;
 	s16 Dist;
 	s16 flag;
+	s16 pos_x;
     s16 pos_y;   //0-300
 }_openmv_pole_tracking_st;
 

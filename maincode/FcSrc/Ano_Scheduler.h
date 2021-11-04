@@ -96,6 +96,7 @@ typedef struct
 	u8 opmv_ctl_flag;
 	u8 hwt101_ctl_flag;
 	u8 openmv_clr_flag;
+	u8 openmv_down_flag;
 	u8 yaw_set_flag; //yaw轴角度确定位
 	u8 pole_ctl_flag; //绕杆模式
 	u8 of_alt_ctl_flag; //光流定高
@@ -138,6 +139,7 @@ void Init_GeneralCtlArg(void);
 void Scheduler_Setup(void);
 void Scheduler_Run(void);
 u8 taskset2(s16 dT);
+u8 taskset3(s16 dT);
 u8 TFMiniPosCtl(s16 expect);
 u8 OpMVPosCtl(s16 expect1, s16 expect2);
 u8 OpMVPosCtl_Down(s16 expect1, s16 expect2);

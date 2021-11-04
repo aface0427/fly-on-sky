@@ -235,9 +235,10 @@ static void Loop_20Hz(void) //50ms执行一次
 {
 	//OFAltCtl(150);
 	//user_send(0xf2,speed_zz,direction_z);
-	user_send(0xf1,hwt101ct.yaw_angle,ano_of.of_alt_cm);
-	user_send(0xf2,mission_step,mission_step);
-	user_send(0xf3,dx,dy);
+	user_send(0xf1,opmv.pole.pos_x,opmv.pole.pos_y);
+	user_send(0xf2,test_output_x,test_output_y);
+	//user_flag.openmv_down_flag=1;
+	//user_send(0xf3,dx,dy);
 	/*********************************绕杆*******************************************/
 	if(user_flag.pole_ctl_flag&&opmv.pole.is_invalid&&opmv.pole.pos_y>30&&opmv.pole.pos_y<70){
 		PolePosCtl(50, -10, 0); //x方向保持距离、y方向移动速度、yaw期望位置
@@ -258,6 +259,10 @@ static void Loop_20Hz(void) //50ms执行一次
   if(user_flag.tfmini_ctl_flag){
 		TFMiniPosCtl(50); //x方向定距离
 	}	
+	/*********************************openmv xy轴定位*******************************************/
+  if(user_flag.openmv_down_flag){
+		OpMVPosCtl_Down(0,0); //x方向定距离
+	}	
 	
 	
 	/*********************************光流激光定高*******************************************/
@@ -270,7 +275,8 @@ static void Loop_20Hz(void) //50ms执行一次
 	/*********************************任务集*******************************************/
 	if(mission_task){
 		//TaskSet(50);
-		taskset2(50);
+		//taskset2(50);
+		taskset3(50);
 	}
 	test22=rt_tar.st_data.vel_y;
 	/*********************************数据位清零*******************************************/
@@ -375,7 +381,7 @@ void Init_PID(void){
 */
 void Init_GeneralCtlArg(void){
 	/*x*/
-	user_threshold_x.max_speed = 12;
+	user_threshold_x.max_speed = 15;
 	user_threshold_x.normalize_distance = 500.0f;
 	user_threshold_x.normalize_speed = 20.0f;
 	
@@ -385,7 +391,7 @@ void Init_GeneralCtlArg(void){
 	user_threshold_pole_x.normalize_speed = 3.0f;
 	
 	/*y*/
-	user_threshold_y.max_speed = 12;
+	user_threshold_y.max_speed = 15;
 	user_threshold_y.normalize_distance = 80.0f;
 	user_threshold_y.normalize_speed = 20.0f;
 	
@@ -491,13 +497,14 @@ u8 OpMVPosCtl_Down(s16 expect1, s16 expect2){
 	user_exp_fdb_x.exp_distance = expect1;
 	user_exp_fdb_y.exp_distance = expect2;
 		
-	if(opmv.mol.is_invalid){
-		user_exp_fdb_x.fdb_distance = user_exp_fdb_x.exp_distance;
-		user_exp_fdb_y.fdb_distance = user_exp_fdb_y.exp_distance;
+	if(opmv.pole.flag==1){
+		
+		user_exp_fdb_x.fdb_distance = opmv.pole.pos_x;
+		user_exp_fdb_y.fdb_distance = opmv.pole.pos_y;
 	}
 	else{
-		user_exp_fdb_x.fdb_distance = opmv.mol.pos_y;
-		user_exp_fdb_y.fdb_distance = opmv.mol.pos_z;
+		user_exp_fdb_x.fdb_distance = user_exp_fdb_x.exp_distance;
+		user_exp_fdb_y.fdb_distance = user_exp_fdb_y.exp_distance;
 	}
 		
 	test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_y, 1);
@@ -1153,6 +1160,7 @@ u8 taskset2(s16 dT)
 			}
 			break;
 		case 29:
+			user_flag.of_alt_ctl_flag = 0;
 			mission_step+=OneKey_Land();
 			break;
 		case 30:
@@ -1164,6 +1172,160 @@ u8 taskset2(s16 dT)
 			}
 			break;
 		case 31:
+			FC_Lock();
+			mission_step =0;
+		default:
+			break;
+	}
+	
+}
+u8 taskset3(s16 dT)
+{
+	switch(mission_step)
+	{
+		case 0:
+			cnt=0;
+			break;
+		/*case 1:
+			FC_Unlock();
+			cnt+=dT;
+			if(timejudge(3))
+			{
+				mission_step++;
+				cnt=0;
+			}
+			break;
+		case 2:
+			mission_step+=OneKey_Takeoff(100);
+			break;
+		case 3:
+			user_flag.yaw_set_flag=1;
+			Position_incre=0;
+			Position_pre=0;
+			cnt+=dT;
+			pp=cnt;
+			if(timejudge(3))
+			{
+				mission_step++;
+				cnt=0;
+			}
+			break;*/
+		case 1:
+			mission_step=4;
+			break;
+		case 4:
+			user_flag.of_alt_ctl_flag=1;
+			if(ano_of.of_alt_cm>140&&ano_of.of_alt_cm<160)
+			{
+				cnt+=dT;
+			}
+			else cnt=0;
+			if(timejudge(3))
+			{
+				mission_step++;
+				DataClr();
+				user_flag.yaw_set_flag=1;
+				cnt=0;
+			}
+			break;
+		case 5:
+			RealTimeSpeedControl(20,Direction_x);
+			cnt+=dT;
+			if(cnt>17500)
+			{
+				mission_step++;
+				DataClr();
+				user_flag.yaw_set_flag=1;
+				cnt=0;
+			}
+			break;
+		case 6:
+			cnt+=dT;
+			if(cnt>3000)
+			{
+				mission_step++;
+				DataClr();
+				user_flag.yaw_set_flag=1;
+				cnt=0;
+			}
+			break;
+		case 7:
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			pos_pre = pos_now;
+			pos_start = pos_incre;
+			user_flag.yaw_set_flag=0;
+			mission_step += 1;
+			break;
+		case 8:
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			RealTimeSpeedControl(-20, Direction_yaw);
+			pos_pre = pos_now;
+			if(UserAbs(pos_incre - pos_start) > 90){
+				flag=1;
+				RealTimeSpeedControl(0, Direction_yaw);
+			}
+			if(flag==1)
+			{
+				cnt+=dT;	
+				pos_now = hwt101ct.yaw_angle;
+				pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+				user_exp_fdb_yaw.exp_distance = 0;
+				user_exp_fdb_yaw.fdb_distance = UserAbs(pos_incre - pos_start)-90;
+				test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+			}
+			if(timejudge(3))
+			{
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				flag=0;
+				DataClr();
+				user_flag.yaw_set_flag = 1;
+				cnt=0;
+			}
+			break;
+		case 9:
+			cnt+=dT;
+			if(timejudge(3))
+			{
+				cnt=0;
+				mission_step++;
+			}
+			break;
+		case 10:
+			RealTimeSpeedControl(20,Direction_x);
+			cnt+=dT;
+			if(cnt>12500)
+			{
+				mission_step++;
+				DataClr();
+				user_flag.yaw_set_flag=1;
+				cnt=0;
+			}
+			break;
+		case 11:
+			cnt+=dT;
+			if(timejudge(3))
+			{
+				cnt=0;
+				mission_step++;
+			}
+			break;
+		case 12:
+			user_flag.of_alt_ctl_flag = 0;
+			mission_step+=OneKey_Land();
+			break;
+		case 13:
+			cnt+=dT;
+			if(timejudge(3))
+			{
+				cnt=0;
+				mission_step++;
+			}
+			break;
+		case 14:
 			FC_Lock();
 			mission_step =0;
 		default:

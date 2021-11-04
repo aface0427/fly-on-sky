@@ -82,7 +82,7 @@ void UserTask_OneKeyCmd(void)
 							user_flag.hwt101_ctl_flag = 0;
 							user_flag.pole_ctl_flag = 0;
 							user_flag.of_alt_ctl_flag = 0;
-							
+							user_flag.openmv_down_flag=0;
 							user_flag.openmv_clr_flag = 1;
 							user_flag.yaw_set_flag = 0;
 							
