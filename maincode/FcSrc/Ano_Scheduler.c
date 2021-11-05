@@ -17,8 +17,8 @@
 #include "Drv_OpenMV.h"
 #include "Drv_Uart.h"
 extern _ano_of_st ano_of;
-const int common_time=0;
-const int common_speed=0;
+const int common_time=2500;
+const int common_speed=20;
 _user_flag_set user_flag = {0};
 s16 dx, dy;
 u16 cnt = 0;
@@ -282,7 +282,7 @@ static void Loop_20Hz(void) //50ms执行一次
 	if(user_flag.of_alt_ctl_flag==1){
 		OFAltCtl(150); //期望高度
 	}
-	else if(user_flag.of_alt_ctl_flag==1){
+	else if(user_flag.of_alt_ctl_flag==2){
 		OFAltCtl(10); //期望高度
 	}
 	/*********************************任务集*******************************************/
@@ -1218,6 +1218,7 @@ u8 taskset3(s16 dT)
 			Position_pre=0;
 			cnt+=dT;
 			pp=cnt;
+			angle_fix();
 			if(timejudge(3))
 			{
 				mission_step++;
@@ -1226,6 +1227,7 @@ u8 taskset3(s16 dT)
 			break;
 		case 4:
 			user_flag.of_alt_ctl_flag=1;
+			angle_fix();
 			if(ano_of.of_alt_cm>140&&ano_of.of_alt_cm<160)
 			{
 				cnt+=dT;
@@ -1239,10 +1241,10 @@ u8 taskset3(s16 dT)
 			}
 			break;
 		case 5:
-			RealTimeSpeedControl(15,Direction_x);
+			RealTimeSpeedControl(20,Direction_x);
 			angle_fix();
 			cnt+=dT;
-			if(cnt>20000)
+			if(cnt>10000)
 			{
 				mission_step=11;
 				DataClr();
