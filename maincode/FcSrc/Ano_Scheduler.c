@@ -16,14 +16,17 @@
 #include "LX_FC_Fun.h"
 #include "Drv_OpenMV.h"
 #include "Drv_Uart.h"
-
 extern _ano_of_st ano_of;
+const int common_time=0;
+const int common_speed=0;
 _user_flag_set user_flag = {0};
 s16 dx, dy;
 u16 cnt = 0;
 u16 flag=0;
 u8 user_send_buffer[50];
 s16 pp;
+u8 num=0;
+u8 OpenmvSend[5]={0};
 static void ANO_DT_LX_Send_Data(u8 *dataToSend, u8 length)
 {
 	//
@@ -154,6 +157,7 @@ static s16 pos_pre;
 static s16 pos_incre;
 static s16 pos_start;
 int p=1000;
+int x,y;
 bool timejudge(int s)
 {
 	if(cnt/p>=s)return 1;
@@ -166,7 +170,7 @@ bool timejudge(int s)
 static void Loop_1000Hz(void) //1ms执行一次
 {
 	//////////////////////////////////////////////////////////////////////
-
+	
 	//////////////////////////////////////////////////////////////////////
 }
 
@@ -192,6 +196,7 @@ static void Loop_100Hz(void) //10ms执行一次
 
 static void Loop_50Hz(void) //20ms执行一次
 {
+	
 	//////////////////////////////////////////////////////////////////////
   OpenMV_Offline_Check(20);
   TFmini_Offline_Check(20);
@@ -199,7 +204,7 @@ static void Loop_50Hz(void) //20ms执行一次
 	//////////////////////////////////////////////////////////////////////
 	u8 _dt = 20;
 	static s32 dis_dx, dis_dy;
-	static s32 _dis_x, _dis_y;
+	static s32 _dis_x, _dis_y;         
 	
 	/*速度积分*/
 	if(user_flag.of_dis_clear_cmd){
@@ -226,6 +231,10 @@ static void Loop_50Hz(void) //20ms执行一次
 	dt.fun[0xf1].WTS = 1;
 	dt.fun[0xf2].WTS = 1;
 	dt.fun[0xf3].WTS = 1;
+	OpenmvSend[0]=0x08;
+	OpenmvSend[1]=(u8)ano_of.of_alt_cm;
+	OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];
+	DrvUart1SendBuf(&OpenmvSend[0], 3);
 //		/*数据发送*/
 	//user_send(0xf1,mission_step,0);
 	//////////////////////////////////////////////////////////////////////
@@ -233,12 +242,9 @@ static void Loop_50Hz(void) //20ms执行一次
 
 static void Loop_20Hz(void) //50ms执行一次
 {
-	//OFAltCtl(150);
-	//user_send(0xf2,speed_zz,direction_z);
 	user_send(0xf1,opmv.pole.pos_x,opmv.pole.pos_y);
 	user_send(0xf2,test_output_x,test_output_y);
-	//user_flag.openmv_down_flag=1;
-	//user_send(0xf3,dx,dy);
+	user_send(0xf3,cnt,mission_step);
 	/*********************************绕杆*******************************************/
 	if(user_flag.pole_ctl_flag&&opmv.pole.is_invalid&&opmv.pole.pos_y>30&&opmv.pole.pos_y<70){
 		PolePosCtl(50, -10, 0); //x方向保持距离、y方向移动速度、yaw期望位置
@@ -246,23 +252,30 @@ static void Loop_20Hz(void) //50ms执行一次
 	else if(user_flag.pole_ctl_flag)PolePosCtl(50, 0, 0);
 	
 	/*********************************OpenMV yz轴定位*******************************************/
+	//user_flag.opmv_ctl_flag=1;
 	if(user_flag.opmv_ctl_flag){
 		OpMVPosCtl_pole(0, 0); //y方向期望、z方向期望
 	}
 	test11=rt_tar.st_data.vel_y;
 	/*********************************HWT101 yaw轴定位*******************************************/
 	if(user_flag.hwt101_ctl_flag){
-		HWT101PosCtl(0); //无用参数
+		//HWT101PosCtl(0); //无用参数
 		//RealTimeSpeedControl(-15,Direction_yaw);
+		angle_fix();
 	}
 	/*********************************TFmini x轴定位*******************************************/
   if(user_flag.tfmini_ctl_flag){
 		TFMiniPosCtl(50); //x方向定距离
 	}	
 	/*********************************openmv xy轴定位*******************************************/
-  if(user_flag.openmv_down_flag){
-		OpMVPosCtl_Down(0,0); //x方向定距离
+	//user_flag.openmv_down_flag=1;
+  if(user_flag.openmv_down_flag==1){
+		OpMVPosCtl_Down(x,y); //x,y方向定距离
 	}	
+	else if(user_flag.openmv_down_flag==2)
+	{
+		OpMVPosCtl_Down(-500,y);
+	}
 	
 	
 	/*********************************光流激光定高*******************************************/
@@ -277,6 +290,7 @@ static void Loop_20Hz(void) //50ms执行一次
 		//TaskSet(50);
 		//taskset2(50);
 		taskset3(50);
+		//realtask(50);
 	}
 	test22=rt_tar.st_data.vel_y;
 	/*********************************数据位清零*******************************************/
@@ -293,10 +307,11 @@ static void Loop_20Hz(void) //50ms执行一次
 
 static void Loop_2Hz(void) //500ms执行一次
 {
-    opmv.mode_cmd[0] = 0x0A;
-    opmv.mode_cmd[1] = 2;
-    opmv.mode_cmd[2] = opmv.mode_cmd[1] + opmv.mode_cmd[0];
-    DrvUart1SendBuf(&opmv.mode_cmd[0],3);
+//    opmv.mode_cmd[0] = 0x0A;
+//    opmv.mode_cmd[1] = 2;
+//    opmv.mode_cmd[2] = opmv.mode_cmd[1] + opmv.mode_cmd[0];
+//    DrvUart1SendBuf(&opmv.mode_cmd[0],3);
+			
 }
 
 /*
@@ -316,7 +331,7 @@ void Init_PID(void){
 	PID_Speed_arg_x.k_ff = 0;
 	
 //x位置环
-	PID_Distance_arg_x.kp = 8.0f;
+	PID_Distance_arg_x.kp = 2.0f;
 	PID_Distance_arg_x.ki = 0;
 	PID_Distance_arg_x.kd_ex = 0;
 	PID_Distance_arg_x.fb_d_mode = 0;
@@ -332,7 +347,7 @@ void Init_PID(void){
 	PID_Speed_arg_y.k_ff = 0;
 	
 //y位置环
-	PID_Distance_arg_y.kp = 2.5f;
+	PID_Distance_arg_y.kp = 2.0f;
 	PID_Distance_arg_y.ki = 0;
 	PID_Distance_arg_y.kd_ex = 0;
 	PID_Distance_arg_y.fb_d_mode = 0;
@@ -465,7 +480,43 @@ void Scheduler_Run(void)
 	}
 }
 
-
+void angle_fix(void)
+{
+	user_exp_fdb_yaw.exp_distance=user_exp_fdb_yaw.fdb_distance=hwt101ct.yaw_angle;
+	if(hwt101ct.yaw_angle>-40&&hwt101ct.yaw_angle<40)
+	{
+		user_exp_fdb_yaw.exp_distance=359;
+		user_exp_fdb_yaw.fdb_distance=hwt101ct.yaw_angle+359;
+		test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+	}
+	else if(hwt101ct.yaw_angle>50&&hwt101ct.yaw_angle<130)
+	{
+		user_exp_fdb_yaw.exp_distance=359+90;
+		user_exp_fdb_yaw.fdb_distance=hwt101ct.yaw_angle+359;
+		test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+	}
+	else if(hwt101ct.yaw_angle>-130&&hwt101ct.yaw_angle<-50)
+	{
+		user_exp_fdb_yaw.exp_distance=359-90;
+		user_exp_fdb_yaw.fdb_distance=hwt101ct.yaw_angle+359;
+		test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+	}
+	else if(hwt101ct.yaw_angle>140||hwt101ct.yaw_angle<-140)
+	{
+		if(hwt101ct.yaw_angle>140)
+		{
+			user_exp_fdb_yaw.exp_distance=180;
+			user_exp_fdb_yaw.fdb_distance=hwt101ct.yaw_angle;
+			test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 0);
+		}
+		else if(hwt101ct.yaw_angle<-140)
+		{
+			user_exp_fdb_yaw.exp_distance=-180;
+			user_exp_fdb_yaw.fdb_distance=hwt101ct.yaw_angle;
+			test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+		}
+	}
+}
 u8 TFMiniPosCtl(s16 expect){
 	user_exp_fdb_x.exp_distance = expect;
 	if(mission_step==8&&tfmini.Dist>100)user_exp_fdb_x.fdb_distance = expect;
@@ -506,9 +557,9 @@ u8 OpMVPosCtl_Down(s16 expect1, s16 expect2){
 		user_exp_fdb_x.fdb_distance = user_exp_fdb_x.exp_distance;
 		user_exp_fdb_y.fdb_distance = user_exp_fdb_y.exp_distance;
 	}
-		
+	if(expect1!=-500)
 	test_output_x = GeneralPosCtl(user_exp_fdb_x, Direction_x, PID_Distance_arg_x, PID_Distance_val_x, user_threshold_y, 1);
-	test_output_y = GeneralPosCtl(user_exp_fdb_y, Direction_y, PID_Distance_arg_x, PID_Distance_val_y, user_threshold_y, 1);
+	test_output_y = GeneralPosCtl(user_exp_fdb_y, Direction_y, PID_Distance_arg_x, PID_Distance_val_y, user_threshold_y, 0);
 	
 	return 1;
 }
@@ -771,13 +822,16 @@ u8 taskset2(s16 dT)
 			break;
 		case 2:
 			mission_step+=OneKey_Takeoff(100);
+			cnt+=dT;
+			if(timejudge(3))
+			{
+				mission_step++;
+				cnt=0;
+			}
 			break;
 		case 3:
-			user_flag.yaw_set_flag=1;
-			Position_incre=0;
-			Position_pre=0;
+			user_flag.hwt101_ctl_flag=1;
 			cnt+=dT;
-			pp=cnt;
 			if(timejudge(3))
 			{
 				mission_step++;
@@ -795,8 +849,9 @@ u8 taskset2(s16 dT)
 			{
 				mission_step++;
 				DataClr();
-				user_flag.yaw_set_flag=1;
 				cnt=0;
+				Position_incre=0;
+				Position_pre=0;
 			}
 			break;
 		case 5:
@@ -804,7 +859,6 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			pos_pre = pos_now;
 			pos_start = pos_incre;
-			user_flag.yaw_set_flag=0;
 			mission_step += 1;
 			break;
 		case 6:
@@ -812,18 +866,14 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			RealTimeSpeedControl(20, Direction_yaw);
 			pos_pre = pos_now;
-			if(UserAbs(pos_incre - pos_start) > 90){
+			if(UserAbs(pos_incre-pos_start)>80){
 				flag=1;
-				RealTimeSpeedControl(0, Direction_yaw);
+				angle_fix();
 			}
 			if(flag==1)
 			{
-				cnt+=dT;	
-				pos_now = hwt101ct.yaw_angle;
-				pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
-				user_exp_fdb_yaw.exp_distance = 0;
-				user_exp_fdb_yaw.fdb_distance = 90-UserAbs(pos_incre - pos_start);
-				test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+				angle_fix();
+				cnt+=dT;
 			}
 			if(timejudge(3))
 			{
@@ -832,7 +882,6 @@ u8 taskset2(s16 dT)
 				pos_pre = 0;
 				flag=0;
 				DataClr();
-				user_flag.yaw_set_flag = 1;
 				cnt=0;
 			}
 			break;
@@ -840,6 +889,7 @@ u8 taskset2(s16 dT)
 			cnt+=dT;
 			if(timejudge(3))
 			{
+				angle_fix();
 				cnt=0;
 				mission_step++;
 			}
@@ -849,7 +899,6 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			pos_pre = pos_now;
 			pos_start = pos_incre;
-			user_flag.yaw_set_flag=0;
 			mission_step += 1;
 			break;
 		case 9:
@@ -857,18 +906,14 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			RealTimeSpeedControl(20, Direction_yaw);
 			pos_pre = pos_now;
-			if(UserAbs(pos_incre - pos_start) > 90){
+			if(UserAbs(pos_incre-pos_start)>80){
 				flag=1;
-				RealTimeSpeedControl(0, Direction_yaw);
+				angle_fix();
 			}
 			if(flag==1)
 			{
-				cnt+=dT;	
-				pos_now = hwt101ct.yaw_angle;
-				pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
-				user_exp_fdb_yaw.exp_distance = 0;
-				user_exp_fdb_yaw.fdb_distance = 90-UserAbs(pos_incre - pos_start);
-				test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+				angle_fix();
+				cnt+=dT;
 			}
 			if(timejudge(3))
 			{
@@ -877,7 +922,6 @@ u8 taskset2(s16 dT)
 				pos_pre = 0;
 				flag=0;
 				DataClr();
-				user_flag.yaw_set_flag = 1;
 				cnt=0;
 			}
 			break;
@@ -885,6 +929,7 @@ u8 taskset2(s16 dT)
 			cnt+=dT;
 			if(timejudge(3))
 			{
+				angle_fix();
 				cnt=0;
 				mission_step++;
 			}
@@ -894,7 +939,6 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			pos_pre = pos_now;
 			pos_start = pos_incre;
-			user_flag.yaw_set_flag=0;
 			mission_step += 1;
 			break;
 		case 12:
@@ -902,18 +946,14 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			RealTimeSpeedControl(20, Direction_yaw);
 			pos_pre = pos_now;
-			if(UserAbs(pos_incre - pos_start) > 90){
+			if(UserAbs(pos_incre-pos_start)>80){
 				flag=1;
-				RealTimeSpeedControl(0, Direction_yaw);
+				angle_fix();
 			}
 			if(flag==1)
 			{
-				cnt+=dT;	
-				pos_now = hwt101ct.yaw_angle;
-				pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
-				user_exp_fdb_yaw.exp_distance = 0;
-				user_exp_fdb_yaw.fdb_distance = 90-UserAbs(pos_incre - pos_start);
-				test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+				angle_fix();
+				cnt+=dT;
 			}
 			if(timejudge(3))
 			{
@@ -922,7 +962,6 @@ u8 taskset2(s16 dT)
 				pos_pre = 0;
 				flag=0;
 				DataClr();
-				user_flag.yaw_set_flag = 1;
 				cnt=0;
 			}
 			break;
@@ -930,6 +969,7 @@ u8 taskset2(s16 dT)
 			cnt+=dT;
 			if(timejudge(3))
 			{
+				angle_fix();
 				cnt=0;
 				mission_step++;
 			}
@@ -939,7 +979,6 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			pos_pre = pos_now;
 			pos_start = pos_incre;
-			user_flag.yaw_set_flag=0;
 			mission_step += 1;
 			break;
 		case 15:
@@ -947,18 +986,14 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			RealTimeSpeedControl(20, Direction_yaw);
 			pos_pre = pos_now;
-			if(UserAbs(pos_incre - pos_start) > 90){
+			if(UserAbs(pos_incre-pos_start)>80){
 				flag=1;
-				RealTimeSpeedControl(0, Direction_yaw);
+				angle_fix();
 			}
 			if(flag==1)
 			{
-				cnt+=dT;	
-				pos_now = hwt101ct.yaw_angle;
-				pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
-				user_exp_fdb_yaw.exp_distance = 0;
-				user_exp_fdb_yaw.fdb_distance = 90-UserAbs(pos_incre - pos_start);
-				test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+				angle_fix();
+				cnt+=dT;
 			}
 			if(timejudge(3))
 			{
@@ -967,7 +1002,6 @@ u8 taskset2(s16 dT)
 				pos_pre = 0;
 				flag=0;
 				DataClr();
-				user_flag.yaw_set_flag = 1;
 				cnt=0;
 			}
 			break;
@@ -975,6 +1009,7 @@ u8 taskset2(s16 dT)
 			cnt+=dT;
 			if(timejudge(3))
 			{
+				angle_fix();
 				cnt=0;
 				mission_step++;
 			}
@@ -984,26 +1019,21 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			pos_pre = pos_now;
 			pos_start = pos_incre;
-			user_flag.yaw_set_flag=0;
 			mission_step += 1;
 			break;
 		case 18:
 			pos_now = hwt101ct.yaw_angle;
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
-			RealTimeSpeedControl(20, Direction_yaw);
+			RealTimeSpeedControl(-20, Direction_yaw);
 			pos_pre = pos_now;
-			if(UserAbs(pos_incre - pos_start) > 90){
+			if(UserAbs(pos_incre-pos_start)>80){
 				flag=1;
-				RealTimeSpeedControl(0, Direction_yaw);
+				angle_fix();
 			}
 			if(flag==1)
 			{
-				cnt+=dT;	
-				pos_now = hwt101ct.yaw_angle;
-				pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
-				user_exp_fdb_yaw.exp_distance = 0;
-				user_exp_fdb_yaw.fdb_distance = 90-UserAbs(pos_incre - pos_start);
-				test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+				angle_fix();
+				cnt+=dT;
 			}
 			if(timejudge(3))
 			{
@@ -1012,7 +1042,6 @@ u8 taskset2(s16 dT)
 				pos_pre = 0;
 				flag=0;
 				DataClr();
-				user_flag.yaw_set_flag = 1;
 				cnt=0;
 			}
 			break;
@@ -1020,6 +1049,7 @@ u8 taskset2(s16 dT)
 			cnt+=dT;
 			if(timejudge(3))
 			{
+				angle_fix();
 				cnt=0;
 				mission_step++;
 			}
@@ -1029,7 +1059,6 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			pos_pre = pos_now;
 			pos_start = pos_incre;
-			user_flag.yaw_set_flag=0;
 			mission_step += 1;
 			break;
 		case 21:
@@ -1037,18 +1066,14 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			RealTimeSpeedControl(20, Direction_yaw);
 			pos_pre = pos_now;
-			if(UserAbs(pos_incre - pos_start) > 90){
+			if(UserAbs(pos_incre-pos_start)>80){
 				flag=1;
-				RealTimeSpeedControl(0, Direction_yaw);
+				angle_fix();
 			}
 			if(flag==1)
 			{
-				cnt+=dT;	
-				pos_now = hwt101ct.yaw_angle;
-				pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
-				user_exp_fdb_yaw.exp_distance = 0;
-				user_exp_fdb_yaw.fdb_distance = 90-UserAbs(pos_incre - pos_start);
-				test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+				angle_fix();
+				cnt+=dT;
 			}
 			if(timejudge(3))
 			{
@@ -1057,7 +1082,6 @@ u8 taskset2(s16 dT)
 				pos_pre = 0;
 				flag=0;
 				DataClr();
-				user_flag.yaw_set_flag = 1;
 				cnt=0;
 			}
 			break;
@@ -1065,6 +1089,7 @@ u8 taskset2(s16 dT)
 			cnt+=dT;
 			if(timejudge(3))
 			{
+				angle_fix();
 				cnt=0;
 				mission_step++;
 			}
@@ -1074,26 +1099,21 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			pos_pre = pos_now;
 			pos_start = pos_incre;
-			user_flag.yaw_set_flag=0;
 			mission_step += 1;
 			break;
 		case 24:
 			pos_now = hwt101ct.yaw_angle;
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
-			RealTimeSpeedControl(20, Direction_yaw);
+			RealTimeSpeedControl(-20, Direction_yaw);
 			pos_pre = pos_now;
-			if(UserAbs(pos_incre - pos_start) > 90){
+			if(UserAbs(pos_incre-pos_start)>80){
 				flag=1;
-				RealTimeSpeedControl(0, Direction_yaw);
+				angle_fix();
 			}
 			if(flag==1)
 			{
-				cnt+=dT;	
-				pos_now = hwt101ct.yaw_angle;
-				pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
-				user_exp_fdb_yaw.exp_distance = 0;
-				user_exp_fdb_yaw.fdb_distance = 90-UserAbs(pos_incre - pos_start);
-				test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+				angle_fix();
+				cnt+=dT;
 			}
 			if(timejudge(3))
 			{
@@ -1102,7 +1122,6 @@ u8 taskset2(s16 dT)
 				pos_pre = 0;
 				flag=0;
 				DataClr();
-				user_flag.yaw_set_flag = 1;
 				cnt=0;
 			}
 			break;
@@ -1110,6 +1129,7 @@ u8 taskset2(s16 dT)
 			cnt+=dT;
 			if(timejudge(3))
 			{
+				angle_fix();
 				cnt=0;
 				mission_step++;
 			}
@@ -1119,7 +1139,6 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			pos_pre = pos_now;
 			pos_start = pos_incre;
-			user_flag.yaw_set_flag=0;
 			mission_step += 1;
 			break;
 		case 27:
@@ -1127,18 +1146,14 @@ u8 taskset2(s16 dT)
 			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
 			RealTimeSpeedControl(20, Direction_yaw);
 			pos_pre = pos_now;
-			if(UserAbs(pos_incre - pos_start) > 90){
+			if(UserAbs(pos_incre-pos_start)>80){
 				flag=1;
-				RealTimeSpeedControl(0, Direction_yaw);
+				angle_fix();
 			}
 			if(flag==1)
 			{
-				cnt+=dT;	
-				pos_now = hwt101ct.yaw_angle;
-				pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
-				user_exp_fdb_yaw.exp_distance = 0;
-				user_exp_fdb_yaw.fdb_distance = 90-UserAbs(pos_incre - pos_start);
-				test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
+				angle_fix();
+				cnt+=dT;
 			}
 			if(timejudge(3))
 			{
@@ -1147,7 +1162,6 @@ u8 taskset2(s16 dT)
 				pos_pre = 0;
 				flag=0;
 				DataClr();
-				user_flag.yaw_set_flag = 1;
 				cnt=0;
 			}
 			break;
@@ -1155,6 +1169,7 @@ u8 taskset2(s16 dT)
 			cnt+=dT;
 			if(timejudge(3))
 			{
+				angle_fix();
 				cnt=0;
 				mission_step++;
 			}
@@ -1186,7 +1201,7 @@ u8 taskset3(s16 dT)
 		case 0:
 			cnt=0;
 			break;
-		/*case 1:
+		case 1:
 			FC_Unlock();
 			cnt+=dT;
 			if(timejudge(3))
@@ -1199,7 +1214,6 @@ u8 taskset3(s16 dT)
 			mission_step+=OneKey_Takeoff(100);
 			break;
 		case 3:
-			user_flag.yaw_set_flag=1;
 			Position_incre=0;
 			Position_pre=0;
 			cnt+=dT;
@@ -1209,9 +1223,6 @@ u8 taskset3(s16 dT)
 				mission_step++;
 				cnt=0;
 			}
-			break;*/
-		case 1:
-			mission_step=4;
 			break;
 		case 4:
 			user_flag.of_alt_ctl_flag=1;
@@ -1223,103 +1234,39 @@ u8 taskset3(s16 dT)
 			if(timejudge(3))
 			{
 				mission_step++;
-				DataClr();
-				user_flag.yaw_set_flag=1;
+				angle_fix();
 				cnt=0;
 			}
 			break;
 		case 5:
-			RealTimeSpeedControl(20,Direction_x);
+			RealTimeSpeedControl(15,Direction_x);
+			angle_fix();
 			cnt+=dT;
-			if(cnt>17500)
+			if(cnt>20000)
 			{
-				mission_step++;
+				mission_step=11;
 				DataClr();
-				user_flag.yaw_set_flag=1;
-				cnt=0;
-			}
-			break;
-		case 6:
-			cnt+=dT;
-			if(cnt>3000)
-			{
-				mission_step++;
-				DataClr();
-				user_flag.yaw_set_flag=1;
-				cnt=0;
-			}
-			break;
-		case 7:
-			pos_now = hwt101ct.yaw_angle;
-			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
-			pos_pre = pos_now;
-			pos_start = pos_incre;
-			user_flag.yaw_set_flag=0;
-			mission_step += 1;
-			break;
-		case 8:
-			pos_now = hwt101ct.yaw_angle;
-			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
-			RealTimeSpeedControl(-20, Direction_yaw);
-			pos_pre = pos_now;
-			if(UserAbs(pos_incre - pos_start) > 90){
-				flag=1;
-				RealTimeSpeedControl(0, Direction_yaw);
-			}
-			if(flag==1)
-			{
-				cnt+=dT;	
-				pos_now = hwt101ct.yaw_angle;
-				pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
-				user_exp_fdb_yaw.exp_distance = 0;
-				user_exp_fdb_yaw.fdb_distance = UserAbs(pos_incre - pos_start)-90;
-				test_output_yaw = GeneralPosCtl(user_exp_fdb_yaw, Direction_yaw, PID_Distance_arg_yaw, PID_Distance_val_yaw, user_threshold_yaw, 1);
-			}
-			if(timejudge(3))
-			{
-				mission_step += 1;
-				pos_incre = 0;
-				pos_pre = 0;
-				flag=0;
-				DataClr();
-				user_flag.yaw_set_flag = 1;
-				cnt=0;
-			}
-			break;
-		case 9:
-			cnt+=dT;
-			if(timejudge(3))
-			{
-				cnt=0;
-				mission_step++;
-			}
-			break;
-		case 10:
-			RealTimeSpeedControl(20,Direction_x);
-			cnt+=dT;
-			if(cnt>12500)
-			{
-				mission_step++;
-				DataClr();
-				user_flag.yaw_set_flag=1;
+				angle_fix();
 				cnt=0;
 			}
 			break;
 		case 11:
 			cnt+=dT;
-			if(timejudge(3))
+			if(timejudge(5))
 			{
 				cnt=0;
+				angle_fix();
 				mission_step++;
 			}
 			break;
 		case 12:
 			user_flag.of_alt_ctl_flag = 0;
+			user_flag.openmv_down_flag=0;
 			mission_step+=OneKey_Land();
 			break;
 		case 13:
 			cnt+=dT;
-			if(timejudge(3))
+			if(timejudge(4))
 			{
 				cnt=0;
 				mission_step++;
@@ -1333,10 +1280,695 @@ u8 taskset3(s16 dT)
 	}
 	
 }
+u8 realtask(s16 dT)
+{
+	switch(mission_step)
+	{
+		case 0:
+			cnt=0;
+			break;
+		case 1:
+			FC_Unlock();
+			cnt+=dT;
+			if(timejudge(3))
+			{
+				mission_step++;
+				cnt=0;
+			}
+			break;
+		case 2:
+			mission_step+=OneKey_Takeoff(150);
+			if(opmv.pole.flag==1)
+			{
+				x=-28,y=-46;
+				/*未转向A定位，未调参,误差+-10像素点*/
+				user_flag.openmv_down_flag=1;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			break;
+		case 3:
+			user_flag.of_alt_ctl_flag=1;
+			angle_fix();
+			if(opmv.pole.flag==1)
+			{
+				x=-28,y=-46;
+				/*未转向A定位，未调参,误差+-10像素点*/
+				user_flag.openmv_down_flag=1;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(ano_of.of_alt_cm>145&&ano_of.of_alt_cm<155)
+			{
+				cnt+=dT;
+			}
+			else cnt=0;
+			if(timejudge(3))
+			{
+				mission_step++;
+				DataClr();
+				cnt=0;
+				Position_incre=0;
+				Position_pre=0;
+			}
+			break;
+		case 4:/*21号A定位 x正*/
+			angle_fix();
+			if(opmv.pole.flag==1)
+			{
+				x=-28;y=-46;
+				/*未转向A定位，未调参,误差+-10像素点*/
+				user_flag.openmv_down_flag=1;
+				if(UserAbs(opmv.pole.pos_x-x)<=10&&UserAbs(opmv.pole.pos_y-y)<=10)
+				cnt+=dT;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(timejudge(5))
+			{
+				DataClr();
+				mission_step++;
+				cnt=0;
+				user_flag.openmv_down_flag=0;
+			}
+			break;
+		case 5:/*21号右转准备*/
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			pos_pre = pos_now;
+			pos_start = pos_incre;
+			mission_step += 1;
+			break;
+		case 6:/*21号右转 朝向y正*/
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			RealTimeSpeedControl(-20, Direction_yaw);
+			pos_pre = pos_now;
+			if(UserAbs(pos_incre-pos_start)>80){
+				flag=1;
+				angle_fix();
+			}
+			if(flag==1)
+			{
+				angle_fix();
+				cnt+=dT;
+			}
+			if(timejudge(2))
+			{
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				flag=0;
+				DataClr();
+				cnt=0;
+			}
+			break;
+		case 7:/*21号朝向y正闪灯两次*/
+			angle_fix();
+			if(opmv.pole.flag==1)
+			{
+				x=-23;y=11;
+				/*转向后A定位，朝向y正，未调参*/
+				user_flag.openmv_down_flag=1;
+				if(UserAbs(opmv.pole.pos_x-x)<=10&&UserAbs(opmv.pole.pos_y-y)<=10)
+				cnt+=dT;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>3000)
+			{
+				/*闪灯两次*/
+			}
+			if(cnt>5000)
+			{
+				DataClr();
+				mission_step++;
+				angle_fix();
+				cnt=0;
+				user_flag.openmv_down_flag=0;
+				num=2;
+			}
+			break;
+		case 8:/*前进两块地砖，右侧线定位20,19闪灯两次*/
+			angle_fix();
+			RealTimeSpeedControl(common_speed,Direction_x);
+			cnt+=dT;
+			if(opmv.pole.flag==2)
+			/*距离线偏移量待调参*/
+			{
+				y=1;
+				user_flag.openmv_down_flag=2;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>=common_time)
+			{
+				/*闪灯两次*/
+				num--;
+				cnt=0;
+			}
+			if(num==0)
+			{
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				DataClr();
+				cnt=0;
+			}
+			break;
+		case 9:/*前进到18号，角定位*/
+			angle_fix();
+			RealTimeSpeedControl(common_speed,Direction_x);
+			cnt+=dT;
+			if(opmv.pole.flag==1)
+			{
+				x=0,y=0;
+				/*18号角定位，未调参,朝向y正*/
+				user_flag.openmv_down_flag=1;
+			}
+			else
+			{
+				x=0;y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>=common_time)
+			{
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				DataClr();
+				cnt=0;
+			}
+			break;
+		case 10:/*18号角定位，朝向y正*/
+			angle_fix();
+			if(opmv.pole.flag==1)
+			{
+				x=-23;y=11;
+				/*18定位，朝向y正，未调参*/
+				user_flag.openmv_down_flag=1;
+				if(UserAbs(opmv.pole.pos_x-x)<=10&&UserAbs(opmv.pole.pos_y-y)<=10)
+				cnt+=dT;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>3000)
+			{
+				DataClr();
+				mission_step++;
+				angle_fix();
+				cnt=0;
+				user_flag.openmv_down_flag=0;
+				num=2;
+			}
+			break;
+		case 11:/*18右转准备*/
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			pos_pre = pos_now;
+			pos_start = pos_incre;
+			mission_step += 1;
+			break;
+		case 12:/*18右转，朝向x负*/
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			RealTimeSpeedControl(-20, Direction_yaw);
+			pos_pre = pos_now;
+			if(UserAbs(pos_incre-pos_start)>80){
+				flag=1;
+				angle_fix();
+			}
+			if(flag==1)
+			{
+				angle_fix();
+				cnt+=dT;
+			}
+			if(timejudge(2))
+			{
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				flag=0;
+				DataClr();
+				cnt=0;
+			}
+			break;
+		case 13:/*18朝向x负角定位 闪灯两次*/
+			angle_fix();
+			if(opmv.pole.flag==1)
+			{
+				x=-23;y=11;
+				/*18转向后角定位，朝向y正，未调参*/
+				user_flag.openmv_down_flag=1;
+				if(UserAbs(opmv.pole.pos_x-x)<=10&&UserAbs(opmv.pole.pos_y-y)<=10)
+				cnt+=dT;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>3000)
+			{
+				/*闪灯两次*/
+			}
+			if(cnt>5000)
+			{
+				DataClr();
+				mission_step++;
+				angle_fix();
+				cnt=0;
+				user_flag.openmv_down_flag=0;
+				num=3;
+			}
+			break;
+		case 14:/*前进三块地砖，右侧线定位14,10，8闪灯两次*/
+			angle_fix();
+			RealTimeSpeedControl(common_speed,Direction_x);
+			cnt+=dT;
+			if(opmv.pole.flag==2)
+			/*距离线偏移量待调参*/
+			{
+				y=1;
+				user_flag.openmv_down_flag=2;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>=common_time)
+			{
+				/*闪灯两次*/
+				num--;
+				cnt=0;
+			}
+			if(num==0)
+			{
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				DataClr();
+				cnt=0;
+			}
+			break;
+		case 15:/*前进到4号，角定位*/
+			angle_fix();
+			RealTimeSpeedControl(common_speed,Direction_x);
+			cnt+=dT;
+			if(opmv.pole.flag==1)
+			{
+				x=0,y=0;
+				/*4号角定位，未调参,朝向x负*/
+				user_flag.openmv_down_flag=1;
+			}
+			else
+			{
+				x=0;y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>=common_time)
+			{
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				DataClr();
+				cnt=0;
+			}
+			break;
+		case 16:/*4号角定位，朝向x负*/
+			angle_fix();
+			if(opmv.pole.flag==1)
+			{
+				x=-23;y=11;
+				/*4定位，朝向y正，未调参*/
+				user_flag.openmv_down_flag=1;
+				if(UserAbs(opmv.pole.pos_x-x)<=10&&UserAbs(opmv.pole.pos_y-y)<=10)
+				cnt+=dT;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>3000)
+			{
+				DataClr();
+				mission_step++;
+				angle_fix();
+				cnt=0;
+				user_flag.openmv_down_flag=0;
+			}
+			break;
+		case 17:/*4左转准备*/
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			pos_pre = pos_now;
+			pos_start = pos_incre;
+			mission_step += 1;
+			break;
+		case 18:/*4左转，朝向y正*/
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			RealTimeSpeedControl(20, Direction_yaw);
+			pos_pre = pos_now;
+			if(UserAbs(pos_incre-pos_start)>80){
+				flag=1;
+				angle_fix();
+			}
+			if(flag==1)
+			{
+				angle_fix();
+				cnt+=dT;
+			}
+			if(timejudge(2))
+			{
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				flag=0;
+				DataClr();
+				cnt=0;
+			}
+			break;
+		case 19:/*4朝向y正角定位 闪灯两次*/
+			angle_fix();
+			if(opmv.pole.flag==1)
+			{
+				x=-23;y=11;
+				/*4转向后角定位，朝向y正，未调参*/
+				user_flag.openmv_down_flag=1;
+				if(UserAbs(opmv.pole.pos_x-x)<=10&&UserAbs(opmv.pole.pos_y-y)<=10)
+				cnt+=dT;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>3000)
+			{
+				/*闪灯两次*/
+			}
+			if(cnt>5000)
+			{
+				DataClr();
+				mission_step++;
+				angle_fix();
+				cnt=0;
+				user_flag.openmv_down_flag=0;
+				num=2;
+			}
+			break;
+			case 20:/*前进两块地砖，右侧线定位3，2闪灯两次*/
+			angle_fix();
+			RealTimeSpeedControl(common_speed,Direction_x);
+			cnt+=dT;
+			if(opmv.pole.flag==2)
+			/*距离线偏移量待调参*/
+			{
+				y=1;
+				user_flag.openmv_down_flag=2;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>=common_time)
+			{
+				/*闪灯两次*/
+				num--;
+				cnt=0;
+			}
+			if(num==0)
+			{
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				DataClr();
+				cnt=0;
+			}
+			break;
+		case 21:/*前进到1号，角定位*/
+			angle_fix();
+			RealTimeSpeedControl(common_speed,Direction_x);
+			cnt+=dT;
+			if(opmv.pole.flag==1)
+			{
+				x=0,y=0;
+				/*1号角定位，未调参,朝向y正*/
+				user_flag.openmv_down_flag=1;
+			}
+			else
+			{
+				x=0;y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>=common_time)
+			{
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				DataClr();
+				cnt=0;
+			}
+			break;
+		case 22:/*1号角定位，朝向y正*/
+			angle_fix();
+			if(opmv.pole.flag==1)
+			{
+				x=-23;y=11;
+				/*1定位，朝向y正，未调参*/
+				user_flag.openmv_down_flag=1;
+				if(UserAbs(opmv.pole.pos_x-x)<=10&&UserAbs(opmv.pole.pos_y-y)<=10)
+				cnt+=dT;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>3000)
+			{
+				DataClr();
+				mission_step++;
+				angle_fix();
+				cnt=0;
+				user_flag.openmv_down_flag=0;
+			}
+			break;
+		case 23:/*1左转准备*/
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			pos_pre = pos_now;
+			pos_start = pos_incre;
+			mission_step += 1;
+			break;
+		case 24:/*1左转，朝向x正*/
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			RealTimeSpeedControl(20, Direction_yaw);
+			pos_pre = pos_now;
+			if(UserAbs(pos_incre-pos_start)>80){
+				flag=1;
+				angle_fix();
+			}
+			if(flag==1)
+			{
+				angle_fix();
+				cnt+=dT;
+			}
+			if(timejudge(2))
+			{
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				flag=0;
+				DataClr();
+				cnt=0;
+			}
+			break;
+		case 25:/*1朝向x正角定位 闪灯两次*/
+			angle_fix();
+			if(opmv.pole.flag==1)
+			{
+				x=-23;y=11;
+				/*1转向后角定位，朝向x正，未调参*/
+				user_flag.openmv_down_flag=1;
+				if(UserAbs(opmv.pole.pos_x-x)<=10&&UserAbs(opmv.pole.pos_y-y)<=10)
+				cnt+=dT;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>3000)
+			{
+				/*闪灯两次*/
+			}
+			if(cnt>5000)
+			{
+				DataClr();
+				mission_step++;
+				angle_fix();
+				cnt=0;
+				user_flag.openmv_down_flag=0;
+				num=2;
+			}
+			break;
+		case 26:/*前进到5号，角定位*/
+			angle_fix();
+			RealTimeSpeedControl(common_speed,Direction_x);
+			cnt+=dT;
+			if(opmv.pole.flag==1)
+			{
+				x=0,y=0;
+				/*5号角定位，未调参,朝向x正*/
+				user_flag.openmv_down_flag=1;
+			}
+			else
+			{
+				x=0;y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>=common_time)
+			{
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				DataClr();
+				cnt=0;
+			}
+			break;
+		case 27:/*5号角定位，朝向x正*/
+			angle_fix();
+			if(opmv.pole.flag==1)
+			{
+				x=-23;y=11;
+				/*1定位，朝向y正，未调参*/
+				user_flag.openmv_down_flag=1;
+				if(UserAbs(opmv.pole.pos_x-x)<=10&&UserAbs(opmv.pole.pos_y-y)<=10)
+				cnt+=dT;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>3000)
+			{
+				DataClr();
+				mission_step++;
+				angle_fix();
+				cnt=0;
+				user_flag.openmv_down_flag=0;
+			}
+			break;
+		case 28:/*5左转准备*/
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			pos_pre = pos_now;
+			pos_start = pos_incre;
+			mission_step += 1;
+			break;
+		case 29:/*5左转，朝向y负*/
+			pos_now = hwt101ct.yaw_angle;
+			pos_incre = ZeroPointCross(pos_now, pos_pre, pos_incre);
+			RealTimeSpeedControl(20, Direction_yaw);
+			pos_pre = pos_now;
+			if(UserAbs(pos_incre-pos_start)>80){
+				flag=1;
+				angle_fix();
+			}
+			if(flag==1)
+			{
+				angle_fix();
+				cnt+=dT;
+			}
+			if(timejudge(2))
+			{
+				mission_step += 1;
+				pos_incre = 0;
+				pos_pre = 0;
+				flag=0;
+				DataClr();
+				cnt=0;
+			}
+			break;
+		case 30:/*5朝向y负角定位 闪灯两次*/
+			angle_fix();
+			if(opmv.pole.flag==1)
+			{
+				x=-23;y=11;
+				/*5转向后角定位，朝向y负，未调参*/
+				user_flag.openmv_down_flag=1;
+				if(UserAbs(opmv.pole.pos_x-x)<=10&&UserAbs(opmv.pole.pos_y-y)<=10)
+				cnt+=dT;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(cnt>3000)
+			{
+				/*闪灯两次*/
+			}
+			if(cnt>5000)
+			{
+				DataClr();
+				mission_step++;
+				angle_fix();
+				cnt=0;
+				user_flag.openmv_down_flag=0;
+				num=1;
+			}
+			break;
+	}
+}
+/*ending part
+case 8:
+			user_flag.of_alt_ctl_flag = 0;
+			mission_step+=OneKey_Land();
+			break;
+		case 9:
+			cnt+=dT;
+			if(timejudge(3))
+			{
+				cnt=0;
+				mission_step++;
+			}
+			break;
+		case 10:
+			FC_Lock();
+			mission_step =0;
+			break;
+		default:
+			break;*/
 s16 ZeroPointCross(s16 pos_now, s16 pos_pre, s16 pos_incre){
 	if((pos_now - pos_pre) > 180)
 	{
-		pos_incre  += (pos_now - pos_pre) - 359;
+		pos_incre  += -179-pos_pre+pos_now-180;
 	}
 	else if((pos_now - pos_pre) < -180)
 	{
@@ -1356,6 +1988,5 @@ s16 UserAbs(s16 num){
 	else	
 		return num;
 }
-/******************* (C) COPYRIGHT 2014 ANO TECH *****END OF FILE************/
 
 

@@ -55,6 +55,8 @@ void UserTask_OneKeyCmd(void)
 							mission_task = 1;
 							mission_step = 1;
 							user_flag.openmv_clr_flag = 0;
+							//user_flag.hwt101_ctl_flag=1;
+							//user_flag.openmv_down_flag=1;
 							//user_flag.tfmini_ctl_flag = 1;
 							//user_flag.opmv_ctl_flag = 1;
 							//user_flag.hwt101_ctl_flag = 1;
@@ -476,6 +478,7 @@ s16 GeneralPosCtl(_user_exp_fdb_set exp_fdb, 		//输入输出的期望与反馈
 	
 	test2=exp_distance-fdb_distance;
   //发送对应输出指令
+	
 	RealTimeSpeedControl(_out_speed, direction);
 	
 	return _out_speed;

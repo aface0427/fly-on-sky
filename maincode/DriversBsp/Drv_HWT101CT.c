@@ -8,6 +8,22 @@
 u16 hwt_offline_check_time;
 u8 hwt101ct_buf[20];
 _hwt101ct_data_st hwt101ct;
+s16 fix_first(s16 a,s16 b)
+{
+	a=a-b;
+	int p;
+	if(a>179)
+	{
+		p=179-a;
+		a=-180-p;
+	}
+	else if(a<-179)
+	{
+		p=-179-a;
+		a=180-p;
+	}
+	return a;
+}
 /**********************************************************************************************************
 *函 数 名: HWT101CT_Byte_Get
 *功能说明: HWT101CT字节数据获取
@@ -76,6 +92,9 @@ static void HWT101CT_Data_Analysis(u8 *buf_data)
     if(*(buf_data+1)==0x53){
         yaw_angle = (s16)((((short)*(buf_data+7))<<8)|((short)*(buf_data+6)));
         hwt101ct.yaw_angle = yaw_angle * 180 / 32768; //单位为°
+				if(hwt101ct.first_angle<-490)hwt101ct.first_angle++;
+				else if(hwt101ct.first_angle==-490)hwt101ct.first_angle=hwt101ct.yaw_angle;
+				else hwt101ct.yaw_angle=fix_first(hwt101ct.yaw_angle,hwt101ct.first_angle);
     }
 	HWT101CT_Check_Reset(); 
 }

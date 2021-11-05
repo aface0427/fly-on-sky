@@ -10,7 +10,8 @@ typedef struct
 {
 	u8 offline;
 	s16 yaw_angle;
-    s16 yaw_speed;
+  s16 yaw_speed;
+	s16 first_angle;
 }_hwt101ct_data_st;
 //==Êı¾İÉùÃ÷
 extern _hwt101ct_data_st hwt101ct;

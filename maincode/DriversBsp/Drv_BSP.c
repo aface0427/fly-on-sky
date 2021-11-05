@@ -46,7 +46,7 @@ u8 All_Init()
 	ANO_DT_Init();
 	MyDelayMs(800);
 	//GPS接口初始化
-	Init_GPS();
+//	Init_GPS();
 	//初始化定时中断
 	DrvTimerFcInit();
 	//初始化完成，返回1
