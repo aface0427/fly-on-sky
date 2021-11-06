@@ -158,7 +158,7 @@ static s16 pos_incre;
 static s16 pos_start;
 int p=1000;
 int x=0,y=0;
-const int xx=0,yy=0;
+const int xx=90,yy=90;
 void change_back()
 {
 	x=xx;
@@ -248,10 +248,6 @@ static void Loop_50Hz(void) //20ms执行一次
 	dt.fun[0xf1].WTS = 1;
 	dt.fun[0xf2].WTS = 1;
 	dt.fun[0xf3].WTS = 1;
-	OpenmvSend[0]=0x08;
-	OpenmvSend[1]=(u8)ano_of.of_alt_cm;
-	OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];
-	DrvUart1SendBuf(&OpenmvSend[0], 3);
 //		/*数据发送*/
 	//user_send(0xf1,mission_step,0);
 	//////////////////////////////////////////////////////////////////////
@@ -704,7 +700,8 @@ u8 realtask(s16 dT)
 			
 			OpenmvSend[0]=0x08;
 			OpenmvSend[1]=(u8)30;
-			OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];
+			OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];			
+			DrvUart1SendBuf(&OpenmvSend[0], 3);
 			if(opmv.pole.flag==4)
 			{
 				x=0,y=0;
@@ -738,7 +735,8 @@ u8 realtask(s16 dT)
 			else cnt=0;
 			OpenmvSend[0]=0x08;
 			OpenmvSend[1]=(u8)30;
-			OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];
+			OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];			
+			DrvUart1SendBuf(&OpenmvSend[0], 3);
 			if(timejudge(3))
 			{
 				mission_step=100;
@@ -767,7 +765,8 @@ u8 realtask(s16 dT)
 			{
 				OpenmvSend[0]=0x08;
 				OpenmvSend[1]=(u8)29;
-				OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];
+				OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];			
+				DrvUart1SendBuf(&OpenmvSend[0], 3);
 				DataClr();
 				mission_step++;
 				cnt=0;
@@ -792,7 +791,8 @@ u8 realtask(s16 dT)
 			if(opmv.pole.flag==3)cnt+=dT;
 			OpenmvSend[0]=0x08;
 			OpenmvSend[1]=(u8)31;
-			OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];
+			OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];			
+			DrvUart1SendBuf(&OpenmvSend[0], 3);
 			if(cnt>=1000)
 			{
 				mission_step=4;
@@ -805,7 +805,7 @@ u8 realtask(s16 dT)
 			angle_fix();
 			if(opmv.pole.flag==3)
 			{
-				x=-28;y=-46;
+				x=-33;y=-80;
 				/*未转向A定位，未调参,误差+-10像素点*/
 				user_flag.openmv_down_flag=1;
 				if(UserAbs(opmv.pole.pos_x-x)<=10&&UserAbs(opmv.pole.pos_y-y)<=10)
@@ -859,7 +859,7 @@ u8 realtask(s16 dT)
 			angle_fix();
 			if(opmv.pole.flag==1)
 			{
-				x=-23;y=11;
+				x=-40;y=20;
 				/*转向后A定位，朝向y正，未调参*/
 				user_flag.openmv_down_flag=1;
 				if(UserAbs(opmv.pole.pos_x-x)<=10&&UserAbs(opmv.pole.pos_y-y)<=10)
@@ -875,7 +875,8 @@ u8 realtask(s16 dT)
 				angle_fix();
 				OpenmvSend[0]=0x08;
 				OpenmvSend[1]=(u8)21;
-				OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];
+				OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];			
+				DrvUart1SendBuf(&OpenmvSend[0], 3);
 			}
 			if(cnt>4000)
 			{
