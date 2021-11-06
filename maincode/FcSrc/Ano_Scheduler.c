@@ -259,9 +259,10 @@ static void Loop_50Hz(void) //20ms执行一次
 
 static void Loop_20Hz(void) //50ms执行一次
 {
-	user_send(0xf1,opmv.pole.pos_x,opmv.pole.pos_y);
-	user_send(0xf2,test_output_x,test_output_y);
-	user_send(0xf3,cnt,mission_step);
+	user_send(0xf1,test_output_x,test_output_y);
+	user_send(0xf2,opmv.pole.pos_x,opmv.pole.pos_y);
+	user_send(0xf4,cnt,mission_step);
+	user_send(0xf3,opmv.pole.flag,hwt101ct.yaw_angle);
 	/*********************************绕杆*******************************************/
 	if(user_flag.pole_ctl_flag&&opmv.pole.is_invalid&&opmv.pole.pos_y>30&&opmv.pole.pos_y<70){
 		PolePosCtl(50, -10, 0); //x方向保持距离、y方向移动速度、yaw期望位置
@@ -699,10 +700,15 @@ u8 realtask(s16 dT)
 			break;
 		case 2:
 			mission_step+=OneKey_Takeoff(150);
-			if(opmv.pole.flag==1)
+			angle_fix();
+			
+			OpenmvSend[0]=0x08;
+			OpenmvSend[1]=(u8)30;
+			OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];
+			if(opmv.pole.flag==4)
 			{
-				x=-28,y=-46;
-				/*未转向A定位，未调参,误差+-10像素点*/
+				x=0,y=0;
+				/*起飞点定位*/
 				user_flag.openmv_down_flag=1;
 			}
 			else
@@ -714,10 +720,10 @@ u8 realtask(s16 dT)
 		case 3:
 			user_flag.of_alt_ctl_flag=1;
 			angle_fix();
-			if(opmv.pole.flag==1)
+			if(opmv.pole.flag==4)
 			{
-				x=-28,y=-46;
-				/*未转向A定位，未调参,误差+-10像素点*/
+				x=0,y=0;
+				/*起飞点定位*/
 				user_flag.openmv_down_flag=1;
 			}
 			else
@@ -730,7 +736,49 @@ u8 realtask(s16 dT)
 				cnt+=dT;
 			}
 			else cnt=0;
+			OpenmvSend[0]=0x08;
+			OpenmvSend[1]=(u8)30;
+			OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];
 			if(timejudge(3))
+			{
+				mission_step=100;
+				DataClr();
+				cnt=0;
+				Position_incre=0;
+				Position_pre=0;
+			}
+			break;
+		case 100:
+			angle_fix();
+			if(opmv.pole.flag==4)
+			{
+				x=0;y=0;
+				/*起飞点定位,误差+-10像素点*/
+				user_flag.openmv_down_flag=1;
+				if(UserAbs(opmv.pole.pos_x-x)<=10&&UserAbs(opmv.pole.pos_y-y)<=10)
+				cnt+=dT;
+			}
+			else
+			{
+				x=0,y=0;
+				user_flag.openmv_down_flag=0;
+			}
+			if(timejudge(5))
+			{
+				OpenmvSend[0]=0x08;
+				OpenmvSend[1]=(u8)29;
+				OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];
+				DataClr();
+				mission_step++;
+				cnt=0;
+				user_flag.openmv_down_flag=0;
+			}
+			break;
+		case 101://找A x输出
+			angle_fix();
+			RealTimeSpeedControl(20,Direction_x);
+			cnt+=dT;
+		  if(cnt>=9500)
 			{
 				mission_step++;
 				DataClr();
@@ -738,10 +786,24 @@ u8 realtask(s16 dT)
 				Position_incre=0;
 				Position_pre=0;
 			}
-			break;
+		case 102://找A y输出
+			angle_fix();
+			RealTimeSpeedControl(-10,Direction_y);
+			if(opmv.pole.flag==3)cnt+=dT;
+			OpenmvSend[0]=0x08;
+			OpenmvSend[1]=(u8)31;
+			OpenmvSend[2]=OpenmvSend[0]+OpenmvSend[1];
+			if(cnt>=1000)
+			{
+				mission_step=4;
+				DataClr();
+				cnt=0;
+				Position_incre=0;
+				Position_pre=0;
+			}
 		case 4:/*21号A定位 x正*/
 			angle_fix();
-			if(opmv.pole.flag==1)
+			if(opmv.pole.flag==3)
 			{
 				x=-28;y=-46;
 				/*未转向A定位，未调参,误差+-10像素点*/
@@ -2722,5 +2784,20 @@ s16 UserAbs(s16 num){
 	else	
 		return num;
 }
-
+s16 ZeroPointCross(s16 pos_now, s16 pos_pre, s16 pos_incre){
+	if((pos_now - pos_pre) > 180)
+	{
+		pos_incre  += -179-pos_pre+pos_now-180;
+	}
+	else if((pos_now - pos_pre) < -180)
+	{
+		pos_incre  += 359 + (pos_now - pos_pre);
+	}
+	else
+	{
+		pos_incre  += (pos_now - pos_pre);
+	}
+	
+	return pos_incre;
+}
 

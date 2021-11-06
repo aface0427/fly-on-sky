@@ -28,7 +28,7 @@ int main(void)
 	//调度器初始化，系统为裸奔，这里人工做了一个时分调度器
 	Scheduler_Setup();
 	//角度补偿开启
-	hwt101ct.first_angle=-500;
+	hwt101ct.first_angle=-5000;
 	while (1)
 	{
 		//运行任务调度器，所有系统功能，除了中断服务函数，都在任务调度器内完成

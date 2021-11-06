@@ -92,8 +92,8 @@ static void HWT101CT_Data_Analysis(u8 *buf_data)
     if(*(buf_data+1)==0x53){
         yaw_angle = (s16)((((short)*(buf_data+7))<<8)|((short)*(buf_data+6)));
         hwt101ct.yaw_angle = yaw_angle * 180 / 32768; //µ¥Î»Îª¡ã
-				if(hwt101ct.first_angle<-490)hwt101ct.first_angle++;
-				else if(hwt101ct.first_angle==-490)hwt101ct.first_angle=hwt101ct.yaw_angle;
+				if(hwt101ct.first_angle<-500)hwt101ct.first_angle++;
+				else if(hwt101ct.first_angle==-500)hwt101ct.first_angle=hwt101ct.yaw_angle;
 				else hwt101ct.yaw_angle=fix_first(hwt101ct.yaw_angle,hwt101ct.first_angle);
     }
 	HWT101CT_Check_Reset(); 
