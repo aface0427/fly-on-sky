@@ -252,9 +252,11 @@ static void Loop_50Hz(void) //20ms执行一次
 	//user_send(0xf1,mission_step,0);
 	//////////////////////////////////////////////////////////////////////
 }
-
+int cnt_mode=0;
 static void Loop_20Hz(void) //50ms执行一次
 {
+	if(ano_of.of_alt_cm>100)cnt_mode+=50;
+	if(cnt_mode>3000)LX_Change_Mode(2);
 	user_send(0xf1,test_output_x,test_output_y);
 	user_send(0xf2,opmv.pole.pos_x,opmv.pole.pos_y);
 	user_send(0xf4,cnt,mission_step);
@@ -293,6 +295,7 @@ static void Loop_20Hz(void) //50ms执行一次
 	/*********************************任务集*******************************************/
 	if(mission_task){
 		//TaskSet(50);
+		realtask(50);
 		//taskset2(50);
 		//taskset3(50);
 		//realtask(50);
