@@ -71,8 +71,8 @@ static inline void RC_Data_Task(float dT_s)
 		}*/
 		if (rc_in.rc_ch.st_data.ch_[ch_5_aux1] < 1700)
 		{
-			LX_Change_Mode(1);
-			mod_f[0] = 1;
+			LX_Change_Mode(2);
+			mod_f[0] = 2;
 		}
 		else
 		{
