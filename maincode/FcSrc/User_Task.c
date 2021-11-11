@@ -71,7 +71,7 @@ void UserTask_OneKeyCmd(void)
             //复位标记，以便再次执行
             one_key_takeoff_f = 0;
         }
-				
+				if (rc_in.rc_ch.st_data.ch_[ch_6_aux2] > 1700)test1=1;
         //
         //判断第6通道拨杆位置 800<CH_6<1200
         if (rc_in.rc_ch.st_data.ch_[ch_6_aux2] > 800 && rc_in.rc_ch.st_data.ch_[ch_6_aux2] < 1200)
